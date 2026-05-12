@@ -1,0 +1,479 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Conversation Brain</title>
+<script src="https://d3js.org/d3.v7.min.js"></script>
+<style>
+  :root {
+    --bg-0: #07070b;
+    --bg-1: #0d0d14;
+    --panel: rgba(18, 18, 28, 0.78);
+    --panel-edge: rgba(255, 255, 255, 0.06);
+    --text: #e8e8f0;
+    --muted: #8a8aa0;
+    --accent: #7aa2ff;
+    --accent-2: #d68bff;
+    --accent-3: #61f0c4;
+    --warn: #ff9c66;
+  }
+
+  * { box-sizing: border-box; }
+  html, body {
+    margin: 0;
+    height: 100%;
+    background:
+      radial-gradient(1200px 800px at 70% 30%, #15102a 0%, transparent 60%),
+      radial-gradient(900px 700px at 20% 80%, #0a1a24 0%, transparent 60%),
+      var(--bg-0);
+    color: var(--text);
+    font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial;
+    overflow: hidden;
+  }
+
+  #stage { position: fixed; inset: 0; }
+  svg { width: 100%; height: 100%; display: block; }
+
+  .panel {
+    position: fixed;
+    background: var(--panel);
+    border: 1px solid var(--panel-edge);
+    border-radius: 14px;
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+    box-shadow: 0 10px 40px rgba(0,0,0,0.45);
+  }
+
+  #controls {
+    top: 18px;
+    left: 18px;
+    padding: 14px 16px;
+    width: 360px;
+    max-height: calc(100vh - 36px);
+    overflow: auto;
+  }
+  #controls h1 {
+    font-size: 14px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    margin: 0 0 4px;
+    color: var(--text);
+  }
+  #controls .sub {
+    color: var(--muted);
+    font-size: 12px;
+    margin-bottom: 12px;
+  }
+  textarea {
+    width: 100%;
+    min-height: 140px;
+    background: rgba(0,0,0,0.35);
+    color: var(--text);
+    border: 1px solid var(--panel-edge);
+    border-radius: 10px;
+    padding: 10px;
+    font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+    font-size: 12px;
+    resize: vertical;
+  }
+  textarea:focus { outline: 1px solid var(--accent); }
+
+  .row { display: flex; gap: 8px; margin-top: 10px; flex-wrap: wrap; }
+  button {
+    background: linear-gradient(180deg, #2a2a40, #1a1a2c);
+    color: var(--text);
+    border: 1px solid var(--panel-edge);
+    padding: 8px 12px;
+    border-radius: 9px;
+    font-size: 12px;
+    cursor: pointer;
+    transition: transform 0.05s ease, border-color 0.15s ease, background 0.2s;
+  }
+  button:hover { border-color: var(--accent); }
+  button:active { transform: translateY(1px); }
+  button.primary {
+    background: linear-gradient(180deg, #3656d0, #2540a8);
+    border-color: #4a6cf0;
+  }
+  button.ghost {
+    background: transparent;
+  }
+
+  .toggles { display: flex; gap: 14px; margin-top: 10px; color: var(--muted); font-size: 12px; }
+  .toggles label { display: flex; align-items: center; gap: 6px; cursor: pointer; user-select: none; }
+
+  .legend {
+    margin-top: 12px;
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    font-size: 11px;
+    color: var(--muted);
+  }
+  .legend .dot {
+    display: inline-block; width: 10px; height: 10px; border-radius: 50%;
+    margin-right: 5px; vertical-align: middle;
+  }
+
+  #stats {
+    bottom: 18px;
+    left: 18px;
+    padding: 10px 14px;
+    color: var(--muted);
+    font-size: 12px;
+    font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  }
+  #stats b { color: var(--text); }
+
+  #tooltip {
+    position: fixed;
+    pointer-events: none;
+    padding: 8px 10px;
+    background: rgba(10,10,18,0.92);
+    border: 1px solid var(--panel-edge);
+    border-radius: 8px;
+    font-size: 12px;
+    color: var(--text);
+    transform: translate(-50%, calc(-100% - 12px));
+    opacity: 0;
+    transition: opacity 0.12s;
+    white-space: nowrap;
+  }
+  #tooltip .freq { color: var(--accent-3); }
+  #tooltip .cat { color: var(--muted); font-size: 10px; text-transform: uppercase; letter-spacing: 0.08em; }
+
+  .node text {
+    fill: var(--text);
+    font-weight: 500;
+    text-anchor: middle;
+    dominant-baseline: middle;
+    paint-order: stroke;
+    stroke: rgba(0,0,0,0.55);
+    stroke-width: 3px;
+    pointer-events: none;
+  }
+  .node circle { cursor: grab; }
+  .node circle:active { cursor: grabbing; }
+
+  .brain-outline {
+    fill: none;
+    stroke: rgba(122, 162, 255, 0.18);
+    stroke-width: 1.2;
+    stroke-dasharray: 4 6;
+  }
+
+  details > summary {
+    cursor: pointer;
+    color: var(--muted);
+    font-size: 12px;
+    margin: 10px 0 6px;
+    user-select: none;
+  }
+  details > summary:hover { color: var(--text); }
+
+  .pill {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 999px;
+    background: rgba(122,162,255,0.12);
+    border: 1px solid rgba(122,162,255,0.3);
+    color: var(--accent);
+    font-size: 10px;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    margin-right: 6px;
+  }
+</style>
+</head>
+<body>
+<div id="stage">
+  <svg id="brain"></svg>
+</div>
+
+<div id="controls" class="panel">
+  <h1>Conversation Brain</h1>
+  <div class="sub"><span class="pill">v1</span>Modules grow with frequency.</div>
+
+  <textarea id="input" placeholder="Paste conversations here — one per line or as a single block. Topics are extracted by frequency."></textarea>
+
+  <div class="row">
+    <button class="primary" id="analyze">Analyze</button>
+    <button id="loadSample">Load sample</button>
+    <button class="ghost" id="clear">Clear</button>
+  </div>
+
+  <div class="toggles">
+    <label><input type="checkbox" id="showLinks" checked /> co-occurrence links</label>
+    <label><input type="checkbox" id="showLabels" checked /> labels</label>
+  </div>
+
+  <details>
+    <summary>How it works</summary>
+    <div style="font-size: 12px; color: var(--muted); line-height: 1.5;">
+      Each message is tokenized, stop-words removed, and remaining terms counted.
+      Bigger node = higher frequency. Links connect terms that appear together
+      in the same message. Drag nodes; scroll to zoom.
+    </div>
+  </details>
+
+  <div class="legend">
+    <span><span class="dot" style="background:#7aa2ff"></span>frequent</span>
+    <span><span class="dot" style="background:#d68bff"></span>medium</span>
+    <span><span class="dot" style="background:#61f0c4"></span>rare</span>
+  </div>
+</div>
+
+<div id="stats" class="panel">
+  <span><b id="msgCount">0</b> messages</span> ·
+  <span><b id="termCount">0</b> topics</span> ·
+  <span><b id="linkCount">0</b> links</span>
+</div>
+
+<div id="tooltip"></div>
+
+<script>
+const STOPWORDS = new Set(("a,about,above,after,again,against,all,am,an,and,any,are,as,at,be,because,been,before,being,below,between,both,but,by,can,cant,could,couldnt,did,didnt,do,does,doesnt,doing,dont,down,during,each,few,for,from,further,had,hadnt,has,hasnt,have,havent,having,he,hed,hell,hes,her,here,heres,hers,herself,him,himself,his,how,hows,i,id,ill,im,ive,if,in,into,is,isnt,it,its,itself,lets,me,more,most,mustnt,my,myself,no,nor,not,of,off,on,once,only,or,other,ought,our,ours,ourselves,out,over,own,same,shant,she,shed,shell,shes,should,shouldnt,so,some,such,than,that,thats,the,their,theirs,them,themselves,then,there,theres,these,they,theyd,theyll,theyre,theyve,this,those,through,to,too,under,until,up,very,was,wasnt,we,wed,well,were,weve,werent,what,whats,when,whens,where,wheres,which,while,who,whos,whom,why,whys,with,wont,would,wouldnt,you,youd,youll,youre,youve,your,yours,yourself,yourselves,just,like,really,get,got,go,going,gonna,wanna,thing,things,one,two,know,yeah,okay,ok,oh,um,uh,also,maybe,actually,kinda,sorta,much,many,lot,lots,still,even,way,want,need,make,makes,made,take,takes,took,see,saw,seen,say,said,says,tell,told,think,thought,find,found,use,used,using,back,new,old,good,bad,big,small,thanks,thank,please,hi,hello,hey,bye,yes,nope,sure,right,wrong,fine,well,bit,sort,kind").split(","));
+
+const SAMPLE = [
+  "We need to redesign the onboarding flow — users keep dropping off at the signup step.",
+  "Let's talk about the onboarding flow again, particularly the signup form fields.",
+  "Pricing strategy: should we move to a usage-based model or stick with tiered subscriptions?",
+  "Marketing wants more case studies for the website. The website needs a refresh too.",
+  "The API rate limits are causing problems for enterprise customers.",
+  "Enterprise customers asked about SSO again. SAML support is becoming a real blocker.",
+  "Hiring update: we have three engineering candidates this week.",
+  "We should reduce churn by improving the onboarding experience.",
+  "Pricing experiment: A/B test the new pricing page.",
+  "The mobile app crash rate spiked after the latest release.",
+  "Mobile crashes are concentrated on Android 14 devices.",
+  "Roadmap planning for Q3 — let's prioritize SSO and the analytics dashboard.",
+  "The analytics dashboard mockups look great but performance is a concern.",
+  "Customer support tickets are up 22% — mostly billing and pricing questions.",
+  "Billing system migration to Stripe is on track for next month.",
+  "Stripe integration needs better error handling on failed payments.",
+  "Marketing campaign launch hit a snag with the email vendor.",
+  "Email deliverability is suffering, we should switch ESP.",
+  "Design system updates — new typography and color tokens.",
+  "Design review covered the dashboard, onboarding, and settings pages.",
+  "Performance: the dashboard load time is 4.2s on cold cache.",
+  "We need to ship the SSO feature before the enterprise renewal.",
+  "Hiring: senior backend engineer offer accepted.",
+  "Engineering retro highlighted slow CI, flaky tests, and unclear ownership.",
+  "CI improvements: parallelize the test suite and cache deps."
+];
+
+const svg = d3.select("#brain");
+let width = window.innerWidth;
+let height = window.innerHeight;
+svg.attr("viewBox", [0, 0, width, height]);
+
+const root = svg.append("g");
+const linkGroup = root.append("g").attr("class", "links");
+const nodeGroup = root.append("g").attr("class", "nodes");
+const outlineGroup = root.append("g").attr("class", "outline");
+
+// brain-ish outline (two lobes)
+function brainPath(w, h) {
+  const cx = w / 2, cy = h / 2;
+  const rx = Math.min(w, h) * 0.38, ry = Math.min(w, h) * 0.32;
+  const gap = rx * 0.05;
+  const lx = cx - rx / 2 - gap;
+  const rx2 = cx + rx / 2 + gap;
+  const lobe = (x, y, rxL, ryL) =>
+    `M ${x - rxL} ${y}
+     C ${x - rxL} ${y - ryL}, ${x + rxL} ${y - ryL}, ${x + rxL} ${y}
+     C ${x + rxL} ${y + ryL}, ${x - rxL} ${y + ryL}, ${x - rxL} ${y} Z`;
+  return lobe(lx, cy, rx / 2, ry) + " " + lobe(rx2, cy, rx / 2, ry);
+}
+
+function redrawOutline() {
+  outlineGroup.selectAll("path").remove();
+  outlineGroup.append("path")
+    .attr("class", "brain-outline")
+    .attr("d", brainPath(width, height));
+}
+redrawOutline();
+
+const zoom = d3.zoom()
+  .scaleExtent([0.3, 4])
+  .on("zoom", (event) => root.attr("transform", event.transform));
+svg.call(zoom);
+
+let simulation = null;
+let lastData = { nodes: [], links: [] };
+
+function tokenize(text) {
+  return text
+    .toLowerCase()
+    .replace(/[^a-z0-9\s'-]/g, " ")
+    .replace(/'/g, "")
+    .split(/\s+/)
+    .filter(w => w.length > 2 && !STOPWORDS.has(w) && !/^\d+$/.test(w));
+}
+
+function analyze(messages) {
+  const freq = new Map();
+  const cooc = new Map();
+
+  for (const msg of messages) {
+    const tokens = Array.from(new Set(tokenize(msg)));
+    for (const t of tokens) freq.set(t, (freq.get(t) || 0) + 1);
+    for (let i = 0; i < tokens.length; i++) {
+      for (let j = i + 1; j < tokens.length; j++) {
+        const [a, b] = [tokens[i], tokens[j]].sort();
+        const k = a + "" + b;
+        cooc.set(k, (cooc.get(k) || 0) + 1);
+      }
+    }
+  }
+
+  const top = Array.from(freq.entries())
+    .filter(([, c]) => c >= 1)
+    .sort((a, b) => b[1] - a[1])
+    .slice(0, 60);
+
+  const keep = new Set(top.map(([w]) => w));
+  const nodes = top.map(([w, c]) => ({ id: w, count: c }));
+
+  const links = [];
+  for (const [k, c] of cooc.entries()) {
+    if (c < 2) continue;
+    const [a, b] = k.split("");
+    if (keep.has(a) && keep.has(b)) links.push({ source: a, target: b, weight: c });
+  }
+
+  return { nodes, links };
+}
+
+function render({ nodes, links }) {
+  lastData = { nodes, links };
+  document.getElementById("msgCount").textContent = currentMessages.length;
+  document.getElementById("termCount").textContent = nodes.length;
+  document.getElementById("linkCount").textContent = links.length;
+
+  if (!nodes.length) {
+    nodeGroup.selectAll("*").remove();
+    linkGroup.selectAll("*").remove();
+    return;
+  }
+
+  const maxC = d3.max(nodes, d => d.count) || 1;
+  const minC = d3.min(nodes, d => d.count) || 1;
+  const rScale = d3.scaleSqrt().domain([minC, maxC]).range([10, 64]);
+  const colorScale = d3.scaleLinear()
+    .domain([minC, (minC + maxC) / 2, maxC])
+    .range(["#61f0c4", "#d68bff", "#7aa2ff"]);
+
+  const showLinks = document.getElementById("showLinks").checked;
+  const showLabels = document.getElementById("showLabels").checked;
+
+  // Links
+  const link = linkGroup.selectAll("line").data(showLinks ? links : [], d => d.source.id + "-" + d.target.id);
+  link.exit().remove();
+  link.enter().append("line")
+    .attr("stroke", "rgba(180, 180, 220, 0.18)")
+    .attr("stroke-width", d => Math.min(3, Math.sqrt(d.weight)))
+    .merge(link)
+    .attr("stroke-width", d => Math.min(3, Math.sqrt(d.weight)));
+
+  // Nodes
+  const node = nodeGroup.selectAll("g.node").data(nodes, d => d.id);
+  node.exit().remove();
+
+  const enter = node.enter().append("g").attr("class", "node");
+  enter.append("circle")
+    .attr("r", 0)
+    .attr("fill", d => colorScale(d.count))
+    .attr("stroke", "rgba(255,255,255,0.15)")
+    .attr("stroke-width", 1.5)
+    .style("filter", "drop-shadow(0 0 8px rgba(122,162,255,0.35))");
+  enter.append("text")
+    .attr("font-size", 0)
+    .text(d => d.id);
+
+  const merged = enter.merge(node);
+  merged.select("circle")
+    .transition().duration(450)
+    .attr("r", d => rScale(d.count))
+    .attr("fill", d => colorScale(d.count));
+  merged.select("text")
+    .style("display", showLabels ? null : "none")
+    .transition().duration(450)
+    .attr("font-size", d => Math.max(10, Math.min(20, rScale(d.count) * 0.45)));
+
+  merged.call(d3.drag()
+    .on("start", (e, d) => { if (!e.active) simulation.alphaTarget(0.3).restart(); d.fx = d.x; d.fy = d.y; })
+    .on("drag", (e, d) => { d.fx = e.x; d.fy = e.y; })
+    .on("end", (e, d) => { if (!e.active) simulation.alphaTarget(0); d.fx = null; d.fy = null; }));
+
+  const tooltip = document.getElementById("tooltip");
+  merged.on("mousemove", (event, d) => {
+    tooltip.innerHTML = `<div class="cat">topic</div><div><b>${d.id}</b> — <span class="freq">${d.count}×</span></div>`;
+    tooltip.style.left = event.clientX + "px";
+    tooltip.style.top = event.clientY + "px";
+    tooltip.style.opacity = 1;
+  }).on("mouseleave", () => { tooltip.style.opacity = 0; });
+
+  if (simulation) simulation.stop();
+  simulation = d3.forceSimulation(nodes)
+    .force("link", d3.forceLink(links).id(d => d.id).distance(d => 80 + 40 / (d.weight || 1)).strength(0.25))
+    .force("charge", d3.forceManyBody().strength(d => -90 - rScale(d.count) * 6))
+    .force("center", d3.forceCenter(width / 2, height / 2).strength(0.05))
+    .force("collide", d3.forceCollide().radius(d => rScale(d.count) + 4).strength(0.9))
+    .force("x", d3.forceX(width / 2).strength(0.04))
+    .force("y", d3.forceY(height / 2).strength(0.06))
+    .on("tick", () => {
+      linkGroup.selectAll("line")
+        .attr("x1", d => d.source.x).attr("y1", d => d.source.y)
+        .attr("x2", d => d.target.x).attr("y2", d => d.target.y);
+      merged.attr("transform", d => `translate(${d.x},${d.y})`);
+    });
+}
+
+let currentMessages = [];
+
+function getMessages() {
+  const raw = document.getElementById("input").value.trim();
+  if (!raw) return [];
+  return raw.split(/\n+/).map(s => s.trim()).filter(Boolean);
+}
+
+document.getElementById("analyze").addEventListener("click", () => {
+  currentMessages = getMessages();
+  render(analyze(currentMessages));
+});
+
+document.getElementById("loadSample").addEventListener("click", () => {
+  document.getElementById("input").value = SAMPLE.join("\n");
+  currentMessages = SAMPLE.slice();
+  render(analyze(currentMessages));
+});
+
+document.getElementById("clear").addEventListener("click", () => {
+  document.getElementById("input").value = "";
+  currentMessages = [];
+  render({ nodes: [], links: [] });
+});
+
+document.getElementById("showLinks").addEventListener("change", () => render(analyze(currentMessages)));
+document.getElementById("showLabels").addEventListener("change", () => render(analyze(currentMessages)));
+
+window.addEventListener("resize", () => {
+  width = window.innerWidth;
+  height = window.innerHeight;
+  svg.attr("viewBox", [0, 0, width, height]);
+  redrawOutline();
+  if (simulation) {
+    simulation.force("center", d3.forceCenter(width / 2, height / 2).strength(0.05));
+    simulation.force("x", d3.forceX(width / 2).strength(0.04));
+    simulation.force("y", d3.forceY(height / 2).strength(0.06));
+    simulation.alpha(0.3).restart();
+  }
+});
+
+// auto-load sample on first visit
+document.getElementById("loadSample").click();
+</script>
+</body>
+</html>
