@@ -101,6 +101,14 @@
   .btn.secondary { background: var(--panel-2); color: var(--ink); border: 1px solid var(--border); }
   .score { font-weight: 600; }
 
+  .q-card-static .q-meta { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; color: var(--muted); font-size: 13px; margin-bottom: 8px; }
+  .q-card-static .q-prompt { font-size: 16px; margin: 10px 0; }
+  .choices-static { margin: 8px 0 12px; padding-left: 22px; }
+  .choices-static li { padding: 4px 0; font-size: 15px; }
+  details { background: var(--panel-2); border: 1px solid var(--border); border-radius: 6px; padding: 8px 12px; }
+  details summary { cursor: pointer; font-weight: 600; color: var(--accent); font-size: 14px; user-select: none; padding: 4px 0; }
+  details[open] summary { margin-bottom: 6px; }
+  details .explain { margin-top: 0; }
   .visual-frame { background: #f5f5f0; border-radius: 8px; padding: 8px; margin: 8px 0; }
   .legend { display: flex; flex-wrap: wrap; gap: 12px; font-size: 12px; color: var(--muted); margin-top: 8px; }
   .legend-item { display: flex; align-items: center; gap: 6px; }
@@ -378,368 +386,346 @@
 
 <!-- ============ QUIZ ============ -->
 <section id="quiz" class="tab">
-  <noscript>
-    <div class="card" style="border-left:3px solid var(--warn)">
-      <b>JavaScript is disabled.</b> The interactive quiz needs JS. Download this file and open it in a regular browser (double-click the .html file) — Chrome, Safari, Firefox, or Edge all work.
-    </div>
-  </noscript>
+
   <div class="card">
-    <div class="q-meta">
-      <span>Question <span id="qNum">1</span> / <span id="qTotal">0</span></span>
-      <span class="score">Score: <span id="score">0</span></span>
-    </div>
-    <div id="qVisual" class="visual-frame" style="display:none;"></div>
-    <div id="qPrompt" class="q-prompt"></div>
-    <div id="choices" class="choices"></div>
-    <div id="explain" class="explain" style="display:none;"></div>
-    <div class="controls">
-      <button id="restart" class="btn secondary">Restart</button>
-      <button id="next" class="btn" disabled>Next →</button>
-    </div>
+    <h2>Self-check quiz — 18 questions</h2>
+    <p style="color:var(--muted); margin:4px 0 0;">Read each question, pick your answer in your head, then tap <b>Show answer</b> to check. Tally your score as you go.</p>
   </div>
 
-  <div id="finalCard" class="card" style="display:none; text-align:center;">
-    <h2>Quiz complete</h2>
-    <p style="font-size:28px; font-weight:700; margin:8px 0;"><span id="finalScore"></span></p>
-    <p id="finalMsg" style="color:var(--muted)"></p>
-    <button id="again" class="btn">Try again</button>
+  <!-- Q1 -->
+  <div class="card q-card-static">
+    <div class="q-meta"><span>Question 1 of 18</span><span class="pill B">Class B</span></div>
+    <div class="visual-frame">
+      <svg viewBox="0 0 240 160" width="100%">
+        <rect width="240" height="160" fill="#f5f5f0"/>
+        <circle cx="120" cy="80" r="60" fill="none" stroke="#2b6cff" stroke-width="3"/>
+        <circle cx="120" cy="80" r="38" fill="none" stroke="#2b6cff" stroke-width="3"/>
+        <text x="120" y="40" text-anchor="middle" font-size="12" fill="#1e3a8a" font-weight="700">100</text>
+        <text x="120" y="52" text-anchor="middle" font-size="10" fill="#1e3a8a">SFC</text>
+      </svg>
+    </div>
+    <div class="q-prompt">On a sectional chart you see two thick <b>SOLID BLUE</b> concentric circles around a major airport, labeled '100/SFC'. What airspace is this and what's the ceiling?</div>
+    <ol class="choices-static" type="A">
+      <li>Class B, ceiling 10,000 MSL</li>
+      <li>Class C, ceiling 10,000 AGL</li>
+      <li>Class D, ceiling 1,000 AGL</li>
+      <li>Class E, ceiling 1,000 MSL</li>
+    </ol>
+    <details><summary>Show answer</summary><div class="explain"><b>A — Class B, 10,000 MSL.</b> Solid blue rings = Class B. '100/SFC' = 10,000 MSL ceiling, surface floor.</div></details>
   </div>
+
+  <!-- Q2 -->
+  <div class="card q-card-static">
+    <div class="q-meta"><span>Question 2 of 18</span><span class="pill C">Class C</span></div>
+    <div class="visual-frame">
+      <svg viewBox="0 0 240 160" width="100%">
+        <rect width="240" height="160" fill="#f5f5f0"/>
+        <circle cx="120" cy="80" r="58" fill="none" stroke="#c026d3" stroke-width="3"/>
+        <circle cx="120" cy="80" r="32" fill="none" stroke="#c026d3" stroke-width="3"/>
+        <text x="120" y="40" text-anchor="middle" font-size="12" fill="#6b21a8" font-weight="700">42</text>
+        <text x="120" y="52" text-anchor="middle" font-size="10" fill="#6b21a8">SFC</text>
+      </svg>
+    </div>
+    <div class="q-prompt">Two <b>SOLID MAGENTA</b> concentric circles around an airport with '42/SFC'. Which airspace and ceiling?</div>
+    <ol class="choices-static" type="A">
+      <li>Class B, 4,200 MSL</li>
+      <li>Class C, 4,200 MSL</li>
+      <li>Class C, 4,000 AGL above the airport elevation</li>
+      <li>Class E, 4,200 AGL</li>
+    </ol>
+    <details><summary>Show answer</summary><div class="explain"><b>B — Class C, 4,200 MSL.</b> Solid magenta = Class C. Sectional numbers are hundreds of feet MSL.</div></details>
+  </div>
+
+  <!-- Q3 -->
+  <div class="card q-card-static">
+    <div class="q-meta"><span>Question 3 of 18</span><span class="pill D">Class D</span></div>
+    <div class="visual-frame">
+      <svg viewBox="0 0 240 160" width="100%">
+        <rect width="240" height="160" fill="#f5f5f0"/>
+        <circle cx="120" cy="80" r="48" fill="none" stroke="#2b6cff" stroke-width="3" stroke-dasharray="6,4"/>
+        <rect x="103" y="120" width="34" height="18" fill="#f5f5f0" stroke="#1e3a8a"/>
+        <text x="120" y="134" text-anchor="middle" font-size="12" fill="#1e3a8a" font-weight="700">[25]</text>
+      </svg>
+    </div>
+    <div class="q-prompt">A single <b>DASHED BLUE</b> circle around a towered airport with a boxed <b>[25]</b>. What airspace? What does [25] mean?</div>
+    <ol class="choices-static" type="A">
+      <li>Class C, ceiling 2,500 MSL</li>
+      <li>Class D, ceiling 2,500 MSL</li>
+      <li>Class B, ceiling 25,000 MSL</li>
+      <li>Class E surface area, ceiling 2,500 AGL</li>
+    </ol>
+    <details><summary>Show answer</summary><div class="explain"><b>B — Class D, 2,500 MSL.</b> Dashed blue = Class D. Boxed [25] = ceiling in hundreds of feet MSL.</div></details>
+  </div>
+
+  <!-- Q4 -->
+  <div class="card q-card-static">
+    <div class="q-meta"><span>Question 4 of 18</span><span class="pill E">Class E sfc</span></div>
+    <div class="visual-frame">
+      <svg viewBox="0 0 240 160" width="100%">
+        <rect width="240" height="160" fill="#f5f5f0"/>
+        <circle cx="120" cy="80" r="52" fill="none" stroke="#c026d3" stroke-width="2.5" stroke-dasharray="6,4"/>
+      </svg>
+    </div>
+    <div class="q-prompt">A <b>DASHED MAGENTA</b> ring surrounds a non-towered airport. As a Part 107 pilot, what does this mean for you?</div>
+    <ol class="choices-static" type="A">
+      <li>Class G — fly freely below 400 AGL.</li>
+      <li>Class E to the surface — authorization required to operate here.</li>
+      <li>Class D — call the tower (there isn't one).</li>
+      <li>Class B — never permitted.</li>
+    </ol>
+    <details><summary>Show answer</summary><div class="explain"><b>B — Class E to the surface.</b> Dashed magenta = Class E down to the surface (non-towered airport w/ instrument approach). LAANC/DroneZone authorization required.</div></details>
+  </div>
+
+  <!-- Q5 -->
+  <div class="card q-card-static">
+    <div class="q-meta"><span>Question 5 of 18</span><span class="pill E">Class E 700</span></div>
+    <div class="visual-frame">
+      <svg viewBox="0 0 240 160" width="100%">
+        <defs>
+          <radialGradient id="q5g" cx="50%" cy="50%" r="50%">
+            <stop offset="60%" stop-color="#c026d3" stop-opacity="0"/>
+            <stop offset="80%" stop-color="#c026d3" stop-opacity="0.6"/>
+            <stop offset="100%" stop-color="#c026d3" stop-opacity="0"/>
+          </radialGradient>
+        </defs>
+        <rect width="240" height="160" fill="#f5f5f0"/>
+        <circle cx="120" cy="80" r="75" fill="url(#q5g)"/>
+      </svg>
+    </div>
+    <div class="q-prompt">On the sectional you see a <b>FUZZY MAGENTA</b> shaded area (a 'vignette'). What is the floor of controlled airspace here?</div>
+    <ol class="choices-static" type="A">
+      <li>Surface</li>
+      <li>700 AGL</li>
+      <li>1,200 AGL</li>
+      <li>14,500 MSL</li>
+    </ol>
+    <details><summary>Show answer</summary><div class="explain"><b>B — 700 AGL.</b> Magenta vignette = Class E starts at 700 AGL. Below 700' is Class G — Part 107 below 400' needs no authorization.</div></details>
+  </div>
+
+  <!-- Q6 -->
+  <div class="card q-card-static">
+    <div class="q-meta"><span>Question 6 of 18</span><span class="pill E">Class E 1200</span></div>
+    <div class="visual-frame">
+      <svg viewBox="0 0 240 160" width="100%">
+        <defs>
+          <radialGradient id="q6g" cx="50%" cy="50%" r="50%">
+            <stop offset="60%" stop-color="#2b6cff" stop-opacity="0"/>
+            <stop offset="80%" stop-color="#2b6cff" stop-opacity="0.55"/>
+            <stop offset="100%" stop-color="#2b6cff" stop-opacity="0"/>
+          </radialGradient>
+        </defs>
+        <rect width="240" height="160" fill="#f5f5f0"/>
+        <rect width="240" height="160" fill="url(#q6g)"/>
+      </svg>
+    </div>
+    <div class="q-prompt">A <b>FUZZY BLUE</b> vignette covers part of the chart. Class E floor?</div>
+    <ol class="choices-static" type="A">
+      <li>Surface</li>
+      <li>700 AGL</li>
+      <li>1,200 AGL</li>
+      <li>18,000 MSL</li>
+    </ol>
+    <details><summary>Show answer</summary><div class="explain"><b>C — 1,200 AGL.</b> Blue vignette = Class E starts at 1,200 AGL. Below is Class G.</div></details>
+  </div>
+
+  <!-- Q7 -->
+  <div class="card q-card-static">
+    <div class="q-meta"><span>Question 7 of 18</span><span class="pill A">Class A</span></div>
+    <div class="q-prompt">Which class of airspace has a <b>CEILING of 18,000 MSL</b> and is reserved for IFR traffic (no drones)?</div>
+    <ol class="choices-static" type="A">
+      <li>Class A</li>
+      <li>Class B</li>
+      <li>Class E</li>
+      <li>Class G</li>
+    </ol>
+    <details><summary>Show answer</summary><div class="explain"><b>A — Class A.</b> 18,000 MSL up to FL600. IFR only — Part 107 ops prohibited.</div></details>
+  </div>
+
+  <!-- Q8 -->
+  <div class="card q-card-static">
+    <div class="q-meta"><span>Question 8 of 18</span><span class="pill B">Class B</span></div>
+    <div class="q-prompt">Standard ceiling of Class B airspace?</div>
+    <ol class="choices-static" type="A">
+      <li>2,500 AGL</li>
+      <li>4,000 AGL</li>
+      <li>10,000 MSL</li>
+      <li>18,000 MSL</li>
+    </ol>
+    <details><summary>Show answer</summary><div class="explain"><b>C — 10,000 MSL.</b> Class B tops out at 10,000 MSL.</div></details>
+  </div>
+
+  <!-- Q9 -->
+  <div class="card q-card-static">
+    <div class="q-meta"><span>Question 9 of 18</span><span class="pill C">Class C</span></div>
+    <div class="q-prompt">A Class C airspace typically extends from the surface to what altitude?</div>
+    <ol class="choices-static" type="A">
+      <li>2,500 AGL</li>
+      <li>4,000 AGL above the airport elevation</li>
+      <li>10,000 MSL</li>
+      <li>1,200 AGL</li>
+    </ol>
+    <details><summary>Show answer</summary><div class="explain"><b>B — 4,000 AGL above the airport elevation</b> (charted in MSL on sectionals).</div></details>
+  </div>
+
+  <!-- Q10 -->
+  <div class="card q-card-static">
+    <div class="q-meta"><span>Question 10 of 18</span><span class="pill D">Class D</span></div>
+    <div class="q-prompt">Class D airspace typically extends from the surface to:</div>
+    <ol class="choices-static" type="A">
+      <li>2,500 AGL</li>
+      <li>4,000 AGL</li>
+      <li>10,000 MSL</li>
+      <li>Surface only</li>
+    </ol>
+    <details><summary>Show answer</summary><div class="explain"><b>A — 2,500 AGL.</b> Class D goes from surface to roughly 2,500 feet AGL above the airport.</div></details>
+  </div>
+
+  <!-- Q11 -->
+  <div class="card q-card-static">
+    <div class="q-meta"><span>Question 11 of 18</span><span class="pill B">Class B</span></div>
+    <div class="visual-frame">
+      <svg viewBox="0 0 320 200" width="100%">
+        <rect width="320" height="200" fill="#e8f1fb"/>
+        <rect x="0" y="180" width="320" height="20" fill="#8b6f4e"/>
+        <rect x="60" y="80" width="200" height="100" fill="#2b6cff" fill-opacity="0.30" stroke="#2b6cff" stroke-width="2"/>
+        <rect x="90" y="110" width="140" height="70" fill="#2b6cff" fill-opacity="0.30" stroke="#2b6cff" stroke-width="2"/>
+        <rect x="125" y="140" width="70" height="40" fill="#2b6cff" fill-opacity="0.40" stroke="#2b6cff" stroke-width="2"/>
+        <text x="160" y="60" text-anchor="middle" font-size="11" fill="#1e3a8a">10,000 MSL ceiling</text>
+      </svg>
+    </div>
+    <div class="q-prompt">This "upside-down wedding cake" shape with <b>blue</b> layers represents which airspace?</div>
+    <ol class="choices-static" type="A">
+      <li>Class B</li>
+      <li>Class C</li>
+      <li>Class D</li>
+      <li>Class E</li>
+    </ol>
+    <details><summary>Show answer</summary><div class="explain"><b>A — Class B.</b> Blue = B or D, but multiple stacked tiers is the signature of Class B.</div></details>
+  </div>
+
+  <!-- Q12 -->
+  <div class="card q-card-static">
+    <div class="q-meta"><span>Question 12 of 18</span><span class="pill C">Class C</span></div>
+    <div class="visual-frame">
+      <svg viewBox="0 0 320 200" width="100%">
+        <rect width="320" height="200" fill="#e8f1fb"/>
+        <rect x="0" y="180" width="320" height="20" fill="#8b6f4e"/>
+        <rect x="80" y="110" width="160" height="70" fill="#c026d3" fill-opacity="0.30" stroke="#c026d3" stroke-width="2"/>
+        <rect x="120" y="140" width="80" height="40" fill="#c026d3" fill-opacity="0.45" stroke="#c026d3" stroke-width="2"/>
+        <text x="160" y="100" text-anchor="middle" font-size="11" fill="#6b21a8">4,000 AGL ceiling</text>
+      </svg>
+    </div>
+    <div class="q-prompt">Two-tier <b>magenta</b> wedding cake — which class?</div>
+    <ol class="choices-static" type="A">
+      <li>Class B</li>
+      <li>Class C</li>
+      <li>Class D</li>
+      <li>Class E surface</li>
+    </ol>
+    <details><summary>Show answer</summary><div class="explain"><b>B — Class C.</b> Magenta + two rings (inner core + shelf) = Class C.</div></details>
+  </div>
+
+  <!-- Q13 -->
+  <div class="card q-card-static">
+    <div class="q-meta"><span>Question 13 of 18</span><span class="pill G">Class G</span></div>
+    <div class="q-prompt">You're flying a drone at 200 AGL in a rural area with no airports or sectional shading nearby. Most likely airspace?</div>
+    <ol class="choices-static" type="A">
+      <li>Class B</li>
+      <li>Class E to surface</li>
+      <li>Class G</li>
+      <li>Class A</li>
+    </ol>
+    <details><summary>Show answer</summary><div class="explain"><b>C — Class G.</b> Below the floor of Class E in unshaded areas (typically 1,200 AGL), you're uncontrolled. No authorization needed.</div></details>
+  </div>
+
+  <!-- Q14 -->
+  <div class="card q-card-static">
+    <div class="q-meta"><span>Question 14 of 18</span><span class="pill B">B</span><span class="pill C">C</span><span class="pill D">D</span><span class="pill E">E</span></div>
+    <div class="q-prompt">As a Part 107 pilot, which classes of airspace require ATC authorization (e.g., via LAANC) before you can operate?</div>
+    <ol class="choices-static" type="A">
+      <li>B, C, D, and E to the surface</li>
+      <li>Only Class B</li>
+      <li>Only Class G</li>
+      <li>A, B, and C</li>
+    </ol>
+    <details><summary>Show answer</summary><div class="explain"><b>A — B, C, D, and Class E that extends to the surface.</b> All four require authorization.</div></details>
+  </div>
+
+  <!-- Q15 -->
+  <div class="card q-card-static">
+    <div class="q-meta"><span>Question 15 of 18</span><span class="pill C">Class C</span></div>
+    <div class="q-prompt">The number '<b>42/SFC</b>' inside a Class C ring on a sectional means:</div>
+    <ol class="choices-static" type="A">
+      <li>Ceiling 4,200 AGL, floor 42 feet</li>
+      <li>Ceiling 4,200 MSL, floor surface</li>
+      <li>Ceiling 42,000 MSL, floor surface</li>
+      <li>Ceiling 420 MSL, floor surface</li>
+    </ol>
+    <details><summary>Show answer</summary><div class="explain"><b>B — Ceiling 4,200 MSL, floor surface.</b> Numbers are hundreds of feet MSL. SFC = surface.</div></details>
+  </div>
+
+  <!-- Q16 -->
+  <div class="card q-card-static">
+    <div class="q-meta"><span>Question 16 of 18</span><span class="pill E">Class E</span></div>
+    <div class="q-prompt">If the chart shows <b>NO vignette</b> and no special class around you, where does Class E typically begin?</div>
+    <ol class="choices-static" type="A">
+      <li>Surface</li>
+      <li>700 AGL</li>
+      <li>1,200 AGL</li>
+      <li>14,500 MSL</li>
+    </ol>
+    <details><summary>Show answer</summary><div class="explain"><b>C — 1,200 AGL.</b> Default Class E floor in unshaded sectional areas is 1,200 AGL.</div></details>
+  </div>
+
+  <!-- Q17 -->
+  <div class="card q-card-static">
+    <div class="q-meta"><span>Question 17 of 18</span><span class="pill G">Class G</span></div>
+    <div class="visual-frame">
+      <svg viewBox="0 0 240 160" width="100%">
+        <defs>
+          <radialGradient id="q17g" cx="50%" cy="50%" r="50%">
+            <stop offset="60%" stop-color="#c026d3" stop-opacity="0"/>
+            <stop offset="80%" stop-color="#c026d3" stop-opacity="0.6"/>
+            <stop offset="100%" stop-color="#c026d3" stop-opacity="0"/>
+          </radialGradient>
+        </defs>
+        <rect width="240" height="160" fill="#f5f5f0"/>
+        <circle cx="120" cy="80" r="75" fill="url(#q17g)"/>
+      </svg>
+    </div>
+    <div class="q-prompt">You're inside a <b>magenta vignette</b> area, flying a drone at <b>350 AGL</b>. Which class are you in and do you need authorization?</div>
+    <ol class="choices-static" type="A">
+      <li>Class E — yes, authorization required</li>
+      <li>Class G — no authorization required</li>
+      <li>Class D — call the tower</li>
+      <li>Class B — prohibited</li>
+    </ol>
+    <details><summary>Show answer</summary><div class="explain"><b>B — Class G, no authorization.</b> Magenta vignette = Class E starts at 700 AGL. At 350 AGL you're in Class G. Still follow Part 107 rules (≤400', daylight, VLOS, etc.).</div></details>
+  </div>
+
+  <!-- Q18 -->
+  <div class="card q-card-static">
+    <div class="q-meta"><span>Question 18 of 18</span><span class="pill E">Class E sfc</span></div>
+    <div class="q-prompt">Which sectional symbol indicates Class E airspace that <b>extends down to the surface</b>?</div>
+    <ol class="choices-static" type="A">
+      <li>Solid blue circle</li>
+      <li>Solid magenta circle</li>
+      <li>Dashed magenta circle</li>
+      <li>Dashed blue circle</li>
+    </ol>
+    <details><summary>Show answer</summary><div class="explain"><b>C — Dashed magenta circle.</b> (Dashed BLUE = Class D.)</div></details>
+  </div>
+
+  <div class="card" style="text-align:center;">
+    <h2>Done!</h2>
+    <p style="color:var(--muted)">Aim for 16/18 (≈90%) two runs in a row. Re-read any missed concepts in the <b>Learn</b> or <b>Sectional Symbols</b> tabs.</p>
+  </div>
+
 </section>
 
 </main>
 
 <footer>Study aid for FAA Part 107. Always verify with current FAA publications and your sectional chart. Not for navigation.</footer>
 
-<script>
-// Tabs are handled purely with CSS (radio + :checked) — no JS needed.
-
-// ---------- Reusable SVG snippets for quiz visuals ----------
-const SVG = {
-  classB: `<svg viewBox="0 0 240 160" width="100%">
-    <rect width="240" height="160" fill="#f5f5f0"/>
-    <circle cx="120" cy="80" r="60" fill="none" stroke="#2b6cff" stroke-width="3"/>
-    <circle cx="120" cy="80" r="38" fill="none" stroke="#2b6cff" stroke-width="3"/>
-    <text x="120" y="40" text-anchor="middle" font-size="12" fill="#1e3a8a" font-weight="700">100</text>
-    <text x="120" y="52" text-anchor="middle" font-size="10" fill="#1e3a8a">SFC</text>
-  </svg>`,
-  classC: `<svg viewBox="0 0 240 160" width="100%">
-    <rect width="240" height="160" fill="#f5f5f0"/>
-    <circle cx="120" cy="80" r="58" fill="none" stroke="#c026d3" stroke-width="3"/>
-    <circle cx="120" cy="80" r="32" fill="none" stroke="#c026d3" stroke-width="3"/>
-    <text x="120" y="40" text-anchor="middle" font-size="12" fill="#6b21a8" font-weight="700">42</text>
-    <text x="120" y="52" text-anchor="middle" font-size="10" fill="#6b21a8">SFC</text>
-  </svg>`,
-  classD: `<svg viewBox="0 0 240 160" width="100%">
-    <rect width="240" height="160" fill="#f5f5f0"/>
-    <circle cx="120" cy="80" r="48" fill="none" stroke="#2b6cff" stroke-width="3" stroke-dasharray="6,4"/>
-    <rect x="103" y="120" width="34" height="18" fill="#f5f5f0" stroke="#1e3a8a"/>
-    <text x="120" y="134" text-anchor="middle" font-size="12" fill="#1e3a8a" font-weight="700">[25]</text>
-  </svg>`,
-  classEsfc: `<svg viewBox="0 0 240 160" width="100%">
-    <rect width="240" height="160" fill="#f5f5f0"/>
-    <circle cx="120" cy="80" r="52" fill="none" stroke="#c026d3" stroke-width="2.5" stroke-dasharray="6,4"/>
-  </svg>`,
-  classE700: `<svg viewBox="0 0 240 160" width="100%">
-    <defs>
-      <radialGradient id="qm" cx="50%" cy="50%" r="50%">
-        <stop offset="60%" stop-color="#c026d3" stop-opacity="0"/>
-        <stop offset="80%" stop-color="#c026d3" stop-opacity="0.6"/>
-        <stop offset="100%" stop-color="#c026d3" stop-opacity="0"/>
-      </radialGradient>
-    </defs>
-    <rect width="240" height="160" fill="#f5f5f0"/>
-    <circle cx="120" cy="80" r="75" fill="url(#qm)"/>
-  </svg>`,
-  classE1200: `<svg viewBox="0 0 240 160" width="100%">
-    <defs>
-      <radialGradient id="qb" cx="50%" cy="50%" r="50%">
-        <stop offset="60%" stop-color="#2b6cff" stop-opacity="0"/>
-        <stop offset="80%" stop-color="#2b6cff" stop-opacity="0.55"/>
-        <stop offset="100%" stop-color="#2b6cff" stop-opacity="0"/>
-      </radialGradient>
-    </defs>
-    <rect width="240" height="160" fill="#f5f5f0"/>
-    <rect width="240" height="160" fill="url(#qb)"/>
-  </svg>`,
-  weddingCake: `<svg viewBox="0 0 320 200" width="100%">
-    <rect width="320" height="200" fill="#e8f1fb"/>
-    <rect x="0" y="180" width="320" height="20" fill="#8b6f4e"/>
-    <rect x="60" y="80" width="200" height="100" fill="#2b6cff" fill-opacity="0.30" stroke="#2b6cff" stroke-width="2"/>
-    <rect x="90" y="110" width="140" height="70" fill="#2b6cff" fill-opacity="0.30" stroke="#2b6cff" stroke-width="2"/>
-    <rect x="125" y="140" width="70" height="40" fill="#2b6cff" fill-opacity="0.40" stroke="#2b6cff" stroke-width="2"/>
-    <text x="160" y="60" text-anchor="middle" font-size="11" fill="#1e3a8a">10,000 MSL ceiling</text>
-  </svg>`,
-  weddingCakeC: `<svg viewBox="0 0 320 200" width="100%">
-    <rect width="320" height="200" fill="#e8f1fb"/>
-    <rect x="0" y="180" width="320" height="20" fill="#8b6f4e"/>
-    <rect x="80" y="110" width="160" height="70" fill="#c026d3" fill-opacity="0.30" stroke="#c026d3" stroke-width="2"/>
-    <rect x="120" y="140" width="80" height="40" fill="#c026d3" fill-opacity="0.45" stroke="#c026d3" stroke-width="2"/>
-    <text x="160" y="100" text-anchor="middle" font-size="11" fill="#6b21a8">4,000 AGL ceiling</text>
-  </svg>`
-};
-
-// ---------- Question bank ----------
-const QUESTIONS = [
-  {
-    visual: SVG.classB,
-    prompt: "On a sectional chart you see two thick SOLID BLUE concentric circles around a major airport, labeled '100/SFC'. What airspace is this and what's the ceiling?",
-    choices: [
-      "Class B, ceiling 10,000 MSL",
-      "Class C, ceiling 10,000 AGL",
-      "Class D, ceiling 1,000 AGL",
-      "Class E, ceiling 1,000 MSL"
-    ],
-    answer: 0,
-    explain: "Solid blue rings = Class B. '100/SFC' reads as 10,000 MSL ceiling / surface floor."
-  },
-  {
-    visual: SVG.classC,
-    prompt: "Two SOLID MAGENTA concentric circles around an airport with '42/SFC'. Which airspace and ceiling?",
-    choices: [
-      "Class B, 4,200 MSL",
-      "Class C, 4,200 MSL",
-      "Class C, 4,000 AGL above the airport elevation",
-      "Class E, 4,200 AGL"
-    ],
-    answer: 1,
-    explain: "Solid magenta = Class C. '42/SFC' = ceiling 4,200 MSL, floor surface. (Class C ceilings are charted in MSL.)"
-  },
-  {
-    visual: SVG.classD,
-    prompt: "A single DASHED BLUE circle around a towered airport with a boxed [25]. What airspace? What does [25] mean?",
-    choices: [
-      "Class C, ceiling 2,500 MSL",
-      "Class D, ceiling 2,500 MSL",
-      "Class B, ceiling 25,000 MSL",
-      "Class E surface area, ceiling 2,500 AGL"
-    ],
-    answer: 1,
-    explain: "Dashed blue = Class D. [25] = ceiling 2,500 MSL (number in hundreds of feet)."
-  },
-  {
-    visual: SVG.classEsfc,
-    prompt: "A DASHED MAGENTA ring surrounds a non-towered airport. As a Part 107 pilot, what does this mean for you?",
-    choices: [
-      "Class G — fly freely below 400 AGL.",
-      "Class E to the surface — authorization required to operate here.",
-      "Class D — call the tower (there isn't one).",
-      "Class B — never permitted."
-    ],
-    answer: 1,
-    explain: "Dashed magenta = Class E that extends to the surface (instrument-approach airport without a tower). Authorization (LAANC/DroneZone) is required."
-  },
-  {
-    visual: SVG.classE700,
-    prompt: "On the sectional you see a FUZZY MAGENTA shaded area (a 'vignette'). What is the floor of controlled airspace here?",
-    choices: [
-      "Surface",
-      "700 AGL",
-      "1,200 AGL",
-      "14,500 MSL"
-    ],
-    answer: 1,
-    explain: "Magenta vignette = Class E starts at 700 AGL. Below 700' you're in Class G — Part 107 operations below 400' need no authorization."
-  },
-  {
-    visual: SVG.classE1200,
-    prompt: "A FUZZY BLUE vignette covers part of the chart. Class E floor?",
-    choices: [
-      "Surface",
-      "700 AGL",
-      "1,200 AGL",
-      "18,000 MSL"
-    ],
-    answer: 2,
-    explain: "Blue vignette = Class E starts at 1,200 AGL. Below it is Class G."
-  },
-  {
-    prompt: "Which class of airspace has a CEILING of 18,000 MSL and is reserved for IFR traffic (no drones)?",
-    choices: ["Class A", "Class B", "Class E", "Class G"],
-    answer: 0,
-    explain: "Class A: 18,000 MSL up to FL600. IFR only — Part 107 operations are prohibited."
-  },
-  {
-    prompt: "Standard ceiling of Class B airspace?",
-    choices: ["2,500 AGL", "4,000 AGL", "10,000 MSL", "18,000 MSL"],
-    answer: 2,
-    explain: "Class B tops out at 10,000 MSL."
-  },
-  {
-    prompt: "A Class C airspace typically extends from the surface to what altitude?",
-    choices: ["2,500 AGL", "4,000 AGL above the airport elevation", "10,000 MSL", "1,200 AGL"],
-    answer: 1,
-    explain: "Class C ceiling is typically 4,000 feet above the airport elevation (charted in MSL)."
-  },
-  {
-    prompt: "Class D airspace typically extends from the surface to:",
-    choices: ["2,500 AGL", "4,000 AGL", "10,000 MSL", "Surface only"],
-    answer: 0,
-    explain: "Class D goes from surface to approximately 2,500 feet AGL above the airport."
-  },
-  {
-    visual: SVG.weddingCake,
-    prompt: "This 'upside-down wedding cake' shape with blue layers represents which airspace?",
-    choices: ["Class B", "Class C", "Class D", "Class E"],
-    answer: 0,
-    explain: "Blue = B or D. Multiple stacked tiers (the wedding cake) is the signature of Class B."
-  },
-  {
-    visual: SVG.weddingCakeC,
-    prompt: "Two-tier magenta wedding cake — which class?",
-    choices: ["Class B", "Class C", "Class D", "Class E surface"],
-    answer: 1,
-    explain: "Magenta + two rings (inner core + shelf) = Class C."
-  },
-  {
-    prompt: "You're flying a drone at 200 AGL in a rural area with no airports or sectional shading nearby. Most likely airspace?",
-    choices: ["Class B", "Class E to surface", "Class G", "Class A"],
-    answer: 2,
-    explain: "Below the floor of Class E (typically 1,200 AGL in unshaded areas), uncontrolled = Class G. No authorization needed."
-  },
-  {
-    prompt: "As a Part 107 pilot, which classes of airspace require ATC authorization (e.g., via LAANC) before you can operate?",
-    choices: [
-      "B, C, D, and E to the surface",
-      "Only Class B",
-      "Only Class G",
-      "A, B, and C"
-    ],
-    answer: 0,
-    explain: "Authorization is required for Class B, C, D, and lateral boundaries of E that extend to the surface."
-  },
-  {
-    prompt: "The number '42/SFC' inside a Class C ring on a sectional means:",
-    choices: [
-      "Ceiling 4,200 AGL, floor 42 feet",
-      "Ceiling 4,200 MSL, floor surface",
-      "Ceiling 42,000 MSL, floor surface",
-      "Ceiling 420 MSL, floor surface"
-    ],
-    answer: 1,
-    explain: "Numbers are in hundreds of feet MSL. '42' = 4,200 MSL. 'SFC' = surface."
-  },
-  {
-    prompt: "If the chart shows NO vignette and no special class around you, where does Class E typically begin?",
-    choices: ["Surface", "700 AGL", "1,200 AGL", "14,500 MSL"],
-    answer: 2,
-    explain: "Default Class E floor in unshaded sectional areas is 1,200 AGL (in some western U.S. areas it can be 14,500 MSL, but 1,200 AGL is the standard answer)."
-  },
-  {
-    visual: SVG.classE700,
-    prompt: "You're inside a magenta vignette area, flying a drone at 350 AGL. Which class are you in and do you need authorization?",
-    choices: [
-      "Class E — yes, authorization required",
-      "Class G — no authorization required",
-      "Class D — call the tower",
-      "Class B — prohibited"
-    ],
-    answer: 1,
-    explain: "Magenta vignette = Class E starts at 700 AGL. At 350 AGL you're in uncontrolled Class G — no authorization needed (but still follow Part 107 rules)."
-  },
-  {
-    prompt: "Which sectional symbol indicates Class E airspace that extends down to the surface?",
-    choices: [
-      "Solid blue circle",
-      "Solid magenta circle",
-      "Dashed magenta circle",
-      "Dashed blue circle"
-    ],
-    answer: 2,
-    explain: "Dashed MAGENTA = Class E to the surface. (Dashed BLUE = Class D.)"
-  }
-];
-
-// ---------- Quiz engine ----------
-let order = [];
-let idx = 0;
-let score = 0;
-let answered = false;
-
-function shuffle(arr) {
-  const a = arr.slice();
-  for (let i = a.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [a[i], a[j]] = [a[j], a[i]];
-  }
-  return a;
-}
-
-function startQuiz() {
-  order = shuffle(QUESTIONS.map((_, i) => i));
-  idx = 0; score = 0; answered = false;
-  document.getElementById('qTotal').textContent = order.length;
-  document.getElementById('finalCard').style.display = 'none';
-  document.querySelector('#quiz .card').style.display = '';
-  renderQuestion();
-}
-
-function renderQuestion() {
-  answered = false;
-  const q = QUESTIONS[order[idx]];
-  document.getElementById('qNum').textContent = idx + 1;
-  document.getElementById('score').textContent = score;
-  document.getElementById('qPrompt').textContent = q.prompt;
-  const visual = document.getElementById('qVisual');
-  if (q.visual) { visual.innerHTML = q.visual; visual.style.display = ''; }
-  else { visual.style.display = 'none'; }
-  const choices = document.getElementById('choices');
-  choices.innerHTML = '';
-  q.choices.forEach((c, i) => {
-    const btn = document.createElement('button');
-    btn.className = 'choice';
-    btn.textContent = c;
-    btn.addEventListener('click', () => pick(i, btn));
-    choices.appendChild(btn);
-  });
-  document.getElementById('explain').style.display = 'none';
-  document.getElementById('next').disabled = true;
-  document.getElementById('next').textContent = idx === order.length - 1 ? 'Finish' : 'Next →';
-}
-
-function pick(i, btn) {
-  if (answered) return;
-  answered = true;
-  const q = QUESTIONS[order[idx]];
-  const buttons = document.querySelectorAll('.choice');
-  buttons.forEach((b, j) => {
-    b.classList.add('disabled');
-    if (j === q.answer) b.classList.add('correct');
-    if (j === i && i !== q.answer) b.classList.add('wrong');
-  });
-  if (i === q.answer) score++;
-  document.getElementById('score').textContent = score;
-  const ex = document.getElementById('explain');
-  ex.innerHTML = `<b>${i === q.answer ? '✓ Correct.' : '✗ Not quite.'}</b> ${q.explain}`;
-  ex.style.display = '';
-  document.getElementById('next').disabled = false;
-}
-
-document.getElementById('next').addEventListener('click', () => {
-  if (idx < order.length - 1) {
-    idx++;
-    renderQuestion();
-  } else {
-    finishQuiz();
-  }
-});
-document.getElementById('restart').addEventListener('click', startQuiz);
-document.getElementById('again').addEventListener('click', startQuiz);
-
-function finishQuiz() {
-  document.querySelector('#quiz .card').style.display = 'none';
-  const final = document.getElementById('finalCard');
-  final.style.display = '';
-  const pct = Math.round((score / order.length) * 100);
-  document.getElementById('finalScore').textContent = `${score} / ${order.length}  (${pct}%)`;
-  let msg = '';
-  if (pct >= 90) msg = "Exam-ready on airspace. Keep this fresh and review weather/regs next.";
-  else if (pct >= 75) msg = "Solid. Re-read the Cheat Sheet, then run it again.";
-  else if (pct >= 50) msg = "Getting there. Spend more time on Sectional Symbols, then retry.";
-  else msg = "Hit the Learn tab — focus on color + line-style → class mapping.";
-  document.getElementById('finalMsg').textContent = msg;
-}
-
-startQuiz();
-</script>
 </body>
 </html>
