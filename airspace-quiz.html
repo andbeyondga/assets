@@ -44,14 +44,16 @@
   .tab-radio { position: absolute; left: -9999px; }
   #t-learn:checked ~ header nav label[for="t-learn"],
   #t-symbols:checked ~ header nav label[for="t-symbols"],
-  #t-quiz:checked ~ header nav label[for="t-quiz"] {
+  #t-quiz:checked ~ header nav label[for="t-quiz"],
+  #t-quiz2:checked ~ header nav label[for="t-quiz2"] {
     background: var(--accent); color: #0a0f14; border-color: var(--accent); font-weight: 600;
   }
   main { max-width: 1200px; margin: 0 auto; padding: 24px; }
   section.tab { display: none; }
   #t-learn:checked   ~ main #learn,
   #t-symbols:checked ~ main #symbols,
-  #t-quiz:checked    ~ main #quiz { display: block; }
+  #t-quiz:checked    ~ main #quiz,
+  #t-quiz2:checked   ~ main #quiz2 { display: block; }
 
   .card {
     background: var(--panel); border: 1px solid var(--border); border-radius: 10px;
@@ -101,11 +103,12 @@
   .btn.secondary { background: var(--panel-2); color: var(--ink); border: 1px solid var(--border); }
   .score { font-weight: 600; }
 
-  /* ===== Interactive Quiz (pure CSS, uses :target + :has) ===== */
-  #quiz .question { display: none; }
-  #quiz .question:target { display: block; }
-  /* Default-show q1 when no question is the URL target */
+  /* ===== Interactive Quizzes (pure CSS, uses :target + :has) ===== */
+  #quiz .question, #quiz2 .question { display: none; }
+  #quiz .question:target, #quiz2 .question:target { display: block; }
+  /* Default-show the first card of each quiz when no question is the URL target */
   body:not(:has(#quiz .question:target)) #q1 { display: block; }
+  body:not(:has(#quiz2 .question:target)) #m1 { display: block; }
 
   .q-meta-bar {
     display: flex; justify-content: space-between; align-items: center;
@@ -161,6 +164,7 @@
 <input type="radio" name="tab" id="t-learn" class="tab-radio" checked>
 <input type="radio" name="tab" id="t-symbols" class="tab-radio">
 <input type="radio" name="tab" id="t-quiz" class="tab-radio">
+<input type="radio" name="tab" id="t-quiz2" class="tab-radio">
 
 <header>
   <div>
@@ -170,7 +174,8 @@
   <nav>
     <label for="t-learn">Learn</label>
     <label for="t-symbols">Sectional Symbols</label>
-    <label for="t-quiz">Quiz</label>
+    <label for="t-quiz">Quiz 1</label>
+    <label for="t-quiz2">Quiz 2 (Map ID)</label>
   </nav>
 </header>
 
@@ -422,8 +427,14 @@
 <section id="quiz" class="tab">
 
   <div class="card quiz-intro">
-    <h2>Interactive Quiz — 18 questions</h2>
-    <p style="color:var(--muted); margin:4px 0 0;">Click an answer; it turns green if correct, red if wrong (with the correct one highlighted). Then click Next.</p>
+    <div style="display:flex; justify-content:space-between; align-items:center; gap:10px; flex-wrap:wrap;">
+      <div>
+        <h2 style="margin-bottom:4px;">Interactive Quiz — 18 questions</h2>
+        <p style="color:var(--muted); margin:0;">Click an answer; it turns green if correct, red if wrong. Then click Next.</p>
+      </div>
+      <a class="btn secondary" data-shuffle="quiz" href="#q1">🔀 Shuffle</a>
+    </div>
+    <p class="js-warn" style="margin:8px 0 0; font-size:12px; color:var(--warn); display:none;">Shuffle needs JavaScript — your viewer has JS disabled, so questions stay in fixed order. Open this file in a real browser (Chrome/Safari/Firefox) to get shuffling.</p>
   </div>
 
   <div class="card question" id="q1">
@@ -829,10 +840,437 @@
 
 </section>
 
+<section id="quiz2" class="tab">
+
+  <div class="card">
+    <div style="display:flex; justify-content:space-between; align-items:flex-start; gap:10px; flex-wrap:wrap;">
+      <div>
+        <h2 style="margin-bottom:4px;">Quiz 2 — Map Identification (8 questions)</h2>
+        <p style="color:var(--muted); margin:0;">Each card shows a stylized sectional excerpt with a red <b>★</b> marking your drone. Identify the airspace.</p>
+      </div>
+      <a class="btn secondary" data-shuffle="quiz2" href="#m1">🔀 Shuffle</a>
+    </div>
+    <p style="margin:8px 0 0; font-size:13px;"><b>Legend:</b> blue ✈ = towered airport • magenta ✈ = non-towered • solid lines = hard floors/ceilings • dashed lines = surface airspace • fuzzy shading = vignette transition (magenta=700 AGL, blue=1,200 AGL).</p>
+  </div>
+
+  <div class="card question" id="m1">
+    <div class="q-meta-bar"><span>Map 1 of 8</span><span><span class="pill B">Class B</span></span></div>
+    <div class="visual-frame"><svg viewBox="0 0 400 300" width="100%">
+    <rect width="400" height="300" fill="#f1e3c4"/>
+    <rect x="0" y="0" width="400" height="300" fill="#e6d6b3" fill-opacity="0.25"/>
+    <!-- subtle terrain blobs -->
+    <ellipse cx="80" cy="60" rx="60" ry="20" fill="#d4c08e" fill-opacity="0.5"/>
+    <ellipse cx="320" cy="240" rx="55" ry="18" fill="#d4c08e" fill-opacity="0.5"/>
+    <circle cx="200" cy="150" r="110" fill="none" stroke="#2b6cff" stroke-width="3"/>
+    <circle cx="200" cy="150" r="55" fill="none" stroke="#2b6cff" stroke-width="3"/>
+    <text x="300" y="55" font-size="11" font-weight="700" fill="#1e3a8a">100/SFC</text>
+    <g>
+      <circle cx="200" cy="150" r="6" fill="#2b6cff" stroke="#1e3a8a" stroke-width="1"/>
+      <line x1="193" y1="150" x2="207" y2="150" stroke="#1e3a8a" stroke-width="1.5"/>
+      <line x1="200" y1="143" x2="200" y2="157" stroke="#1e3a8a" stroke-width="1.5"/>
+      <text x="200" y="170" text-anchor="middle" font-size="10" font-weight="700" fill="#1e3a8a">KMET</text>
+      
+    </g><text x="170" y="95" font-family="sans-serif" font-size="11" font-weight="700" fill="#1f2937" letter-spacing="1">METRO</text>
+    <g transform="translate(200,150)">
+      <polygon points="0,-12 3,-4 11,-4 5,2 7,10 0,5 -7,10 -5,2 -11,-4 -3,-4"
+               fill="#dc2626" stroke="#7f1d1d" stroke-width="1"/>
+      <text x="15" y="4" font-family="sans-serif" font-size="11" font-weight="700" fill="#7f1d1d">YOU</text>
+    </g></svg></div>
+    <div class="q-prompt">The red <b>★</b> marker shows your drone position at <b>1,500 MSL</b>, dead center of a major airport's inner ring. What airspace are you in?</div>
+    <div class="choices">
+      <label class="choice"><input type="radio" name="m1" class="correct"><span><b>A.</b> Class B — authorization required</span></label>
+      <label class="choice"><input type="radio" name="m1" class="wrong"><span><b>B.</b> Class C — authorization required</span></label>
+      <label class="choice"><input type="radio" name="m1" class="wrong"><span><b>C.</b> Class D — authorization required</span></label>
+      <label class="choice"><input type="radio" name="m1" class="wrong"><span><b>D.</b> Class G — no authorization needed</span></label>
+    </div>
+    <div class="explain explain-correct">✓ <b>Correct!</b> Two thick SOLID BLUE rings = Class B. '100/SFC' means ceiling 10,000 MSL, floor surface. At 1,500 MSL inside the inner ring you're in Class B — LAANC required.</div>
+    <div class="explain explain-wrong">✗ <b>Correct: A — Class B.</b> Two solid blue rings = Class B. Inside the inner core from surface up to 10,000 MSL = Class B. Authorization required.</div>
+    <div class="qnav">
+      <a class="btn secondary" href="#quiz2">Top</a>
+      <a class="btn" href="#m2">Next →</a>
+    </div>
+  </div>
+
+  <div class="card question" id="m2">
+    <div class="q-meta-bar"><span>Map 2 of 8</span><span><span class="pill C">Class C</span></span></div>
+    <div class="visual-frame"><svg viewBox="0 0 400 300" width="100%">
+    <rect width="400" height="300" fill="#f1e3c4"/>
+    <rect x="0" y="0" width="400" height="300" fill="#e6d6b3" fill-opacity="0.25"/>
+    <!-- subtle terrain blobs -->
+    <ellipse cx="80" cy="60" rx="60" ry="20" fill="#d4c08e" fill-opacity="0.5"/>
+    <ellipse cx="320" cy="240" rx="55" ry="18" fill="#d4c08e" fill-opacity="0.5"/>
+    <circle cx="200" cy="150" r="85" fill="none" stroke="#c026d3" stroke-width="3"/>
+    <circle cx="200" cy="150" r="45" fill="none" stroke="#c026d3" stroke-width="3"/>
+    <text x="270" y="80" font-size="11" font-weight="700" fill="#6b21a8">42/SFC</text>
+    <g>
+      <circle cx="200" cy="150" r="6" fill="#2b6cff" stroke="#1e3a8a" stroke-width="1"/>
+      <line x1="193" y1="150" x2="207" y2="150" stroke="#1e3a8a" stroke-width="1.5"/>
+      <line x1="200" y1="143" x2="200" y2="157" stroke="#1e3a8a" stroke-width="1.5"/>
+      <text x="200" y="170" text-anchor="middle" font-size="10" font-weight="700" fill="#1e3a8a">KRGN</text>
+      
+    </g><text x="140" y="80" font-family="sans-serif" font-size="11" font-weight="700" fill="#1f2937" letter-spacing="1">RIVER CITY</text>
+    <g transform="translate(255,150)">
+      <polygon points="0,-12 3,-4 11,-4 5,2 7,10 0,5 -7,10 -5,2 -11,-4 -3,-4"
+               fill="#dc2626" stroke="#7f1d1d" stroke-width="1"/>
+      <text x="15" y="4" font-family="sans-serif" font-size="11" font-weight="700" fill="#7f1d1d">YOU</text>
+    </g></svg></div>
+    <div class="q-prompt">You're at <b>2,000 MSL</b> at the marked spot — inside the outer ring of these solid magenta rings, but outside the inner ring. What class?</div>
+    <div class="choices">
+      <label class="choice"><input type="radio" name="m2" class="wrong"><span><b>A.</b> Class B</span></label>
+      <label class="choice"><input type="radio" name="m2" class="correct"><span><b>B.</b> Class C (outer shelf)</span></label>
+      <label class="choice"><input type="radio" name="m2" class="wrong"><span><b>C.</b> Class D</span></label>
+      <label class="choice"><input type="radio" name="m2" class="wrong"><span><b>D.</b> Class G — no authorization</span></label>
+    </div>
+    <div class="explain explain-correct">✓ <b>Correct!</b> Solid MAGENTA rings = Class C. The outer ring is the shelf (typically starts ~1,200 AGL up to ~4,000 AGL). At 2,000 MSL inside the shelf footprint you're in Class C — authorization required.</div>
+    <div class="explain explain-wrong">✗ <b>Correct: B — Class C (outer shelf).</b> Solid magenta rings = Class C. Inside the outer ring footprint = Class C airspace. Auth required.</div>
+    <div class="qnav">
+      <a class="btn secondary" href="#m1">← Prev</a>
+      <a class="btn" href="#m3">Next →</a>
+    </div>
+  </div>
+
+  <div class="card question" id="m3">
+    <div class="q-meta-bar"><span>Map 3 of 8</span><span><span class="pill G">Class G</span></span></div>
+    <div class="visual-frame"><svg viewBox="0 0 400 300" width="100%">
+    <rect width="400" height="300" fill="#f1e3c4"/>
+    <rect x="0" y="0" width="400" height="300" fill="#e6d6b3" fill-opacity="0.25"/>
+    <!-- subtle terrain blobs -->
+    <ellipse cx="80" cy="60" rx="60" ry="20" fill="#d4c08e" fill-opacity="0.5"/>
+    <ellipse cx="320" cy="240" rx="55" ry="18" fill="#d4c08e" fill-opacity="0.5"/>
+    <defs>
+      <radialGradient id="mv3" cx="50%" cy="50%" r="50%">
+        <stop offset="55%" stop-color="#c026d3" stop-opacity="0"/>
+        <stop offset="80%" stop-color="#c026d3" stop-opacity="0.55"/>
+        <stop offset="100%" stop-color="#c026d3" stop-opacity="0"/>
+      </radialGradient>
+    </defs>
+    <circle cx="120" cy="200" r="140" fill="url(#mv3)"/>
+    <circle cx="280" cy="150" r="55" fill="none" stroke="#2b6cff" stroke-width="3" stroke-dasharray="6,4"/>
+    <rect x="266" y="73" width="28" height="16" fill="#f1e3c4" stroke="#1e3a8a"/>
+    <text x="280" y="85" text-anchor="middle" font-size="11" font-weight="700" fill="#1e3a8a">[29]</text>
+    <g>
+      <circle cx="280" cy="150" r="6" fill="#2b6cff" stroke="#1e3a8a" stroke-width="1"/>
+      <line x1="273" y1="150" x2="287" y2="150" stroke="#1e3a8a" stroke-width="1.5"/>
+      <line x1="280" y1="143" x2="280" y2="157" stroke="#1e3a8a" stroke-width="1.5"/>
+      <text x="280" y="170" text-anchor="middle" font-size="10" font-weight="700" fill="#1e3a8a">KSML</text>
+      <text x="280" y="180" text-anchor="middle" font-size="9" fill="#1e3a8a">SML 1187</text>
+    </g><text x="250" y="80" font-family="sans-serif" font-size="11" font-weight="700" fill="#1f2937" letter-spacing="1">SMALLVILLE</text>
+    <g transform="translate(120,200)">
+      <polygon points="0,-12 3,-4 11,-4 5,2 7,10 0,5 -7,10 -5,2 -11,-4 -3,-4"
+               fill="#dc2626" stroke="#7f1d1d" stroke-width="1"/>
+      <text x="15" y="4" font-family="sans-serif" font-size="11" font-weight="700" fill="#7f1d1d">YOU</text>
+    </g></svg></div>
+    <div class="q-prompt">The marker is in the <b>fuzzy magenta shaded</b> area, well outside the dashed blue circle. Your altitude is <b>300 AGL</b>. What class?</div>
+    <div class="choices">
+      <label class="choice"><input type="radio" name="m3" class="wrong"><span><b>A.</b> Class D — call the tower</span></label>
+      <label class="choice"><input type="radio" name="m3" class="wrong"><span><b>B.</b> Class E — authorization required</span></label>
+      <label class="choice"><input type="radio" name="m3" class="correct"><span><b>C.</b> Class G — no authorization required</span></label>
+      <label class="choice"><input type="radio" name="m3" class="wrong"><span><b>D.</b> Class B — prohibited</span></label>
+    </div>
+    <div class="explain explain-correct">✓ <b>Correct!</b> Magenta vignette = Class E starts at 700 AGL. At 300 AGL you're below the Class E floor → Class G. The dashed blue Class D doesn't reach you.</div>
+    <div class="explain explain-wrong">✗ <b>Correct: C — Class G.</b> Magenta vignette = E floor at 700 AGL. Below 700 AGL = Class G. The Class D ring is far away.</div>
+    <div class="qnav">
+      <a class="btn secondary" href="#m2">← Prev</a>
+      <a class="btn" href="#m4">Next →</a>
+    </div>
+  </div>
+
+  <div class="card question" id="m4">
+    <div class="q-meta-bar"><span>Map 4 of 8</span><span><span class="pill E">Class E sfc</span></span></div>
+    <div class="visual-frame"><svg viewBox="0 0 400 300" width="100%">
+    <rect width="400" height="300" fill="#f1e3c4"/>
+    <rect x="0" y="0" width="400" height="300" fill="#e6d6b3" fill-opacity="0.25"/>
+    <!-- subtle terrain blobs -->
+    <ellipse cx="80" cy="60" rx="60" ry="20" fill="#d4c08e" fill-opacity="0.5"/>
+    <ellipse cx="320" cy="240" rx="55" ry="18" fill="#d4c08e" fill-opacity="0.5"/>
+    <circle cx="200" cy="150" r="70" fill="none" stroke="#c026d3" stroke-width="2.5" stroke-dasharray="6,4"/>
+    <g>
+      <circle cx="200" cy="150" r="5" fill="#c026d3" stroke="#6b21a8" stroke-width="1"/>
+      <text x="200" y="168" text-anchor="middle" font-size="10" font-weight="700" fill="#6b21a8">0X1</text>
+      <text x="200" y="180" text-anchor="middle" font-size="9" fill="#6b21a8">ELEV 822</text>
+    </g><text x="160" y="70" font-family="sans-serif" font-size="11" font-weight="700" fill="#1f2937" letter-spacing="1">GRAYSON</text>
+    <g transform="translate(200,150)">
+      <polygon points="0,-12 3,-4 11,-4 5,2 7,10 0,5 -7,10 -5,2 -11,-4 -3,-4"
+               fill="#dc2626" stroke="#7f1d1d" stroke-width="1"/>
+      <text x="15" y="4" font-family="sans-serif" font-size="11" font-weight="700" fill="#7f1d1d">YOU</text>
+    </g></svg></div>
+    <div class="q-prompt">The marker sits at a small non-towered airport ringed by a <b>DASHED MAGENTA</b> line. You're at 200 AGL. What's the airspace and do you need authorization?</div>
+    <div class="choices">
+      <label class="choice"><input type="radio" name="m4" class="wrong"><span><b>A.</b> Class G — fly freely</span></label>
+      <label class="choice"><input type="radio" name="m4" class="correct"><span><b>B.</b> Class E to the surface — authorization required</span></label>
+      <label class="choice"><input type="radio" name="m4" class="wrong"><span><b>C.</b> Class D — call the tower</span></label>
+      <label class="choice"><input type="radio" name="m4" class="wrong"><span><b>D.</b> Class B — prohibited</span></label>
+    </div>
+    <div class="explain explain-correct">✓ <b>Correct!</b> Dashed MAGENTA = Class E that extends all the way to the surface (non-towered field with an instrument approach). You're inside it, so authorization (LAANC/DroneZone) is required.</div>
+    <div class="explain explain-wrong">✗ <b>Correct: B — Class E to the surface.</b> Dashed magenta ring = E to the surface. Authorization required to operate inside.</div>
+    <div class="qnav">
+      <a class="btn secondary" href="#m3">← Prev</a>
+      <a class="btn" href="#m5">Next →</a>
+    </div>
+  </div>
+
+  <div class="card question" id="m5">
+    <div class="q-meta-bar"><span>Map 5 of 8</span><span><span class="pill G">Class G</span></span></div>
+    <div class="visual-frame"><svg viewBox="0 0 400 300" width="100%">
+    <rect width="400" height="300" fill="#f1e3c4"/>
+    <rect x="0" y="0" width="400" height="300" fill="#e6d6b3" fill-opacity="0.25"/>
+    <!-- subtle terrain blobs -->
+    <ellipse cx="80" cy="60" rx="60" ry="20" fill="#d4c08e" fill-opacity="0.5"/>
+    <ellipse cx="320" cy="240" rx="55" ry="18" fill="#d4c08e" fill-opacity="0.5"/><defs><radialGradient id="bv5" cx="50%" cy="50%" r="60%"><stop offset="40%" stop-color="#2b6cff" stop-opacity="0"/><stop offset="80%" stop-color="#2b6cff" stop-opacity="0.5"/><stop offset="100%" stop-color="#2b6cff" stop-opacity="0"/></radialGradient></defs><rect width="400" height="300" fill="url(#bv5)"/><text x="50" y="50" font-family="sans-serif" font-size="11" font-weight="700" fill="#1f2937" letter-spacing="1">FARMSIDE</text>
+    <g transform="translate(200,160)">
+      <polygon points="0,-12 3,-4 11,-4 5,2 7,10 0,5 -7,10 -5,2 -11,-4 -3,-4"
+               fill="#dc2626" stroke="#7f1d1d" stroke-width="1"/>
+      <text x="15" y="4" font-family="sans-serif" font-size="11" font-weight="700" fill="#7f1d1d">YOU</text>
+    </g></svg></div>
+    <div class="q-prompt">Open rural area inside a <b>fuzzy blue</b> vignette. No airports or rings nearby. Marker at <b>350 AGL</b>. What class?</div>
+    <div class="choices">
+      <label class="choice"><input type="radio" name="m5" class="wrong"><span><b>A.</b> Class B</span></label>
+      <label class="choice"><input type="radio" name="m5" class="wrong"><span><b>B.</b> Class E — authorization required</span></label>
+      <label class="choice"><input type="radio" name="m5" class="correct"><span><b>C.</b> Class G — no authorization needed</span></label>
+      <label class="choice"><input type="radio" name="m5" class="wrong"><span><b>D.</b> Class D — call tower</span></label>
+    </div>
+    <div class="explain explain-correct">✓ <b>Correct!</b> Blue vignette = Class E starts at 1,200 AGL. Below 1,200 AGL = Class G. At 350 AGL no authorization required. (Standard Part 107 max is 400 AGL.)</div>
+    <div class="explain explain-wrong">✗ <b>Correct: C — Class G.</b> Blue vignette = E starts at 1,200 AGL. Below that you're in uncontrolled Class G.</div>
+    <div class="qnav">
+      <a class="btn secondary" href="#m4">← Prev</a>
+      <a class="btn" href="#m6">Next →</a>
+    </div>
+  </div>
+
+  <div class="card question" id="m6">
+    <div class="q-meta-bar"><span>Map 6 of 8</span><span><span class="pill G">Class G</span></span></div>
+    <div class="visual-frame"><svg viewBox="0 0 400 300" width="100%">
+    <rect width="400" height="300" fill="#f1e3c4"/>
+    <rect x="0" y="0" width="400" height="300" fill="#e6d6b3" fill-opacity="0.25"/>
+    <!-- subtle terrain blobs -->
+    <ellipse cx="80" cy="60" rx="60" ry="20" fill="#d4c08e" fill-opacity="0.5"/>
+    <ellipse cx="320" cy="240" rx="55" ry="18" fill="#d4c08e" fill-opacity="0.5"/>
+    <circle cx="110" cy="150" r="50" fill="none" stroke="#2b6cff" stroke-width="3" stroke-dasharray="6,4"/>
+    <rect x="96" y="78" width="28" height="16" fill="#f1e3c4" stroke="#1e3a8a"/>
+    <text x="110" y="90" text-anchor="middle" font-size="11" font-weight="700" fill="#1e3a8a">[25]</text>
+    <g>
+      <circle cx="110" cy="150" r="6" fill="#2b6cff" stroke="#1e3a8a" stroke-width="1"/>
+      <line x1="103" y1="150" x2="117" y2="150" stroke="#1e3a8a" stroke-width="1.5"/>
+      <line x1="110" y1="143" x2="110" y2="157" stroke="#1e3a8a" stroke-width="1.5"/>
+      <text x="110" y="170" text-anchor="middle" font-size="10" font-weight="700" fill="#1e3a8a">KEAS</text>
+      <text x="110" y="180" text-anchor="middle" font-size="9" fill="#1e3a8a">EAS 1015</text>
+    </g>
+    <circle cx="310" cy="150" r="70" fill="none" stroke="#c026d3" stroke-width="3"/>
+    <circle cx="310" cy="150" r="35" fill="none" stroke="#c026d3" stroke-width="3"/>
+    <text x="365" y="95" font-size="11" font-weight="700" fill="#6b21a8">38/SFC</text>
+    <g>
+      <circle cx="310" cy="150" r="6" fill="#2b6cff" stroke="#1e3a8a" stroke-width="1"/>
+      <line x1="303" y1="150" x2="317" y2="150" stroke="#1e3a8a" stroke-width="1.5"/>
+      <line x1="310" y1="143" x2="310" y2="157" stroke="#1e3a8a" stroke-width="1.5"/>
+      <text x="310" y="170" text-anchor="middle" font-size="10" font-weight="700" fill="#1e3a8a">KWST</text>
+      <text x="310" y="180" text-anchor="middle" font-size="9" fill="#1e3a8a">WST 920</text>
+    </g><text x="50" y="60" font-family="sans-serif" font-size="11" font-weight="700" fill="#1f2937" letter-spacing="1">EASTON</text><text x="340" y="60" font-family="sans-serif" font-size="11" font-weight="700" fill="#1f2937" letter-spacing="1">WESTON</text>
+    <g transform="translate(210,200)">
+      <polygon points="0,-12 3,-4 11,-4 5,2 7,10 0,5 -7,10 -5,2 -11,-4 -3,-4"
+               fill="#dc2626" stroke="#7f1d1d" stroke-width="1"/>
+      <text x="15" y="4" font-family="sans-serif" font-size="11" font-weight="700" fill="#7f1d1d">YOU</text>
+    </g></svg></div>
+    <div class="q-prompt">Marker is in the open area between a dashed blue (Class D) airport and a solid magenta (Class C) airport. No vignette. Altitude 400 AGL. What class?</div>
+    <div class="choices">
+      <label class="choice"><input type="radio" name="m6" class="wrong"><span><b>A.</b> Class C</span></label>
+      <label class="choice"><input type="radio" name="m6" class="wrong"><span><b>B.</b> Class D</span></label>
+      <label class="choice"><input type="radio" name="m6" class="correct"><span><b>C.</b> Class G</span></label>
+      <label class="choice"><input type="radio" name="m6" class="wrong"><span><b>D.</b> Class E to the surface</span></label>
+    </div>
+    <div class="explain explain-correct">✓ <b>Correct!</b> Outside both rings, with no vignette, Class E floor is 1,200 AGL by default — so 400 AGL is Class G. No authorization needed, but mind the proximity to both airports.</div>
+    <div class="explain explain-wrong">✗ <b>Correct: C — Class G.</b> Outside both rings and below the default E floor of 1,200 AGL = Class G.</div>
+    <div class="qnav">
+      <a class="btn secondary" href="#m5">← Prev</a>
+      <a class="btn" href="#m7">Next →</a>
+    </div>
+  </div>
+
+  <div class="card question" id="m7">
+    <div class="q-meta-bar"><span>Map 7 of 8</span><span><span class="pill B">Class B</span></span></div>
+    <div class="visual-frame"><svg viewBox="0 0 400 300" width="100%">
+    <rect width="400" height="300" fill="#f1e3c4"/>
+    <rect x="0" y="0" width="400" height="300" fill="#e6d6b3" fill-opacity="0.25"/>
+    <!-- subtle terrain blobs -->
+    <ellipse cx="80" cy="60" rx="60" ry="20" fill="#d4c08e" fill-opacity="0.5"/>
+    <ellipse cx="320" cy="240" rx="55" ry="18" fill="#d4c08e" fill-opacity="0.5"/><circle cx="200" cy="150" r="135" fill="none" stroke="#2b6cff" stroke-width="3"/><circle cx="200" cy="150" r="90" fill="none" stroke="#2b6cff" stroke-width="3"/><circle cx="200" cy="150" r="50" fill="none" stroke="#2b6cff" stroke-width="3"/>
+    <g>
+      <circle cx="200" cy="150" r="6" fill="#2b6cff" stroke="#1e3a8a" stroke-width="1"/>
+      <line x1="193" y1="150" x2="207" y2="150" stroke="#1e3a8a" stroke-width="1.5"/>
+      <line x1="200" y1="143" x2="200" y2="157" stroke="#1e3a8a" stroke-width="1.5"/>
+      <text x="200" y="170" text-anchor="middle" font-size="10" font-weight="700" fill="#1e3a8a">KBIG</text>
+      <text x="200" y="180" text-anchor="middle" font-size="9" fill="#1e3a8a">BIG INTL</text>
+    </g><text x="285" y="40" font-size="11" font-weight="700" fill="#1e3a8a">100/SFC</text><text x="245" y="80" font-size="10" font-weight="700" fill="#1e3a8a">100/30</text><text x="205" y="110" font-size="10" font-weight="700" fill="#1e3a8a">100/60</text><text x="120" y="50" font-family="sans-serif" font-size="11" font-weight="700" fill="#1f2937" letter-spacing="1">BIGCITY</text>
+    <g transform="translate(265,150)">
+      <polygon points="0,-12 3,-4 11,-4 5,2 7,10 0,5 -7,10 -5,2 -11,-4 -3,-4"
+               fill="#dc2626" stroke="#7f1d1d" stroke-width="1"/>
+      <text x="15" y="4" font-family="sans-serif" font-size="11" font-weight="700" fill="#7f1d1d">YOU</text>
+    </g></svg></div>
+    <div class="q-prompt">Multi-tier solid blue 'wedding cake' around a major international airport. Marker is in the <b>middle shelf</b> at <b>4,500 MSL</b>. Note the shelf label 100/30. What class?</div>
+    <div class="choices">
+      <label class="choice"><input type="radio" name="m7" class="correct"><span><b>A.</b> Class B — authorization required</span></label>
+      <label class="choice"><input type="radio" name="m7" class="wrong"><span><b>B.</b> Class C</span></label>
+      <label class="choice"><input type="radio" name="m7" class="wrong"><span><b>C.</b> Class G — below the shelf floor</span></label>
+      <label class="choice"><input type="radio" name="m7" class="wrong"><span><b>D.</b> Class E</span></label>
+    </div>
+    <div class="explain explain-correct">✓ <b>Correct!</b> The shelf '100/30' means 10,000 MSL ceiling / 3,000 MSL floor. At 4,500 MSL inside that ring you're in Class B. Authorization required.</div>
+    <div class="explain explain-wrong">✗ <b>Correct: A — Class B.</b> Shelf 100/30 → 10,000 ceiling, 3,000 floor MSL. 4,500 MSL is inside it.</div>
+    <div class="qnav">
+      <a class="btn secondary" href="#m6">← Prev</a>
+      <a class="btn" href="#m8">Next →</a>
+    </div>
+  </div>
+
+  <div class="card question" id="m8">
+    <div class="q-meta-bar"><span>Map 8 of 8</span><span><span class="pill E">Class E</span></span></div>
+    <div class="visual-frame"><svg viewBox="0 0 400 300" width="100%">
+    <rect width="400" height="300" fill="#f1e3c4"/>
+    <rect x="0" y="0" width="400" height="300" fill="#e6d6b3" fill-opacity="0.25"/>
+    <!-- subtle terrain blobs -->
+    <ellipse cx="80" cy="60" rx="60" ry="20" fill="#d4c08e" fill-opacity="0.5"/>
+    <ellipse cx="320" cy="240" rx="55" ry="18" fill="#d4c08e" fill-opacity="0.5"/>
+    <defs>
+      <radialGradient id="mv8" cx="50%" cy="50%" r="50%">
+        <stop offset="55%" stop-color="#c026d3" stop-opacity="0"/>
+        <stop offset="80%" stop-color="#c026d3" stop-opacity="0.55"/>
+        <stop offset="100%" stop-color="#c026d3" stop-opacity="0"/>
+      </radialGradient>
+    </defs>
+    <circle cx="140" cy="150" r="130" fill="url(#mv8)"/><defs><radialGradient id="bv8" cx="100%" cy="50%" r="50%"><stop offset="40%" stop-color="#2b6cff" stop-opacity="0"/><stop offset="80%" stop-color="#2b6cff" stop-opacity="0.5"/><stop offset="100%" stop-color="#2b6cff" stop-opacity="0"/></radialGradient></defs><rect x="220" y="0" width="180" height="300" fill="url(#bv8)"/>
+    <g>
+      <circle cx="140" cy="150" r="5" fill="#c026d3" stroke="#6b21a8" stroke-width="1"/>
+      <text x="140" y="168" text-anchor="middle" font-size="10" font-weight="700" fill="#6b21a8">1G0</text>
+      
+    </g><text x="50" y="60" font-family="sans-serif" font-size="11" font-weight="700" fill="#1f2937" letter-spacing="1">LAKEVIEW</text>
+    <g transform="translate(140,150)">
+      <polygon points="0,-12 3,-4 11,-4 5,2 7,10 0,5 -7,10 -5,2 -11,-4 -3,-4"
+               fill="#dc2626" stroke="#7f1d1d" stroke-width="1"/>
+      <text x="15" y="4" font-family="sans-serif" font-size="11" font-weight="700" fill="#7f1d1d">YOU</text>
+    </g></svg></div>
+    <div class="q-prompt">Marker is inside a <b>fuzzy magenta</b> vignette (well clear of any rings). Altitude is <b>800 AGL</b>. What class are you in?</div>
+    <div class="choices">
+      <label class="choice"><input type="radio" name="m8" class="wrong"><span><b>A.</b> Class G — no authorization required</span></label>
+      <label class="choice"><input type="radio" name="m8" class="correct"><span><b>B.</b> Class E — controlled airspace</span></label>
+      <label class="choice"><input type="radio" name="m8" class="wrong"><span><b>C.</b> Class D — call tower</span></label>
+      <label class="choice"><input type="radio" name="m8" class="wrong"><span><b>D.</b> Class B — prohibited</span></label>
+    </div>
+    <div class="explain explain-correct">✓ <b>Correct!</b> Magenta vignette = Class E starts at 700 AGL. At 800 AGL you're ABOVE the E floor, so you're in Class E. (For Part 107, no authorization is needed for E that doesn't extend to the surface, but you must stay ≤400 AGL — so this scenario is itself outside normal Part 107 limits.)</div>
+    <div class="explain explain-wrong">✗ <b>Correct: B — Class E.</b> Magenta vignette = E starts at 700 AGL. 800 AGL is above that floor. (Side note: Part 107 limits you to 400 AGL anyway.)</div>
+    <div class="qnav">
+      <a class="btn secondary" href="#m7">← Prev</a>
+      <a class="btn" href="#m-done">See results →</a>
+    </div>
+  </div>
+
+  <div class="card question" id="m-done" style="text-align:center;">
+    <h2>Quiz 2 complete</h2>
+    <p style="color:var(--muted)">Count your correct answers as you went. Targets:</p>
+    <ul style="display:inline-block; text-align:left; margin:8px 0;">
+      <li><b>7–8</b>: Solid map-reading. You'll handle Part 107 sectional questions.</li>
+      <li><b>5–6</b>: Re-read Sectional Symbols, then run it again.</li>
+      <li><b>0–4</b>: Spend more time on the Learn tab — focus on what each line/color tells you.</li>
+    </ul>
+    <div class="qnav" style="justify-content:center;">
+      <a class="btn" href="#m1">Restart Quiz 2</a>
+    </div>
+  </div>
+
+</section>
+
+
 
 </main>
 
 <footer>Study aid for FAA Part 107. Always verify with current FAA publications and your sectional chart. Not for navigation.</footer>
+
+<script>
+(function () {
+  function shuffleArr(arr) {
+    const a = arr.slice();
+    for (let i = a.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [a[i], a[j]] = [a[j], a[i]];
+    }
+    return a;
+  }
+
+  function readCard(card) {
+    const metaSpans = card.querySelectorAll('.q-meta-bar > span');
+    const visualEl = card.querySelector('.visual-frame');
+    return {
+      pill: metaSpans[1] ? metaSpans[1].innerHTML : '',
+      visual: visualEl ? visualEl.outerHTML : null,
+      prompt: card.querySelector('.q-prompt').innerHTML,
+      choices: Array.from(card.querySelectorAll('.choice')).map(ch => ({
+        correct: ch.querySelector('input').classList.contains('correct'),
+        html: ch.querySelector('span').innerHTML
+      })),
+      explainCorrect: card.querySelector('.explain-correct').innerHTML,
+      explainWrong: card.querySelector('.explain-wrong').innerHTML
+    };
+  }
+
+  function writeCard(card, data, idx, total, label) {
+    const metaBar = card.querySelector('.q-meta-bar');
+    const metaSpans = metaBar.querySelectorAll('span');
+    if (metaSpans[0]) metaSpans[0].textContent = label + ' ' + (idx + 1) + ' of ' + total;
+    if (metaSpans[1]) metaSpans[1].innerHTML = data.pill;
+
+    // Replace visual block
+    const existingViz = card.querySelector('.visual-frame');
+    if (existingViz) existingViz.remove();
+    if (data.visual) {
+      metaBar.insertAdjacentHTML('afterend', data.visual);
+    }
+
+    card.querySelector('.q-prompt').innerHTML = data.prompt;
+
+    const choicesEl = card.querySelector('.choices');
+    const cardId = card.id;
+    choicesEl.innerHTML = data.choices.map(c =>
+      '<label class="choice"><input type="radio" name="' + cardId + '" class="' + (c.correct ? 'correct' : 'wrong') + '"><span>' + c.html + '</span></label>'
+    ).join('');
+
+    card.querySelector('.explain-correct').innerHTML = data.explainCorrect;
+    card.querySelector('.explain-wrong').innerHTML = data.explainWrong;
+  }
+
+  function shuffleSection(sectionId, label) {
+    const section = document.getElementById(sectionId);
+    if (!section) return;
+    const cards = Array.from(section.querySelectorAll('.question')).filter(c => !c.id.endsWith('-done'));
+    if (cards.length === 0) return;
+    const data = cards.map(readCard);
+    const order = shuffleArr(data.map((_, i) => i));
+    cards.forEach((card, i) => writeCard(card, data[order[i]], i, cards.length, label));
+  }
+
+  function init() {
+    shuffleSection('quiz', 'Question');
+    shuffleSection('quiz2', 'Map');
+
+    document.querySelectorAll('[data-shuffle]').forEach(btn => {
+      btn.addEventListener('click', e => {
+        e.preventDefault();
+        const target = btn.getAttribute('data-shuffle');
+        if (target === 'quiz') {
+          shuffleSection('quiz', 'Question');
+          location.hash = 'q1';
+        } else if (target === 'quiz2') {
+          shuffleSection('quiz2', 'Map');
+          location.hash = 'm1';
+        }
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      });
+    });
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', init);
+  } else {
+    init();
+  }
+})();
+</script>
 
 </body>
 </html>
