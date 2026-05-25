@@ -101,14 +101,48 @@
   .btn.secondary { background: var(--panel-2); color: var(--ink); border: 1px solid var(--border); }
   .score { font-weight: 600; }
 
-  .q-card-static .q-meta { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; color: var(--muted); font-size: 13px; margin-bottom: 8px; }
-  .q-card-static .q-prompt { font-size: 16px; margin: 10px 0; }
-  .choices-static { margin: 8px 0 12px; padding-left: 22px; }
-  .choices-static li { padding: 4px 0; font-size: 15px; }
-  details { background: var(--panel-2); border: 1px solid var(--border); border-radius: 6px; padding: 8px 12px; }
-  details summary { cursor: pointer; font-weight: 600; color: var(--accent); font-size: 14px; user-select: none; padding: 4px 0; }
-  details[open] summary { margin-bottom: 6px; }
-  details .explain { margin-top: 0; }
+  /* ===== Interactive Quiz (pure CSS, uses :target + :has) ===== */
+  #quiz .question { display: none; }
+  #quiz .question:target { display: block; }
+  /* Default-show q1 when no question is the URL target */
+  body:not(:has(#quiz .question:target)) #q1 { display: block; }
+
+  .q-meta-bar {
+    display: flex; justify-content: space-between; align-items: center;
+    color: var(--muted); font-size: 13px; margin-bottom: 8px; gap: 8px; flex-wrap: wrap;
+  }
+  #quiz .q-prompt { font-size: 16px; margin: 10px 0 16px; }
+
+  .choices { display: grid; gap: 10px; margin-bottom: 12px; }
+  .choice {
+    display: flex; align-items: center; gap: 10px;
+    background: var(--panel-2); border: 1px solid var(--border); border-radius: 8px;
+    padding: 12px 14px; cursor: pointer; font-size: 15px;
+    transition: border-color .15s, background .15s;
+  }
+  .choice input { accent-color: var(--accent); cursor: pointer; flex-shrink: 0; }
+  .choice:hover { border-color: var(--accent); }
+
+  /* Once any answer is picked in this question, lock the look */
+  .question:has(input:checked) .choice { cursor: default; }
+  .question:has(input:checked) .choice:hover { border-color: var(--border); }
+  /* Highlight the correct answer in green once anything is selected */
+  .question:has(input:checked) .choice:has(.correct) {
+    background: rgba(74,222,128,0.15); border-color: var(--good);
+  }
+  /* If a wrong answer is the one selected, paint it red */
+  .choice:has(.wrong:checked) {
+    background: rgba(248,113,113,0.18); border-color: var(--bad);
+  }
+
+  .explain { display: none; padding: 12px 14px; border-radius: 8px; margin: 6px 0 12px; font-size: 14px; line-height: 1.45; }
+  .explain-correct { background: rgba(74,222,128,0.1); border-left: 3px solid var(--good); }
+  .explain-wrong   { background: rgba(248,113,113,0.1); border-left: 3px solid var(--bad); }
+  .question:has(.correct:checked) .explain-correct { display: block; }
+  .question:has(.wrong:checked)   .explain-wrong   { display: block; }
+
+  .qnav { display: flex; justify-content: space-between; gap: 10px; margin-top: 8px; flex-wrap: wrap; }
+  a.btn, a.btn.secondary { text-decoration: none; display: inline-block; }
   .visual-frame { background: #f5f5f0; border-radius: 8px; padding: 8px; margin: 8px 0; }
   .legend { display: flex; flex-wrap: wrap; gap: 12px; font-size: 12px; color: var(--muted); margin-top: 8px; }
   .legend-item { display: flex; align-items: center; gap: 6px; }
@@ -387,14 +421,13 @@
 <!-- ============ QUIZ ============ -->
 <section id="quiz" class="tab">
 
-  <div class="card">
-    <h2>Self-check quiz — 18 questions</h2>
-    <p style="color:var(--muted); margin:4px 0 0;">Read each question, pick your answer in your head, then tap <b>Show answer</b> to check. Tally your score as you go.</p>
+  <div class="card quiz-intro">
+    <h2>Interactive Quiz — 18 questions</h2>
+    <p style="color:var(--muted); margin:4px 0 0;">Click an answer; it turns green if correct, red if wrong (with the correct one highlighted). Then click Next.</p>
   </div>
 
-  <!-- Q1 -->
-  <div class="card q-card-static">
-    <div class="q-meta"><span>Question 1 of 18</span><span class="pill B">Class B</span></div>
+  <div class="card question" id="q1">
+    <div class="q-meta-bar"><span>Question 1 of 18</span><span><span class="pill B">Class B</span></span></div>
     <div class="visual-frame">
       <svg viewBox="0 0 240 160" width="100%">
         <rect width="240" height="160" fill="#f5f5f0"/>
@@ -402,21 +435,24 @@
         <circle cx="120" cy="80" r="38" fill="none" stroke="#2b6cff" stroke-width="3"/>
         <text x="120" y="40" text-anchor="middle" font-size="12" fill="#1e3a8a" font-weight="700">100</text>
         <text x="120" y="52" text-anchor="middle" font-size="10" fill="#1e3a8a">SFC</text>
-      </svg>
-    </div>
+      </svg></div>
     <div class="q-prompt">On a sectional chart you see two thick <b>SOLID BLUE</b> concentric circles around a major airport, labeled '100/SFC'. What airspace is this and what's the ceiling?</div>
-    <ol class="choices-static" type="A">
-      <li>Class B, ceiling 10,000 MSL</li>
-      <li>Class C, ceiling 10,000 AGL</li>
-      <li>Class D, ceiling 1,000 AGL</li>
-      <li>Class E, ceiling 1,000 MSL</li>
-    </ol>
-    <details><summary>Show answer</summary><div class="explain"><b>A — Class B, 10,000 MSL.</b> Solid blue rings = Class B. '100/SFC' = 10,000 MSL ceiling, surface floor.</div></details>
+    <div class="choices">
+      <label class="choice"><input type="radio" name="q1" class="correct"><span><b>A.</b> Class B, ceiling 10,000 MSL</span></label>
+      <label class="choice"><input type="radio" name="q1" class="wrong"><span><b>B.</b> Class C, ceiling 10,000 AGL</span></label>
+      <label class="choice"><input type="radio" name="q1" class="wrong"><span><b>C.</b> Class D, ceiling 1,000 AGL</span></label>
+      <label class="choice"><input type="radio" name="q1" class="wrong"><span><b>D.</b> Class E, ceiling 1,000 MSL</span></label>
+    </div>
+    <div class="explain explain-correct">✓ <b>Correct!</b> Solid blue rings = Class B. '100/SFC' = 10,000 MSL ceiling / surface floor.</div>
+    <div class="explain explain-wrong">✗ <b>Correct answer: A — Class B, 10,000 MSL.</b> Solid blue rings = Class B. '100/SFC' = 10,000 MSL ceiling / surface floor.</div>
+    <div class="qnav">
+      <a class="btn secondary" href="#quiz">Top</a>
+      <a class="btn" href="#q2">Next →</a>
+    </div>
   </div>
 
-  <!-- Q2 -->
-  <div class="card q-card-static">
-    <div class="q-meta"><span>Question 2 of 18</span><span class="pill C">Class C</span></div>
+  <div class="card question" id="q2">
+    <div class="q-meta-bar"><span>Question 2 of 18</span><span><span class="pill C">Class C</span></span></div>
     <div class="visual-frame">
       <svg viewBox="0 0 240 160" width="100%">
         <rect width="240" height="160" fill="#f5f5f0"/>
@@ -424,165 +460,196 @@
         <circle cx="120" cy="80" r="32" fill="none" stroke="#c026d3" stroke-width="3"/>
         <text x="120" y="40" text-anchor="middle" font-size="12" fill="#6b21a8" font-weight="700">42</text>
         <text x="120" y="52" text-anchor="middle" font-size="10" fill="#6b21a8">SFC</text>
-      </svg>
-    </div>
+      </svg></div>
     <div class="q-prompt">Two <b>SOLID MAGENTA</b> concentric circles around an airport with '42/SFC'. Which airspace and ceiling?</div>
-    <ol class="choices-static" type="A">
-      <li>Class B, 4,200 MSL</li>
-      <li>Class C, 4,200 MSL</li>
-      <li>Class C, 4,000 AGL above the airport elevation</li>
-      <li>Class E, 4,200 AGL</li>
-    </ol>
-    <details><summary>Show answer</summary><div class="explain"><b>B — Class C, 4,200 MSL.</b> Solid magenta = Class C. Sectional numbers are hundreds of feet MSL.</div></details>
+    <div class="choices">
+      <label class="choice"><input type="radio" name="q2" class="wrong"><span><b>A.</b> Class B, 4,200 MSL</span></label>
+      <label class="choice"><input type="radio" name="q2" class="correct"><span><b>B.</b> Class C, 4,200 MSL</span></label>
+      <label class="choice"><input type="radio" name="q2" class="wrong"><span><b>C.</b> Class C, 4,000 AGL above the airport elevation</span></label>
+      <label class="choice"><input type="radio" name="q2" class="wrong"><span><b>D.</b> Class E, 4,200 AGL</span></label>
+    </div>
+    <div class="explain explain-correct">✓ <b>Correct!</b> Solid magenta = Class C. Sectional numbers are hundreds of feet MSL.</div>
+    <div class="explain explain-wrong">✗ <b>Correct answer: B — Class C, 4,200 MSL.</b> Solid magenta = Class C. Sectional numbers are hundreds of feet MSL.</div>
+    <div class="qnav">
+      <a class="btn secondary" href="#q1">← Prev</a>
+      <a class="btn" href="#q3">Next →</a>
+    </div>
   </div>
 
-  <!-- Q3 -->
-  <div class="card q-card-static">
-    <div class="q-meta"><span>Question 3 of 18</span><span class="pill D">Class D</span></div>
+  <div class="card question" id="q3">
+    <div class="q-meta-bar"><span>Question 3 of 18</span><span><span class="pill D">Class D</span></span></div>
     <div class="visual-frame">
       <svg viewBox="0 0 240 160" width="100%">
         <rect width="240" height="160" fill="#f5f5f0"/>
         <circle cx="120" cy="80" r="48" fill="none" stroke="#2b6cff" stroke-width="3" stroke-dasharray="6,4"/>
         <rect x="103" y="120" width="34" height="18" fill="#f5f5f0" stroke="#1e3a8a"/>
         <text x="120" y="134" text-anchor="middle" font-size="12" fill="#1e3a8a" font-weight="700">[25]</text>
-      </svg>
-    </div>
+      </svg></div>
     <div class="q-prompt">A single <b>DASHED BLUE</b> circle around a towered airport with a boxed <b>[25]</b>. What airspace? What does [25] mean?</div>
-    <ol class="choices-static" type="A">
-      <li>Class C, ceiling 2,500 MSL</li>
-      <li>Class D, ceiling 2,500 MSL</li>
-      <li>Class B, ceiling 25,000 MSL</li>
-      <li>Class E surface area, ceiling 2,500 AGL</li>
-    </ol>
-    <details><summary>Show answer</summary><div class="explain"><b>B — Class D, 2,500 MSL.</b> Dashed blue = Class D. Boxed [25] = ceiling in hundreds of feet MSL.</div></details>
+    <div class="choices">
+      <label class="choice"><input type="radio" name="q3" class="wrong"><span><b>A.</b> Class C, ceiling 2,500 MSL</span></label>
+      <label class="choice"><input type="radio" name="q3" class="correct"><span><b>B.</b> Class D, ceiling 2,500 MSL</span></label>
+      <label class="choice"><input type="radio" name="q3" class="wrong"><span><b>C.</b> Class B, ceiling 25,000 MSL</span></label>
+      <label class="choice"><input type="radio" name="q3" class="wrong"><span><b>D.</b> Class E surface area, ceiling 2,500 AGL</span></label>
+    </div>
+    <div class="explain explain-correct">✓ <b>Correct!</b> Dashed blue = Class D. Boxed [25] = ceiling in hundreds of feet MSL.</div>
+    <div class="explain explain-wrong">✗ <b>Correct answer: B — Class D, 2,500 MSL.</b> Dashed blue = Class D. Boxed [25] = ceiling in hundreds of feet MSL.</div>
+    <div class="qnav">
+      <a class="btn secondary" href="#q2">← Prev</a>
+      <a class="btn" href="#q4">Next →</a>
+    </div>
   </div>
 
-  <!-- Q4 -->
-  <div class="card q-card-static">
-    <div class="q-meta"><span>Question 4 of 18</span><span class="pill E">Class E sfc</span></div>
+  <div class="card question" id="q4">
+    <div class="q-meta-bar"><span>Question 4 of 18</span><span><span class="pill E">Class E sfc</span></span></div>
     <div class="visual-frame">
       <svg viewBox="0 0 240 160" width="100%">
         <rect width="240" height="160" fill="#f5f5f0"/>
         <circle cx="120" cy="80" r="52" fill="none" stroke="#c026d3" stroke-width="2.5" stroke-dasharray="6,4"/>
-      </svg>
-    </div>
+      </svg></div>
     <div class="q-prompt">A <b>DASHED MAGENTA</b> ring surrounds a non-towered airport. As a Part 107 pilot, what does this mean for you?</div>
-    <ol class="choices-static" type="A">
-      <li>Class G — fly freely below 400 AGL.</li>
-      <li>Class E to the surface — authorization required to operate here.</li>
-      <li>Class D — call the tower (there isn't one).</li>
-      <li>Class B — never permitted.</li>
-    </ol>
-    <details><summary>Show answer</summary><div class="explain"><b>B — Class E to the surface.</b> Dashed magenta = Class E down to the surface (non-towered airport w/ instrument approach). LAANC/DroneZone authorization required.</div></details>
+    <div class="choices">
+      <label class="choice"><input type="radio" name="q4" class="wrong"><span><b>A.</b> Class G — fly freely below 400 AGL.</span></label>
+      <label class="choice"><input type="radio" name="q4" class="correct"><span><b>B.</b> Class E to the surface — authorization required to operate here.</span></label>
+      <label class="choice"><input type="radio" name="q4" class="wrong"><span><b>C.</b> Class D — call the tower (there isn't one).</span></label>
+      <label class="choice"><input type="radio" name="q4" class="wrong"><span><b>D.</b> Class B — never permitted.</span></label>
+    </div>
+    <div class="explain explain-correct">✓ <b>Correct!</b> Dashed magenta = Class E down to the surface (non-towered airport w/ instrument approach). LAANC/DroneZone authorization required.</div>
+    <div class="explain explain-wrong">✗ <b>Correct answer: B — Class E to the surface.</b> Dashed magenta = Class E down to the surface. LAANC/DroneZone authorization required.</div>
+    <div class="qnav">
+      <a class="btn secondary" href="#q3">← Prev</a>
+      <a class="btn" href="#q5">Next →</a>
+    </div>
   </div>
 
-  <!-- Q5 -->
-  <div class="card q-card-static">
-    <div class="q-meta"><span>Question 5 of 18</span><span class="pill E">Class E 700</span></div>
+  <div class="card question" id="q5">
+    <div class="q-meta-bar"><span>Question 5 of 18</span><span><span class="pill E">Class E 700</span></span></div>
     <div class="visual-frame">
       <svg viewBox="0 0 240 160" width="100%">
         <defs>
-          <radialGradient id="q5g" cx="50%" cy="50%" r="50%">
+          <radialGradient id="g5" cx="50%" cy="50%" r="50%">
             <stop offset="60%" stop-color="#c026d3" stop-opacity="0"/>
             <stop offset="80%" stop-color="#c026d3" stop-opacity="0.6"/>
             <stop offset="100%" stop-color="#c026d3" stop-opacity="0"/>
           </radialGradient>
         </defs>
         <rect width="240" height="160" fill="#f5f5f0"/>
-        <circle cx="120" cy="80" r="75" fill="url(#q5g)"/>
-      </svg>
-    </div>
+        <circle cx="120" cy="80" r="75" fill="url(#g5)"/>
+      </svg></div>
     <div class="q-prompt">On the sectional you see a <b>FUZZY MAGENTA</b> shaded area (a 'vignette'). What is the floor of controlled airspace here?</div>
-    <ol class="choices-static" type="A">
-      <li>Surface</li>
-      <li>700 AGL</li>
-      <li>1,200 AGL</li>
-      <li>14,500 MSL</li>
-    </ol>
-    <details><summary>Show answer</summary><div class="explain"><b>B — 700 AGL.</b> Magenta vignette = Class E starts at 700 AGL. Below 700' is Class G — Part 107 below 400' needs no authorization.</div></details>
+    <div class="choices">
+      <label class="choice"><input type="radio" name="q5" class="wrong"><span><b>A.</b> Surface</span></label>
+      <label class="choice"><input type="radio" name="q5" class="correct"><span><b>B.</b> 700 AGL</span></label>
+      <label class="choice"><input type="radio" name="q5" class="wrong"><span><b>C.</b> 1,200 AGL</span></label>
+      <label class="choice"><input type="radio" name="q5" class="wrong"><span><b>D.</b> 14,500 MSL</span></label>
+    </div>
+    <div class="explain explain-correct">✓ <b>Correct!</b> Magenta vignette = Class E starts at 700 AGL. Below is Class G — Part 107 below 400' needs no authorization.</div>
+    <div class="explain explain-wrong">✗ <b>Correct answer: B — 700 AGL.</b> Magenta vignette = Class E starts at 700 AGL. Below is Class G.</div>
+    <div class="qnav">
+      <a class="btn secondary" href="#q4">← Prev</a>
+      <a class="btn" href="#q6">Next →</a>
+    </div>
   </div>
 
-  <!-- Q6 -->
-  <div class="card q-card-static">
-    <div class="q-meta"><span>Question 6 of 18</span><span class="pill E">Class E 1200</span></div>
+  <div class="card question" id="q6">
+    <div class="q-meta-bar"><span>Question 6 of 18</span><span><span class="pill E">Class E 1200</span></span></div>
     <div class="visual-frame">
       <svg viewBox="0 0 240 160" width="100%">
         <defs>
-          <radialGradient id="q6g" cx="50%" cy="50%" r="50%">
+          <radialGradient id="g6" cx="50%" cy="50%" r="50%">
             <stop offset="60%" stop-color="#2b6cff" stop-opacity="0"/>
             <stop offset="80%" stop-color="#2b6cff" stop-opacity="0.55"/>
             <stop offset="100%" stop-color="#2b6cff" stop-opacity="0"/>
           </radialGradient>
         </defs>
         <rect width="240" height="160" fill="#f5f5f0"/>
-        <rect width="240" height="160" fill="url(#q6g)"/>
-      </svg>
-    </div>
+        <rect width="240" height="160" fill="url(#g6)"/>
+      </svg></div>
     <div class="q-prompt">A <b>FUZZY BLUE</b> vignette covers part of the chart. Class E floor?</div>
-    <ol class="choices-static" type="A">
-      <li>Surface</li>
-      <li>700 AGL</li>
-      <li>1,200 AGL</li>
-      <li>18,000 MSL</li>
-    </ol>
-    <details><summary>Show answer</summary><div class="explain"><b>C — 1,200 AGL.</b> Blue vignette = Class E starts at 1,200 AGL. Below is Class G.</div></details>
+    <div class="choices">
+      <label class="choice"><input type="radio" name="q6" class="wrong"><span><b>A.</b> Surface</span></label>
+      <label class="choice"><input type="radio" name="q6" class="wrong"><span><b>B.</b> 700 AGL</span></label>
+      <label class="choice"><input type="radio" name="q6" class="correct"><span><b>C.</b> 1,200 AGL</span></label>
+      <label class="choice"><input type="radio" name="q6" class="wrong"><span><b>D.</b> 18,000 MSL</span></label>
+    </div>
+    <div class="explain explain-correct">✓ <b>Correct!</b> Blue vignette = Class E starts at 1,200 AGL. Below is Class G.</div>
+    <div class="explain explain-wrong">✗ <b>Correct answer: C — 1,200 AGL.</b> Blue vignette = Class E starts at 1,200 AGL. Below is Class G.</div>
+    <div class="qnav">
+      <a class="btn secondary" href="#q5">← Prev</a>
+      <a class="btn" href="#q7">Next →</a>
+    </div>
   </div>
 
-  <!-- Q7 -->
-  <div class="card q-card-static">
-    <div class="q-meta"><span>Question 7 of 18</span><span class="pill A">Class A</span></div>
+  <div class="card question" id="q7">
+    <div class="q-meta-bar"><span>Question 7 of 18</span><span><span class="pill A">Class A</span></span></div>
     <div class="q-prompt">Which class of airspace has a <b>CEILING of 18,000 MSL</b> and is reserved for IFR traffic (no drones)?</div>
-    <ol class="choices-static" type="A">
-      <li>Class A</li>
-      <li>Class B</li>
-      <li>Class E</li>
-      <li>Class G</li>
-    </ol>
-    <details><summary>Show answer</summary><div class="explain"><b>A — Class A.</b> 18,000 MSL up to FL600. IFR only — Part 107 ops prohibited.</div></details>
+    <div class="choices">
+      <label class="choice"><input type="radio" name="q7" class="correct"><span><b>A.</b> Class A</span></label>
+      <label class="choice"><input type="radio" name="q7" class="wrong"><span><b>B.</b> Class B</span></label>
+      <label class="choice"><input type="radio" name="q7" class="wrong"><span><b>C.</b> Class E</span></label>
+      <label class="choice"><input type="radio" name="q7" class="wrong"><span><b>D.</b> Class G</span></label>
+    </div>
+    <div class="explain explain-correct">✓ <b>Correct!</b> Class A: 18,000 MSL up to FL600. IFR only — Part 107 ops prohibited.</div>
+    <div class="explain explain-wrong">✗ <b>Correct answer: A — Class A.</b> 18,000 MSL up to FL600. IFR only, no drones.</div>
+    <div class="qnav">
+      <a class="btn secondary" href="#q6">← Prev</a>
+      <a class="btn" href="#q8">Next →</a>
+    </div>
   </div>
 
-  <!-- Q8 -->
-  <div class="card q-card-static">
-    <div class="q-meta"><span>Question 8 of 18</span><span class="pill B">Class B</span></div>
+  <div class="card question" id="q8">
+    <div class="q-meta-bar"><span>Question 8 of 18</span><span><span class="pill B">Class B</span></span></div>
     <div class="q-prompt">Standard ceiling of Class B airspace?</div>
-    <ol class="choices-static" type="A">
-      <li>2,500 AGL</li>
-      <li>4,000 AGL</li>
-      <li>10,000 MSL</li>
-      <li>18,000 MSL</li>
-    </ol>
-    <details><summary>Show answer</summary><div class="explain"><b>C — 10,000 MSL.</b> Class B tops out at 10,000 MSL.</div></details>
+    <div class="choices">
+      <label class="choice"><input type="radio" name="q8" class="wrong"><span><b>A.</b> 2,500 AGL</span></label>
+      <label class="choice"><input type="radio" name="q8" class="wrong"><span><b>B.</b> 4,000 AGL</span></label>
+      <label class="choice"><input type="radio" name="q8" class="correct"><span><b>C.</b> 10,000 MSL</span></label>
+      <label class="choice"><input type="radio" name="q8" class="wrong"><span><b>D.</b> 18,000 MSL</span></label>
+    </div>
+    <div class="explain explain-correct">✓ <b>Correct!</b> Class B tops out at 10,000 MSL.</div>
+    <div class="explain explain-wrong">✗ <b>Correct answer: C — 10,000 MSL.</b> Class B tops out at 10,000 MSL.</div>
+    <div class="qnav">
+      <a class="btn secondary" href="#q7">← Prev</a>
+      <a class="btn" href="#q9">Next →</a>
+    </div>
   </div>
 
-  <!-- Q9 -->
-  <div class="card q-card-static">
-    <div class="q-meta"><span>Question 9 of 18</span><span class="pill C">Class C</span></div>
+  <div class="card question" id="q9">
+    <div class="q-meta-bar"><span>Question 9 of 18</span><span><span class="pill C">Class C</span></span></div>
     <div class="q-prompt">A Class C airspace typically extends from the surface to what altitude?</div>
-    <ol class="choices-static" type="A">
-      <li>2,500 AGL</li>
-      <li>4,000 AGL above the airport elevation</li>
-      <li>10,000 MSL</li>
-      <li>1,200 AGL</li>
-    </ol>
-    <details><summary>Show answer</summary><div class="explain"><b>B — 4,000 AGL above the airport elevation</b> (charted in MSL on sectionals).</div></details>
+    <div class="choices">
+      <label class="choice"><input type="radio" name="q9" class="wrong"><span><b>A.</b> 2,500 AGL</span></label>
+      <label class="choice"><input type="radio" name="q9" class="correct"><span><b>B.</b> 4,000 AGL above the airport elevation</span></label>
+      <label class="choice"><input type="radio" name="q9" class="wrong"><span><b>C.</b> 10,000 MSL</span></label>
+      <label class="choice"><input type="radio" name="q9" class="wrong"><span><b>D.</b> 1,200 AGL</span></label>
+    </div>
+    <div class="explain explain-correct">✓ <b>Correct!</b> Class C ceiling is typically 4,000 feet above the airport elevation (charted in MSL).</div>
+    <div class="explain explain-wrong">✗ <b>Correct answer: B — 4,000 AGL above the airport elevation</b> (charted in MSL on sectionals).</div>
+    <div class="qnav">
+      <a class="btn secondary" href="#q8">← Prev</a>
+      <a class="btn" href="#q10">Next →</a>
+    </div>
   </div>
 
-  <!-- Q10 -->
-  <div class="card q-card-static">
-    <div class="q-meta"><span>Question 10 of 18</span><span class="pill D">Class D</span></div>
+  <div class="card question" id="q10">
+    <div class="q-meta-bar"><span>Question 10 of 18</span><span><span class="pill D">Class D</span></span></div>
     <div class="q-prompt">Class D airspace typically extends from the surface to:</div>
-    <ol class="choices-static" type="A">
-      <li>2,500 AGL</li>
-      <li>4,000 AGL</li>
-      <li>10,000 MSL</li>
-      <li>Surface only</li>
-    </ol>
-    <details><summary>Show answer</summary><div class="explain"><b>A — 2,500 AGL.</b> Class D goes from surface to roughly 2,500 feet AGL above the airport.</div></details>
+    <div class="choices">
+      <label class="choice"><input type="radio" name="q10" class="correct"><span><b>A.</b> 2,500 AGL</span></label>
+      <label class="choice"><input type="radio" name="q10" class="wrong"><span><b>B.</b> 4,000 AGL</span></label>
+      <label class="choice"><input type="radio" name="q10" class="wrong"><span><b>C.</b> 10,000 MSL</span></label>
+      <label class="choice"><input type="radio" name="q10" class="wrong"><span><b>D.</b> Surface only</span></label>
+    </div>
+    <div class="explain explain-correct">✓ <b>Correct!</b> Class D goes from surface to roughly 2,500 feet AGL above the airport.</div>
+    <div class="explain explain-wrong">✗ <b>Correct answer: A — 2,500 AGL.</b> Class D goes from surface to roughly 2,500 feet AGL above the airport.</div>
+    <div class="qnav">
+      <a class="btn secondary" href="#q9">← Prev</a>
+      <a class="btn" href="#q11">Next →</a>
+    </div>
   </div>
 
-  <!-- Q11 -->
-  <div class="card q-card-static">
-    <div class="q-meta"><span>Question 11 of 18</span><span class="pill B">Class B</span></div>
+  <div class="card question" id="q11">
+    <div class="q-meta-bar"><span>Question 11 of 18</span><span><span class="pill B">Class B</span></span></div>
     <div class="visual-frame">
       <svg viewBox="0 0 320 200" width="100%">
         <rect width="320" height="200" fill="#e8f1fb"/>
@@ -591,21 +658,24 @@
         <rect x="90" y="110" width="140" height="70" fill="#2b6cff" fill-opacity="0.30" stroke="#2b6cff" stroke-width="2"/>
         <rect x="125" y="140" width="70" height="40" fill="#2b6cff" fill-opacity="0.40" stroke="#2b6cff" stroke-width="2"/>
         <text x="160" y="60" text-anchor="middle" font-size="11" fill="#1e3a8a">10,000 MSL ceiling</text>
-      </svg>
+      </svg></div>
+    <div class="q-prompt">This 'upside-down wedding cake' shape with <b>blue</b> layers represents which airspace?</div>
+    <div class="choices">
+      <label class="choice"><input type="radio" name="q11" class="correct"><span><b>A.</b> Class B</span></label>
+      <label class="choice"><input type="radio" name="q11" class="wrong"><span><b>B.</b> Class C</span></label>
+      <label class="choice"><input type="radio" name="q11" class="wrong"><span><b>C.</b> Class D</span></label>
+      <label class="choice"><input type="radio" name="q11" class="wrong"><span><b>D.</b> Class E</span></label>
     </div>
-    <div class="q-prompt">This "upside-down wedding cake" shape with <b>blue</b> layers represents which airspace?</div>
-    <ol class="choices-static" type="A">
-      <li>Class B</li>
-      <li>Class C</li>
-      <li>Class D</li>
-      <li>Class E</li>
-    </ol>
-    <details><summary>Show answer</summary><div class="explain"><b>A — Class B.</b> Blue = B or D, but multiple stacked tiers is the signature of Class B.</div></details>
+    <div class="explain explain-correct">✓ <b>Correct!</b> Blue = B or D, but multiple stacked tiers is the signature of Class B.</div>
+    <div class="explain explain-wrong">✗ <b>Correct answer: A — Class B.</b> Blue + stacked tiers = Class B's signature.</div>
+    <div class="qnav">
+      <a class="btn secondary" href="#q10">← Prev</a>
+      <a class="btn" href="#q12">Next →</a>
+    </div>
   </div>
 
-  <!-- Q12 -->
-  <div class="card q-card-static">
-    <div class="q-meta"><span>Question 12 of 18</span><span class="pill C">Class C</span></div>
+  <div class="card question" id="q12">
+    <div class="q-meta-bar"><span>Question 12 of 18</span><span><span class="pill C">Class C</span></span></div>
     <div class="visual-frame">
       <svg viewBox="0 0 320 200" width="100%">
         <rect width="320" height="200" fill="#e8f1fb"/>
@@ -613,115 +683,152 @@
         <rect x="80" y="110" width="160" height="70" fill="#c026d3" fill-opacity="0.30" stroke="#c026d3" stroke-width="2"/>
         <rect x="120" y="140" width="80" height="40" fill="#c026d3" fill-opacity="0.45" stroke="#c026d3" stroke-width="2"/>
         <text x="160" y="100" text-anchor="middle" font-size="11" fill="#6b21a8">4,000 AGL ceiling</text>
-      </svg>
-    </div>
+      </svg></div>
     <div class="q-prompt">Two-tier <b>magenta</b> wedding cake — which class?</div>
-    <ol class="choices-static" type="A">
-      <li>Class B</li>
-      <li>Class C</li>
-      <li>Class D</li>
-      <li>Class E surface</li>
-    </ol>
-    <details><summary>Show answer</summary><div class="explain"><b>B — Class C.</b> Magenta + two rings (inner core + shelf) = Class C.</div></details>
+    <div class="choices">
+      <label class="choice"><input type="radio" name="q12" class="wrong"><span><b>A.</b> Class B</span></label>
+      <label class="choice"><input type="radio" name="q12" class="correct"><span><b>B.</b> Class C</span></label>
+      <label class="choice"><input type="radio" name="q12" class="wrong"><span><b>C.</b> Class D</span></label>
+      <label class="choice"><input type="radio" name="q12" class="wrong"><span><b>D.</b> Class E surface</span></label>
+    </div>
+    <div class="explain explain-correct">✓ <b>Correct!</b> Magenta + two rings (inner core + shelf) = Class C.</div>
+    <div class="explain explain-wrong">✗ <b>Correct answer: B — Class C.</b> Magenta + two rings = Class C.</div>
+    <div class="qnav">
+      <a class="btn secondary" href="#q11">← Prev</a>
+      <a class="btn" href="#q13">Next →</a>
+    </div>
   </div>
 
-  <!-- Q13 -->
-  <div class="card q-card-static">
-    <div class="q-meta"><span>Question 13 of 18</span><span class="pill G">Class G</span></div>
+  <div class="card question" id="q13">
+    <div class="q-meta-bar"><span>Question 13 of 18</span><span><span class="pill G">Class G</span></span></div>
     <div class="q-prompt">You're flying a drone at 200 AGL in a rural area with no airports or sectional shading nearby. Most likely airspace?</div>
-    <ol class="choices-static" type="A">
-      <li>Class B</li>
-      <li>Class E to surface</li>
-      <li>Class G</li>
-      <li>Class A</li>
-    </ol>
-    <details><summary>Show answer</summary><div class="explain"><b>C — Class G.</b> Below the floor of Class E in unshaded areas (typically 1,200 AGL), you're uncontrolled. No authorization needed.</div></details>
+    <div class="choices">
+      <label class="choice"><input type="radio" name="q13" class="wrong"><span><b>A.</b> Class B</span></label>
+      <label class="choice"><input type="radio" name="q13" class="wrong"><span><b>B.</b> Class E to surface</span></label>
+      <label class="choice"><input type="radio" name="q13" class="correct"><span><b>C.</b> Class G</span></label>
+      <label class="choice"><input type="radio" name="q13" class="wrong"><span><b>D.</b> Class A</span></label>
+    </div>
+    <div class="explain explain-correct">✓ <b>Correct!</b> Below the floor of Class E (typically 1,200 AGL in unshaded areas), you're in uncontrolled Class G. No authorization required.</div>
+    <div class="explain explain-wrong">✗ <b>Correct answer: C — Class G.</b> Below the Class E floor in unshaded areas, you're uncontrolled.</div>
+    <div class="qnav">
+      <a class="btn secondary" href="#q12">← Prev</a>
+      <a class="btn" href="#q14">Next →</a>
+    </div>
   </div>
 
-  <!-- Q14 -->
-  <div class="card q-card-static">
-    <div class="q-meta"><span>Question 14 of 18</span><span class="pill B">B</span><span class="pill C">C</span><span class="pill D">D</span><span class="pill E">E</span></div>
+  <div class="card question" id="q14">
+    <div class="q-meta-bar"><span>Question 14 of 18</span><span><span class="pill B">B</span><span class="pill C">C</span><span class="pill D">D</span><span class="pill E">E</span></span></div>
     <div class="q-prompt">As a Part 107 pilot, which classes of airspace require ATC authorization (e.g., via LAANC) before you can operate?</div>
-    <ol class="choices-static" type="A">
-      <li>B, C, D, and E to the surface</li>
-      <li>Only Class B</li>
-      <li>Only Class G</li>
-      <li>A, B, and C</li>
-    </ol>
-    <details><summary>Show answer</summary><div class="explain"><b>A — B, C, D, and Class E that extends to the surface.</b> All four require authorization.</div></details>
+    <div class="choices">
+      <label class="choice"><input type="radio" name="q14" class="correct"><span><b>A.</b> B, C, D, and E to the surface</span></label>
+      <label class="choice"><input type="radio" name="q14" class="wrong"><span><b>B.</b> Only Class B</span></label>
+      <label class="choice"><input type="radio" name="q14" class="wrong"><span><b>C.</b> Only Class G</span></label>
+      <label class="choice"><input type="radio" name="q14" class="wrong"><span><b>D.</b> A, B, and C</span></label>
+    </div>
+    <div class="explain explain-correct">✓ <b>Correct!</b> Authorization is required for Class B, C, D, and lateral boundaries of E that extend to the surface.</div>
+    <div class="explain explain-wrong">✗ <b>Correct answer: A — B, C, D, and Class E that extends to the surface.</b></div>
+    <div class="qnav">
+      <a class="btn secondary" href="#q13">← Prev</a>
+      <a class="btn" href="#q15">Next →</a>
+    </div>
   </div>
 
-  <!-- Q15 -->
-  <div class="card q-card-static">
-    <div class="q-meta"><span>Question 15 of 18</span><span class="pill C">Class C</span></div>
+  <div class="card question" id="q15">
+    <div class="q-meta-bar"><span>Question 15 of 18</span><span><span class="pill C">Class C</span></span></div>
     <div class="q-prompt">The number '<b>42/SFC</b>' inside a Class C ring on a sectional means:</div>
-    <ol class="choices-static" type="A">
-      <li>Ceiling 4,200 AGL, floor 42 feet</li>
-      <li>Ceiling 4,200 MSL, floor surface</li>
-      <li>Ceiling 42,000 MSL, floor surface</li>
-      <li>Ceiling 420 MSL, floor surface</li>
-    </ol>
-    <details><summary>Show answer</summary><div class="explain"><b>B — Ceiling 4,200 MSL, floor surface.</b> Numbers are hundreds of feet MSL. SFC = surface.</div></details>
+    <div class="choices">
+      <label class="choice"><input type="radio" name="q15" class="wrong"><span><b>A.</b> Ceiling 4,200 AGL, floor 42 feet</span></label>
+      <label class="choice"><input type="radio" name="q15" class="correct"><span><b>B.</b> Ceiling 4,200 MSL, floor surface</span></label>
+      <label class="choice"><input type="radio" name="q15" class="wrong"><span><b>C.</b> Ceiling 42,000 MSL, floor surface</span></label>
+      <label class="choice"><input type="radio" name="q15" class="wrong"><span><b>D.</b> Ceiling 420 MSL, floor surface</span></label>
+    </div>
+    <div class="explain explain-correct">✓ <b>Correct!</b> Sectional numbers are hundreds of feet MSL. '42' = 4,200 MSL. 'SFC' = surface.</div>
+    <div class="explain explain-wrong">✗ <b>Correct answer: B — 4,200 MSL ceiling, surface floor.</b> Numbers are hundreds of feet MSL.</div>
+    <div class="qnav">
+      <a class="btn secondary" href="#q14">← Prev</a>
+      <a class="btn" href="#q16">Next →</a>
+    </div>
   </div>
 
-  <!-- Q16 -->
-  <div class="card q-card-static">
-    <div class="q-meta"><span>Question 16 of 18</span><span class="pill E">Class E</span></div>
+  <div class="card question" id="q16">
+    <div class="q-meta-bar"><span>Question 16 of 18</span><span><span class="pill E">Class E</span></span></div>
     <div class="q-prompt">If the chart shows <b>NO vignette</b> and no special class around you, where does Class E typically begin?</div>
-    <ol class="choices-static" type="A">
-      <li>Surface</li>
-      <li>700 AGL</li>
-      <li>1,200 AGL</li>
-      <li>14,500 MSL</li>
-    </ol>
-    <details><summary>Show answer</summary><div class="explain"><b>C — 1,200 AGL.</b> Default Class E floor in unshaded sectional areas is 1,200 AGL.</div></details>
+    <div class="choices">
+      <label class="choice"><input type="radio" name="q16" class="wrong"><span><b>A.</b> Surface</span></label>
+      <label class="choice"><input type="radio" name="q16" class="wrong"><span><b>B.</b> 700 AGL</span></label>
+      <label class="choice"><input type="radio" name="q16" class="correct"><span><b>C.</b> 1,200 AGL</span></label>
+      <label class="choice"><input type="radio" name="q16" class="wrong"><span><b>D.</b> 14,500 MSL</span></label>
+    </div>
+    <div class="explain explain-correct">✓ <b>Correct!</b> Default Class E floor in unshaded sectional areas is 1,200 AGL.</div>
+    <div class="explain explain-wrong">✗ <b>Correct answer: C — 1,200 AGL.</b> Default Class E floor in unshaded sectional areas.</div>
+    <div class="qnav">
+      <a class="btn secondary" href="#q15">← Prev</a>
+      <a class="btn" href="#q17">Next →</a>
+    </div>
   </div>
 
-  <!-- Q17 -->
-  <div class="card q-card-static">
-    <div class="q-meta"><span>Question 17 of 18</span><span class="pill G">Class G</span></div>
+  <div class="card question" id="q17">
+    <div class="q-meta-bar"><span>Question 17 of 18</span><span><span class="pill G">Class G</span></span></div>
     <div class="visual-frame">
       <svg viewBox="0 0 240 160" width="100%">
         <defs>
-          <radialGradient id="q17g" cx="50%" cy="50%" r="50%">
+          <radialGradient id="g17" cx="50%" cy="50%" r="50%">
             <stop offset="60%" stop-color="#c026d3" stop-opacity="0"/>
             <stop offset="80%" stop-color="#c026d3" stop-opacity="0.6"/>
             <stop offset="100%" stop-color="#c026d3" stop-opacity="0"/>
           </radialGradient>
         </defs>
         <rect width="240" height="160" fill="#f5f5f0"/>
-        <circle cx="120" cy="80" r="75" fill="url(#q17g)"/>
-      </svg>
-    </div>
+        <circle cx="120" cy="80" r="75" fill="url(#g17)"/>
+      </svg></div>
     <div class="q-prompt">You're inside a <b>magenta vignette</b> area, flying a drone at <b>350 AGL</b>. Which class are you in and do you need authorization?</div>
-    <ol class="choices-static" type="A">
-      <li>Class E — yes, authorization required</li>
-      <li>Class G — no authorization required</li>
-      <li>Class D — call the tower</li>
-      <li>Class B — prohibited</li>
-    </ol>
-    <details><summary>Show answer</summary><div class="explain"><b>B — Class G, no authorization.</b> Magenta vignette = Class E starts at 700 AGL. At 350 AGL you're in Class G. Still follow Part 107 rules (≤400', daylight, VLOS, etc.).</div></details>
+    <div class="choices">
+      <label class="choice"><input type="radio" name="q17" class="wrong"><span><b>A.</b> Class E — yes, authorization required</span></label>
+      <label class="choice"><input type="radio" name="q17" class="correct"><span><b>B.</b> Class G — no authorization required</span></label>
+      <label class="choice"><input type="radio" name="q17" class="wrong"><span><b>C.</b> Class D — call the tower</span></label>
+      <label class="choice"><input type="radio" name="q17" class="wrong"><span><b>D.</b> Class B — prohibited</span></label>
+    </div>
+    <div class="explain explain-correct">✓ <b>Correct!</b> Magenta vignette = Class E starts at 700 AGL. At 350 AGL you're in uncontrolled Class G. Still follow Part 107 rules.</div>
+    <div class="explain explain-wrong">✗ <b>Correct answer: B — Class G, no authorization.</b> Magenta vignette = E starts at 700 AGL. At 350 AGL you're in G.</div>
+    <div class="qnav">
+      <a class="btn secondary" href="#q16">← Prev</a>
+      <a class="btn" href="#q18">Next →</a>
+    </div>
   </div>
 
-  <!-- Q18 -->
-  <div class="card q-card-static">
-    <div class="q-meta"><span>Question 18 of 18</span><span class="pill E">Class E sfc</span></div>
+  <div class="card question" id="q18">
+    <div class="q-meta-bar"><span>Question 18 of 18</span><span><span class="pill E">Class E sfc</span></span></div>
     <div class="q-prompt">Which sectional symbol indicates Class E airspace that <b>extends down to the surface</b>?</div>
-    <ol class="choices-static" type="A">
-      <li>Solid blue circle</li>
-      <li>Solid magenta circle</li>
-      <li>Dashed magenta circle</li>
-      <li>Dashed blue circle</li>
-    </ol>
-    <details><summary>Show answer</summary><div class="explain"><b>C — Dashed magenta circle.</b> (Dashed BLUE = Class D.)</div></details>
+    <div class="choices">
+      <label class="choice"><input type="radio" name="q18" class="wrong"><span><b>A.</b> Solid blue circle</span></label>
+      <label class="choice"><input type="radio" name="q18" class="wrong"><span><b>B.</b> Solid magenta circle</span></label>
+      <label class="choice"><input type="radio" name="q18" class="correct"><span><b>C.</b> Dashed magenta circle</span></label>
+      <label class="choice"><input type="radio" name="q18" class="wrong"><span><b>D.</b> Dashed blue circle</span></label>
+    </div>
+    <div class="explain explain-correct">✓ <b>Correct!</b> Dashed MAGENTA = Class E to the surface. (Dashed BLUE = Class D.)</div>
+    <div class="explain explain-wrong">✗ <b>Correct answer: C — Dashed magenta circle.</b> (Dashed blue = Class D.)</div>
+    <div class="qnav">
+      <a class="btn secondary" href="#q17">← Prev</a>
+      <a class="btn" href="#q-done">See results →</a>
+    </div>
   </div>
 
-  <div class="card" style="text-align:center;">
-    <h2>Done!</h2>
-    <p style="color:var(--muted)">Aim for 16/18 (≈90%) two runs in a row. Re-read any missed concepts in the <b>Learn</b> or <b>Sectional Symbols</b> tabs.</p>
+  <div class="card question" id="q-done" style="text-align:center;">
+    <h2>You finished all 18 questions</h2>
+    <p style="color:var(--muted)">Count your correct answers as you went. Targets:</p>
+    <ul style="display:inline-block; text-align:left; margin:8px 0;">
+      <li><b>16–18</b>: Exam-ready on airspace.</li>
+      <li><b>13–15</b>: Solid. Re-read the cheat sheet, run it again.</li>
+      <li><b>9–12</b>: Spend more time on the Sectional Symbols tab.</li>
+      <li><b>0–8</b>: Hit the Learn tab — focus on color + line-style → class mapping.</li>
+    </ul>
+    <div class="qnav" style="justify-content:center;">
+      <a class="btn" href="#q1">Restart quiz</a>
+    </div>
   </div>
 
 </section>
+
 
 </main>
 
