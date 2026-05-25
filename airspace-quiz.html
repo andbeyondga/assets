@@ -35,14 +35,23 @@
   header h1 { margin: 0; font-size: 20px; font-weight: 600; }
   header .sub { color: var(--muted); font-size: 13px; }
   nav { display: flex; gap: 6px; }
-  nav button {
+  nav label {
     background: var(--panel); color: var(--ink); border: 1px solid var(--border);
     padding: 8px 14px; border-radius: 6px; cursor: pointer; font-size: 14px;
+    user-select: none;
   }
-  nav button.active { background: var(--accent); color: #0a0f14; border-color: var(--accent); font-weight: 600; }
+  nav label:hover { border-color: var(--accent); }
+  .tab-radio { position: absolute; left: -9999px; }
+  #t-learn:checked ~ header nav label[for="t-learn"],
+  #t-symbols:checked ~ header nav label[for="t-symbols"],
+  #t-quiz:checked ~ header nav label[for="t-quiz"] {
+    background: var(--accent); color: #0a0f14; border-color: var(--accent); font-weight: 600;
+  }
   main { max-width: 1200px; margin: 0 auto; padding: 24px; }
-  section { display: none; }
-  section.active { display: block; }
+  section.tab { display: none; }
+  #t-learn:checked   ~ main #learn,
+  #t-symbols:checked ~ main #symbols,
+  #t-quiz:checked    ~ main #quiz { display: block; }
 
   .card {
     background: var(--panel); border: 1px solid var(--border); border-radius: 10px;
@@ -107,22 +116,26 @@
 </head>
 <body>
 
+<input type="radio" name="tab" id="t-learn" class="tab-radio" checked>
+<input type="radio" name="tab" id="t-symbols" class="tab-radio">
+<input type="radio" name="tab" id="t-quiz" class="tab-radio">
+
 <header>
   <div>
     <h1>Part 107 Airspace Trainer</h1>
     <div class="sub">Learn the classes &amp; sectional chart symbology, then quiz yourself.</div>
   </div>
   <nav>
-    <button data-tab="learn" class="active">Learn</button>
-    <button data-tab="symbols">Sectional Symbols</button>
-    <button data-tab="quiz">Quiz</button>
+    <label for="t-learn">Learn</label>
+    <label for="t-symbols">Sectional Symbols</label>
+    <label for="t-quiz">Quiz</label>
   </nav>
 </header>
 
 <main>
 
 <!-- ============ LEARN ============ -->
-<section id="learn" class="active">
+<section id="learn" class="tab">
 
   <div class="card">
     <h2>The "Wedding Cake" — Side View</h2>
@@ -261,7 +274,7 @@
 </section>
 
 <!-- ============ SECTIONAL SYMBOLS ============ -->
-<section id="symbols">
+<section id="symbols" class="tab">
   <div class="card">
     <h2>How each class looks on a Sectional Chart</h2>
     <p style="color:var(--muted)">These are the visual cues you'll need for the exam. Click between Learn and Symbols, then go to the Quiz.</p>
@@ -364,7 +377,12 @@
 </section>
 
 <!-- ============ QUIZ ============ -->
-<section id="quiz">
+<section id="quiz" class="tab">
+  <noscript>
+    <div class="card" style="border-left:3px solid var(--warn)">
+      <b>JavaScript is disabled.</b> The interactive quiz needs JS. Download this file and open it in a regular browser (double-click the .html file) — Chrome, Safari, Firefox, or Edge all work.
+    </div>
+  </noscript>
   <div class="card">
     <div class="q-meta">
       <span>Question <span id="qNum">1</span> / <span id="qTotal">0</span></span>
@@ -393,15 +411,7 @@
 <footer>Study aid for FAA Part 107. Always verify with current FAA publications and your sectional chart. Not for navigation.</footer>
 
 <script>
-// ---------- Tabs ----------
-document.querySelectorAll('nav button').forEach(b => {
-  b.addEventListener('click', () => {
-    document.querySelectorAll('nav button').forEach(x => x.classList.remove('active'));
-    document.querySelectorAll('section').forEach(x => x.classList.remove('active'));
-    b.classList.add('active');
-    document.getElementById(b.dataset.tab).classList.add('active');
-  });
-});
+// Tabs are handled purely with CSS (radio + :checked) — no JS needed.
 
 // ---------- Reusable SVG snippets for quiz visuals ----------
 const SVG = {
