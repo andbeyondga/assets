@@ -45,7 +45,8 @@
   #t-learn:checked ~ header nav label[for="t-learn"],
   #t-symbols:checked ~ header nav label[for="t-symbols"],
   #t-quiz:checked ~ header nav label[for="t-quiz"],
-  #t-quiz2:checked ~ header nav label[for="t-quiz2"] {
+  #t-quiz2:checked ~ header nav label[for="t-quiz2"],
+  #t-ee:checked ~ header nav label[for="t-ee"] {
     background: var(--accent); color: #0a0f14; border-color: var(--accent); font-weight: 600;
   }
   main { max-width: 1200px; margin: 0 auto; padding: 24px; }
@@ -53,7 +54,8 @@
   #t-learn:checked   ~ main #learn,
   #t-symbols:checked ~ main #symbols,
   #t-quiz:checked    ~ main #quiz,
-  #t-quiz2:checked   ~ main #quiz2 { display: block; }
+  #t-quiz2:checked   ~ main #quiz2,
+  #t-ee:checked      ~ main #ee { display: block; }
 
   .card {
     background: var(--panel); border: 1px solid var(--border); border-radius: 10px;
@@ -104,11 +106,12 @@
   .score { font-weight: 600; }
 
   /* ===== Interactive Quizzes (pure CSS, uses :target + :has) ===== */
-  #quiz .question, #quiz2 .question { display: none; }
-  #quiz .question:target, #quiz2 .question:target { display: block; }
+  #quiz .question, #quiz2 .question, #ee .question { display: none; }
+  #quiz .question:target, #quiz2 .question:target, #ee .question:target { display: block; }
   /* Default-show the first card of each quiz when no question is the URL target */
   body:not(:has(#quiz .question:target)) #q1 { display: block; }
   body:not(:has(#quiz2 .question:target)) #m1 { display: block; }
+  body:not(:has(#ee .question:target)) #e1 { display: block; }
 
   .q-meta-bar {
     display: flex; justify-content: space-between; align-items: center;
@@ -165,6 +168,7 @@
 <input type="radio" name="tab" id="t-symbols" class="tab-radio">
 <input type="radio" name="tab" id="t-quiz" class="tab-radio">
 <input type="radio" name="tab" id="t-quiz2" class="tab-radio">
+<input type="radio" name="tab" id="t-ee" class="tab-radio">
 
 <header>
   <div>
@@ -176,6 +180,7 @@
     <label for="t-symbols">Sectional Symbols</label>
     <label for="t-quiz">Quiz 1</label>
     <label for="t-quiz2">Quiz 2 (Map ID)</label>
+    <label for="t-ee">E&amp;E</label>
   </nav>
 </header>
 
@@ -1176,6 +1181,458 @@
 
 </section>
 
+<section id="ee" class="tab">
+
+  <div class="card">
+    <div style="display:flex; justify-content:space-between; align-items:flex-start; gap:10px; flex-wrap:wrap;">
+      <div>
+        <h2 style="margin-bottom:4px;">E&amp;E — Class E Essentials (10 questions)</h2>
+        <p style="color:var(--muted); margin:0;">The three Class E variants on a sectional, side by side. Study, then quiz.</p>
+      </div>
+      <a class="btn secondary" data-shuffle="ee" href="#e1">🔀 Shuffle</a>
+    </div>
+  </div>
+
+  <div class="card">
+    <h3 style="margin:0 0 10px; color:var(--accent);">The Three Class E's — at a glance</h3>
+    <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(200px, 1fr)); gap:14px;">
+      <div>
+        
+    <svg viewBox="0 0 160 130" width="100%" style="background:#f1e3c4; border-radius:6px;">
+      <rect width="160" height="130" fill="#f1e3c4"/>
+      <circle cx="80" cy="65" r="42" fill="none" stroke="#c026d3" stroke-width="2.5" stroke-dasharray="6,4"/>
+      <circle cx="80" cy="65" r="3" fill="#c026d3"/>
+      <text x="80" y="120" text-anchor="middle" font-size="10" font-weight="700" fill="#6b21a8">DASHED MAGENTA</text>
+    </svg>
+        <div style="margin-top:8px; font-size:13px;">
+          <div><b>Class E to the SURFACE</b></div>
+          <div style="color:var(--muted)">Non-towered airport w/ instrument approach.</div>
+          <div style="margin-top:4px;"><b style="color:var(--bad)">AUTH REQUIRED</b> at any altitude.</div>
+        </div>
+      </div>
+      <div>
+        
+    <svg viewBox="0 0 160 130" width="100%" style="background:#f1e3c4; border-radius:6px;">
+      <defs>
+        <radialGradient id="ref-mv" cx="50%" cy="50%" r="50%">
+          <stop offset="55%" stop-color="#c026d3" stop-opacity="0"/>
+          <stop offset="80%" stop-color="#c026d3" stop-opacity="0.6"/>
+          <stop offset="100%" stop-color="#c026d3" stop-opacity="0"/>
+        </radialGradient>
+      </defs>
+      <rect width="160" height="130" fill="#f1e3c4"/>
+      <circle cx="80" cy="65" r="60" fill="url(#ref-mv)"/>
+      <text x="80" y="120" text-anchor="middle" font-size="10" font-weight="700" fill="#6b21a8">MAGENTA VIGNETTE</text>
+    </svg>
+        <div style="margin-top:8px; font-size:13px;">
+          <div><b>Class E starts at 700 AGL</b></div>
+          <div style="color:var(--muted)">Transition zone around non-towered field.</div>
+          <div style="margin-top:4px;"><b style="color:var(--good)">NO AUTH</b> below 400 AGL (you're in G).</div>
+        </div>
+      </div>
+      <div>
+        
+    <svg viewBox="0 0 160 130" width="100%" style="background:#f1e3c4; border-radius:6px;">
+      <defs>
+        <radialGradient id="ref-bv" cx="50%" cy="50%" r="50%">
+          <stop offset="55%" stop-color="#2b6cff" stop-opacity="0"/>
+          <stop offset="80%" stop-color="#2b6cff" stop-opacity="0.5"/>
+          <stop offset="100%" stop-color="#2b6cff" stop-opacity="0"/>
+        </radialGradient>
+      </defs>
+      <rect width="160" height="130" fill="#f1e3c4"/>
+      <circle cx="80" cy="65" r="60" fill="url(#ref-bv)"/>
+      <text x="80" y="120" text-anchor="middle" font-size="10" font-weight="700" fill="#1e3a8a">BLUE VIGNETTE</text>
+    </svg>
+        <div style="margin-top:8px; font-size:13px;">
+          <div><b>Class E starts at 1,200 AGL</b></div>
+          <div style="color:var(--muted)">Default transition area for most rural land.</div>
+          <div style="margin-top:4px;"><b style="color:var(--good)">NO AUTH</b> below 400 AGL (you're in G).</div>
+        </div>
+      </div>
+    </div>
+    <div style="margin-top:14px; padding:10px 12px; background:var(--panel-2); border-radius:6px; border-left:3px solid var(--accent); font-size:14px;">
+      <b>Mnemonic:</b> Same color (magenta), very different meaning.<br>
+      <b>DASHED line</b> = "E to the floor" → <b>auth needed</b>.<br>
+      <b>FUZZY shading</b> = "E starts up there (700 or 1,200)" → Class G below → <b>no auth</b> for normal Part 107 ops.
+    </div>
+  </div>
+
+  <div class="card question" id="e1">
+    <div class="q-meta-bar"><span>Question 1 of 10</span><span><span class="pill E">Class E sfc</span></span></div>
+    <div class="visual-frame">
+    <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:8px;">
+      <div><div style="text-align:center; font-size:11px; font-weight:700; margin-bottom:4px;">Option A</div>
+    <svg viewBox="0 0 160 130" width="100%" style="background:#f1e3c4; border-radius:6px;">
+      <rect width="160" height="130" fill="#f1e3c4"/>
+      <circle cx="80" cy="65" r="42" fill="none" stroke="#c026d3" stroke-width="2.5" stroke-dasharray="6,4"/>
+      <circle cx="80" cy="65" r="3" fill="#c026d3"/>
+      <text x="80" y="120" text-anchor="middle" font-size="10" font-weight="700" fill="#6b21a8"></text>
+    </svg></div>
+      <div><div style="text-align:center; font-size:11px; font-weight:700; margin-bottom:4px;">Option B</div>
+    <svg viewBox="0 0 160 130" width="100%" style="background:#f1e3c4; border-radius:6px;">
+      <defs>
+        <radialGradient id="q1-mv" cx="50%" cy="50%" r="50%">
+          <stop offset="55%" stop-color="#c026d3" stop-opacity="0"/>
+          <stop offset="80%" stop-color="#c026d3" stop-opacity="0.6"/>
+          <stop offset="100%" stop-color="#c026d3" stop-opacity="0"/>
+        </radialGradient>
+      </defs>
+      <rect width="160" height="130" fill="#f1e3c4"/>
+      <circle cx="80" cy="65" r="60" fill="url(#q1-mv)"/>
+      <text x="80" y="120" text-anchor="middle" font-size="10" font-weight="700" fill="#6b21a8"></text>
+    </svg></div>
+      <div><div style="text-align:center; font-size:11px; font-weight:700; margin-bottom:4px;">Option C</div>
+    <svg viewBox="0 0 160 130" width="100%" style="background:#f1e3c4; border-radius:6px;">
+      <defs>
+        <radialGradient id="q1-bv" cx="50%" cy="50%" r="50%">
+          <stop offset="55%" stop-color="#2b6cff" stop-opacity="0"/>
+          <stop offset="80%" stop-color="#2b6cff" stop-opacity="0.5"/>
+          <stop offset="100%" stop-color="#2b6cff" stop-opacity="0"/>
+        </radialGradient>
+      </defs>
+      <rect width="160" height="130" fill="#f1e3c4"/>
+      <circle cx="80" cy="65" r="60" fill="url(#q1-bv)"/>
+      <text x="80" y="120" text-anchor="middle" font-size="10" font-weight="700" fill="#1e3a8a"></text>
+    </svg></div>
+    </div></div>
+    <div class="q-prompt">Three sectional symbols. <b>Which one indicates Class E airspace that extends down to the surface?</b></div>
+    <div class="choices">
+      <label class="choice"><input type="radio" name="e1" class="correct"><span><b>A.</b> Option A — dashed magenta circle</span></label>
+      <label class="choice"><input type="radio" name="e1" class="wrong"><span><b>B.</b> Option B — fuzzy magenta shading (vignette)</span></label>
+      <label class="choice"><input type="radio" name="e1" class="wrong"><span><b>C.</b> Option C — fuzzy blue shading (vignette)</span></label>
+      <label class="choice"><input type="radio" name="e1" class="wrong"><span><b>D.</b> None of these are Class E</span></label>
+    </div>
+    <div class="explain explain-correct">✓ <b>Correct!</b> Dashed MAGENTA = Class E down to the surface (typically a non-towered airport with an instrument approach). Authorization required for Part 107.</div>
+    <div class="explain explain-wrong">✗ <b>Correct: A — dashed magenta circle.</b> That's Class E to the surface. Magenta vignette = E at 700 AGL, blue vignette = E at 1,200 AGL.</div>
+    <div class="qnav">
+      <a class="btn secondary" href="#ee">Top</a>
+      <a class="btn" href="#e2">Next →</a>
+    </div>
+  </div>
+
+  <div class="card question" id="e2">
+    <div class="q-meta-bar"><span>Question 2 of 10</span><span><span class="pill E">Class E sfc</span></span></div>
+    <div class="visual-frame">
+    <svg viewBox="0 0 400 280" width="100%">
+      
+    <rect width="400" height="280" fill="#f1e3c4"/>
+    <rect x="0" y="0" width="400" height="280" fill="#e6d6b3" fill-opacity="0.25"/>
+      <circle cx="200" cy="140" r="70" fill="none" stroke="#c026d3" stroke-width="2.5" stroke-dasharray="6,4"/>
+      
+    <g>
+      <circle cx="200" cy="140" r="5" fill="#c026d3" stroke="#6b21a8" stroke-width="1"/>
+      <text x="200" y="158" text-anchor="middle" font-size="10" font-weight="700" fill="#6b21a8">0X1</text>
+    </g>
+      
+    <g transform="translate(160,170)">
+      <polygon points="0,-12 3,-4 11,-4 5,2 7,10 0,5 -7,10 -5,2 -11,-4 -3,-4"
+               fill="#dc2626" stroke="#7f1d1d" stroke-width="1"/>
+      <text x="15" y="4" font-family="sans-serif" font-size="11" font-weight="700" fill="#7f1d1d">YOU</text>
+    </g>
+      <text x="20" y="30" font-size="12" font-weight="700" fill="#1f2937">Drone alt: 200 AGL</text>
+    </svg></div>
+    <div class="q-prompt">You're flying a drone at <b>200 AGL</b> inside this <b>dashed magenta</b> ring around a non-towered airport. What class are you in?</div>
+    <div class="choices">
+      <label class="choice"><input type="radio" name="e2" class="wrong"><span><b>A.</b> Class G — uncontrolled, no auth needed</span></label>
+      <label class="choice"><input type="radio" name="e2" class="correct"><span><b>B.</b> Class E — to the surface, auth required</span></label>
+      <label class="choice"><input type="radio" name="e2" class="wrong"><span><b>C.</b> Class D — towered airport airspace</span></label>
+      <label class="choice"><input type="radio" name="e2" class="wrong"><span><b>D.</b> Class B — never permitted</span></label>
+    </div>
+    <div class="explain explain-correct">✓ <b>Correct!</b> Dashed magenta = Class E that reaches down to the surface. At 200 AGL inside the ring you're in Class E, and you need ATC authorization (LAANC) to operate.</div>
+    <div class="explain explain-wrong">✗ <b>Correct: B — Class E to surface.</b> Dashed magenta extends Class E all the way to ground level. Auth required.</div>
+    <div class="qnav">
+      <a class="btn secondary" href="#e1">← Prev</a>
+      <a class="btn" href="#e3">Next →</a>
+    </div>
+  </div>
+
+  <div class="card question" id="e3">
+    <div class="q-meta-bar"><span>Question 3 of 10</span><span><span class="pill G">Class G</span></span></div>
+    <div class="visual-frame">
+    <svg viewBox="0 0 400 280" width="100%">
+      <defs>
+        <radialGradient id="q3mv" cx="50%" cy="50%" r="50%">
+          <stop offset="50%" stop-color="#c026d3" stop-opacity="0"/>
+          <stop offset="80%" stop-color="#c026d3" stop-opacity="0.55"/>
+          <stop offset="100%" stop-color="#c026d3" stop-opacity="0"/>
+        </radialGradient>
+      </defs>
+      
+    <rect width="400" height="280" fill="#f1e3c4"/>
+    <rect x="0" y="0" width="400" height="280" fill="#e6d6b3" fill-opacity="0.25"/>
+      <circle cx="200" cy="140" r="140" fill="url(#q3mv)"/>
+      
+    <g transform="translate(200,140)">
+      <polygon points="0,-12 3,-4 11,-4 5,2 7,10 0,5 -7,10 -5,2 -11,-4 -3,-4"
+               fill="#dc2626" stroke="#7f1d1d" stroke-width="1"/>
+      <text x="15" y="4" font-family="sans-serif" font-size="11" font-weight="700" fill="#7f1d1d">YOU</text>
+    </g>
+      <text x="20" y="30" font-size="12" font-weight="700" fill="#1f2937">Drone alt: 200 AGL</text>
+    </svg></div>
+    <div class="q-prompt">Now you're flying a drone at <b>200 AGL</b> inside this <b>fuzzy magenta vignette</b> area. What class are you in?</div>
+    <div class="choices">
+      <label class="choice"><input type="radio" name="e3" class="correct"><span><b>A.</b> Class G — uncontrolled, no auth needed</span></label>
+      <label class="choice"><input type="radio" name="e3" class="wrong"><span><b>B.</b> Class E — controlled, auth required</span></label>
+      <label class="choice"><input type="radio" name="e3" class="wrong"><span><b>C.</b> Class D — towered airport airspace</span></label>
+      <label class="choice"><input type="radio" name="e3" class="wrong"><span><b>D.</b> Class B — prohibited</span></label>
+    </div>
+    <div class="explain explain-correct">✓ <b>Correct!</b> Magenta VIGNETTE (fuzzy shading) means Class E starts at 700 AGL above it. Below 700 AGL is Class G. At 200 AGL you're well below the Class E floor → Class G, no authorization needed.</div>
+    <div class="explain explain-wrong">✗ <b>Correct: A — Class G.</b> The fuzzy magenta vignette puts the Class E floor at 700 AGL. Below that is Class G — no auth required.</div>
+    <div class="qnav">
+      <a class="btn secondary" href="#e2">← Prev</a>
+      <a class="btn" href="#e4">Next →</a>
+    </div>
+  </div>
+
+  <div class="card question" id="e4">
+    <div class="q-meta-bar"><span>Question 4 of 10</span><span><span class="pill E">Class E 700</span></span></div>
+    <div class="visual-frame">
+    <svg viewBox="0 0 240 160" width="100%">
+      <defs>
+        <radialGradient id="q4mv" cx="50%" cy="50%" r="50%">
+          <stop offset="50%" stop-color="#c026d3" stop-opacity="0"/>
+          <stop offset="80%" stop-color="#c026d3" stop-opacity="0.6"/>
+          <stop offset="100%" stop-color="#c026d3" stop-opacity="0"/>
+        </radialGradient>
+      </defs>
+      
+    <rect width="240" height="160" fill="#f1e3c4"/>
+    <rect x="0" y="0" width="240" height="160" fill="#e6d6b3" fill-opacity="0.25"/>
+      <circle cx="120" cy="80" r="85" fill="url(#q4mv)"/>
+    </svg></div>
+    <div class="q-prompt">Inside this <b>fuzzy magenta vignette</b>, at what altitude does Class E begin?</div>
+    <div class="choices">
+      <label class="choice"><input type="radio" name="e4" class="wrong"><span><b>A.</b> Surface</span></label>
+      <label class="choice"><input type="radio" name="e4" class="correct"><span><b>B.</b> 700 AGL</span></label>
+      <label class="choice"><input type="radio" name="e4" class="wrong"><span><b>C.</b> 1,200 AGL</span></label>
+      <label class="choice"><input type="radio" name="e4" class="wrong"><span><b>D.</b> 14,500 MSL</span></label>
+    </div>
+    <div class="explain explain-correct">✓ <b>Correct!</b> Magenta vignette = Class E floor at 700 AGL. Below it is Class G.</div>
+    <div class="explain explain-wrong">✗ <b>Correct: B — 700 AGL.</b> Magenta vignette = Class E floor at 700 AGL.</div>
+    <div class="qnav">
+      <a class="btn secondary" href="#e3">← Prev</a>
+      <a class="btn" href="#e5">Next →</a>
+    </div>
+  </div>
+
+  <div class="card question" id="e5">
+    <div class="q-meta-bar"><span>Question 5 of 10</span><span><span class="pill E">Class E 1200</span></span></div>
+    <div class="visual-frame">
+    <svg viewBox="0 0 240 160" width="100%">
+      <defs>
+        <radialGradient id="q5bv" cx="50%" cy="50%" r="50%">
+          <stop offset="50%" stop-color="#2b6cff" stop-opacity="0"/>
+          <stop offset="80%" stop-color="#2b6cff" stop-opacity="0.55"/>
+          <stop offset="100%" stop-color="#2b6cff" stop-opacity="0"/>
+        </radialGradient>
+      </defs>
+      
+    <rect width="240" height="160" fill="#f1e3c4"/>
+    <rect x="0" y="0" width="240" height="160" fill="#e6d6b3" fill-opacity="0.25"/>
+      <rect width="240" height="160" fill="url(#q5bv)"/>
+    </svg></div>
+    <div class="q-prompt">Inside this <b>fuzzy blue vignette</b>, at what altitude does Class E begin?</div>
+    <div class="choices">
+      <label class="choice"><input type="radio" name="e5" class="wrong"><span><b>A.</b> Surface</span></label>
+      <label class="choice"><input type="radio" name="e5" class="wrong"><span><b>B.</b> 700 AGL</span></label>
+      <label class="choice"><input type="radio" name="e5" class="correct"><span><b>C.</b> 1,200 AGL</span></label>
+      <label class="choice"><input type="radio" name="e5" class="wrong"><span><b>D.</b> 18,000 MSL</span></label>
+    </div>
+    <div class="explain explain-correct">✓ <b>Correct!</b> Blue vignette = Class E floor at 1,200 AGL. Below it is Class G.</div>
+    <div class="explain explain-wrong">✗ <b>Correct: C — 1,200 AGL.</b> Blue vignette = Class E floor at 1,200 AGL.</div>
+    <div class="qnav">
+      <a class="btn secondary" href="#e4">← Prev</a>
+      <a class="btn" href="#e6">Next →</a>
+    </div>
+  </div>
+
+  <div class="card question" id="e6">
+    <div class="q-meta-bar"><span>Question 6 of 10</span><span><span class="pill E">Identify</span></span></div>
+    <div class="visual-frame">
+    <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px;">
+      <div><div style="text-align:center; font-size:11px; font-weight:700; margin-bottom:4px;">Option A</div>
+    <svg viewBox="0 0 160 130" width="100%" style="background:#f1e3c4; border-radius:6px;">
+      <rect width="160" height="130" fill="#f1e3c4"/>
+      <circle cx="80" cy="65" r="42" fill="none" stroke="#2b6cff" stroke-width="2.5" stroke-dasharray="6,4"/>
+      <rect x="68" y="100" width="24" height="13" fill="#f1e3c4" stroke="#1e3a8a"/>
+      <text x="80" y="110" text-anchor="middle" font-size="10" font-weight="700" fill="#1e3a8a">[25]</text>
+      <text x="80" y="125" text-anchor="middle" font-size="9" font-weight="700" fill="#1e3a8a"></text>
+    </svg></div>
+      <div><div style="text-align:center; font-size:11px; font-weight:700; margin-bottom:4px;">Option B</div>
+    <svg viewBox="0 0 160 130" width="100%" style="background:#f1e3c4; border-radius:6px;">
+      <rect width="160" height="130" fill="#f1e3c4"/>
+      <circle cx="80" cy="65" r="42" fill="none" stroke="#c026d3" stroke-width="2.5" stroke-dasharray="6,4"/>
+      <circle cx="80" cy="65" r="3" fill="#c026d3"/>
+      <text x="80" y="120" text-anchor="middle" font-size="10" font-weight="700" fill="#6b21a8"></text>
+    </svg></div>
+    </div></div>
+    <div class="q-prompt">Both circles are <b>dashed</b>. <b>Which one represents Class E to the surface?</b></div>
+    <div class="choices">
+      <label class="choice"><input type="radio" name="e6" class="wrong"><span><b>A.</b> Option A — dashed BLUE circle</span></label>
+      <label class="choice"><input type="radio" name="e6" class="correct"><span><b>B.</b> Option B — dashed MAGENTA circle</span></label>
+      <label class="choice"><input type="radio" name="e6" class="wrong"><span><b>C.</b> Both — dashed = Class E either way</span></label>
+      <label class="choice"><input type="radio" name="e6" class="wrong"><span><b>D.</b> Neither — both are Class D</span></label>
+    </div>
+    <div class="explain explain-correct">✓ <b>Correct!</b> Dashed MAGENTA = Class E to surface. Dashed BLUE = Class D (towered airport). The color is what tells them apart.</div>
+    <div class="explain explain-wrong">✗ <b>Correct: B — dashed magenta.</b> Dashed BLUE = Class D (towered). Dashed MAGENTA = Class E to surface (non-towered).</div>
+    <div class="qnav">
+      <a class="btn secondary" href="#e5">← Prev</a>
+      <a class="btn" href="#e7">Next →</a>
+    </div>
+  </div>
+
+  <div class="card question" id="e7">
+    <div class="q-meta-bar"><span>Question 7 of 10</span><span><span class="pill E">Class E sfc</span></span></div>
+    <div class="visual-frame">
+    <svg viewBox="0 0 400 280" width="100%">
+      
+    <rect width="400" height="280" fill="#f1e3c4"/>
+    <rect x="0" y="0" width="400" height="280" fill="#e6d6b3" fill-opacity="0.25"/>
+      <circle cx="200" cy="140" r="75" fill="none" stroke="#c026d3" stroke-width="2.5" stroke-dasharray="6,4"/>
+      
+    <g>
+      <circle cx="200" cy="140" r="5" fill="#c026d3" stroke="#6b21a8" stroke-width="1"/>
+      <text x="200" y="158" text-anchor="middle" font-size="10" font-weight="700" fill="#6b21a8">3W2</text>
+    </g>
+      <text x="20" y="30" font-size="12" font-weight="700" fill="#1f2937">Operating below 400 AGL inside the ring</text>
+    </svg></div>
+    <div class="q-prompt">Operating a Part 107 drone <b>below 400 AGL</b> inside this <b>dashed magenta</b> ring. Do you need ATC authorization?</div>
+    <div class="choices">
+      <label class="choice"><input type="radio" name="e7" class="correct"><span><b>A.</b> Yes — authorization required (LAANC/DroneZone)</span></label>
+      <label class="choice"><input type="radio" name="e7" class="wrong"><span><b>B.</b> No — you're below 400 AGL</span></label>
+      <label class="choice"><input type="radio" name="e7" class="wrong"><span><b>C.</b> Only at night</span></label>
+      <label class="choice"><input type="radio" name="e7" class="wrong"><span><b>D.</b> Only if the airport is towered</span></label>
+    </div>
+    <div class="explain explain-correct">✓ <b>Correct!</b> Dashed magenta = Class E down to the surface. Your altitude doesn't matter — anywhere inside that ring you're in controlled Class E, and Part 107 requires authorization.</div>
+    <div class="explain explain-wrong">✗ <b>Correct: A — yes, authorization required.</b> Dashed magenta = Class E to the surface. Class E starts at ground level inside the ring, so the 400-AGL trick does NOT apply here.</div>
+    <div class="qnav">
+      <a class="btn secondary" href="#e6">← Prev</a>
+      <a class="btn" href="#e8">Next →</a>
+    </div>
+  </div>
+
+  <div class="card question" id="e8">
+    <div class="q-meta-bar"><span>Question 8 of 10</span><span><span class="pill G">Class G</span></span></div>
+    <div class="visual-frame">
+    <svg viewBox="0 0 400 280" width="100%">
+      <defs>
+        <radialGradient id="q8mv" cx="50%" cy="50%" r="50%">
+          <stop offset="50%" stop-color="#c026d3" stop-opacity="0"/>
+          <stop offset="80%" stop-color="#c026d3" stop-opacity="0.55"/>
+          <stop offset="100%" stop-color="#c026d3" stop-opacity="0"/>
+        </radialGradient>
+      </defs>
+      
+    <rect width="400" height="280" fill="#f1e3c4"/>
+    <rect x="0" y="0" width="400" height="280" fill="#e6d6b3" fill-opacity="0.25"/>
+      <circle cx="200" cy="140" r="150" fill="url(#q8mv)"/>
+      <text x="20" y="30" font-size="12" font-weight="700" fill="#1f2937">Operating below 400 AGL inside vignette</text>
+    </svg></div>
+    <div class="q-prompt">Operating a Part 107 drone <b>below 400 AGL</b> inside this <b>fuzzy magenta vignette</b>. Do you need ATC authorization?</div>
+    <div class="choices">
+      <label class="choice"><input type="radio" name="e8" class="wrong"><span><b>A.</b> Yes — controlled airspace</span></label>
+      <label class="choice"><input type="radio" name="e8" class="correct"><span><b>B.</b> No — you're in Class G below 700 AGL</span></label>
+      <label class="choice"><input type="radio" name="e8" class="wrong"><span><b>C.</b> Only on weekends</span></label>
+      <label class="choice"><input type="radio" name="e8" class="wrong"><span><b>D.</b> Yes — fuzzy = warning</span></label>
+    </div>
+    <div class="explain explain-correct">✓ <b>Correct!</b> Magenta vignette = Class E floor at 700 AGL. Below 700 AGL is Class G. Since Part 107 caps you at 400 AGL, you're always in Class G here. No auth needed.</div>
+    <div class="explain explain-wrong">✗ <b>Correct: B — no.</b> Fuzzy magenta = E floor at 700 AGL. Below that is Class G. Part 107 below 400 AGL = always Class G here, no auth.</div>
+    <div class="qnav">
+      <a class="btn secondary" href="#e7">← Prev</a>
+      <a class="btn" href="#e9">Next →</a>
+    </div>
+  </div>
+
+  <div class="card question" id="e9">
+    <div class="q-meta-bar"><span>Question 9 of 10</span><span><span class="pill E">Class E 700</span></span></div>
+    <div class="visual-frame">
+    <svg viewBox="0 0 400 280" width="100%">
+      <defs>
+        <radialGradient id="q9mv" cx="50%" cy="50%" r="50%">
+          <stop offset="50%" stop-color="#c026d3" stop-opacity="0"/>
+          <stop offset="80%" stop-color="#c026d3" stop-opacity="0.55"/>
+          <stop offset="100%" stop-color="#c026d3" stop-opacity="0"/>
+        </radialGradient>
+      </defs>
+      
+    <rect width="400" height="280" fill="#f1e3c4"/>
+    <rect x="0" y="0" width="400" height="280" fill="#e6d6b3" fill-opacity="0.25"/>
+      <circle cx="200" cy="140" r="140" fill="url(#q9mv)"/>
+      
+    <g transform="translate(200,140)">
+      <polygon points="0,-12 3,-4 11,-4 5,2 7,10 0,5 -7,10 -5,2 -11,-4 -3,-4"
+               fill="#dc2626" stroke="#7f1d1d" stroke-width="1"/>
+      <text x="15" y="4" font-family="sans-serif" font-size="11" font-weight="700" fill="#7f1d1d">YOU</text>
+    </g>
+      <text x="20" y="30" font-size="12" font-weight="700" fill="#1f2937">Drone alt: 800 AGL</text>
+    </svg></div>
+    <div class="q-prompt">Hypothetically at <b>800 AGL</b> inside this <b>fuzzy magenta vignette</b>. What class are you in?</div>
+    <div class="choices">
+      <label class="choice"><input type="radio" name="e9" class="wrong"><span><b>A.</b> Class G</span></label>
+      <label class="choice"><input type="radio" name="e9" class="correct"><span><b>B.</b> Class E</span></label>
+      <label class="choice"><input type="radio" name="e9" class="wrong"><span><b>C.</b> Class D</span></label>
+      <label class="choice"><input type="radio" name="e9" class="wrong"><span><b>D.</b> Class A</span></label>
+    </div>
+    <div class="explain explain-correct">✓ <b>Correct!</b> Magenta vignette = Class E starts at 700 AGL. At 800 AGL you're ABOVE the floor — so you're in Class E. (Note: real Part 107 ops cap you at 400 AGL — this scenario is hypothetical.)</div>
+    <div class="explain explain-wrong">✗ <b>Correct: B — Class E.</b> Magenta vignette = E floor at 700 AGL. At 800 AGL you've crossed into E. (Standard Part 107 limits you to 400 AGL anyway.)</div>
+    <div class="qnav">
+      <a class="btn secondary" href="#e8">← Prev</a>
+      <a class="btn" href="#e10">Next →</a>
+    </div>
+  </div>
+
+  <div class="card question" id="e10">
+    <div class="q-meta-bar"><span>Question 10 of 10</span><span><span class="pill E">E sfc vs E 700</span></span></div>
+    <div class="visual-frame">
+    <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px;">
+      <div><div style="text-align:center; font-size:11px; font-weight:700; margin-bottom:4px;">Option A: Dashed magenta</div>
+    <svg viewBox="0 0 160 130" width="100%" style="background:#f1e3c4; border-radius:6px;">
+      <rect width="160" height="130" fill="#f1e3c4"/>
+      <circle cx="80" cy="65" r="42" fill="none" stroke="#c026d3" stroke-width="2.5" stroke-dasharray="6,4"/>
+      <circle cx="80" cy="65" r="3" fill="#c026d3"/>
+      <text x="80" y="120" text-anchor="middle" font-size="10" font-weight="700" fill="#6b21a8"></text>
+    </svg></div>
+      <div><div style="text-align:center; font-size:11px; font-weight:700; margin-bottom:4px;">Option B: Magenta vignette</div>
+    <svg viewBox="0 0 160 130" width="100%" style="background:#f1e3c4; border-radius:6px;">
+      <defs>
+        <radialGradient id="q10-mv" cx="50%" cy="50%" r="50%">
+          <stop offset="55%" stop-color="#c026d3" stop-opacity="0"/>
+          <stop offset="80%" stop-color="#c026d3" stop-opacity="0.6"/>
+          <stop offset="100%" stop-color="#c026d3" stop-opacity="0"/>
+        </radialGradient>
+      </defs>
+      <rect width="160" height="130" fill="#f1e3c4"/>
+      <circle cx="80" cy="65" r="60" fill="url(#q10-mv)"/>
+      <text x="80" y="120" text-anchor="middle" font-size="10" font-weight="700" fill="#6b21a8"></text>
+    </svg></div>
+    </div></div>
+    <div class="q-prompt">These look similar but mean very different things for Part 107. <b>Which one means you need authorization to fly below 400 AGL?</b></div>
+    <div class="choices">
+      <label class="choice"><input type="radio" name="e10" class="correct"><span><b>A.</b> Option A only (dashed magenta)</span></label>
+      <label class="choice"><input type="radio" name="e10" class="wrong"><span><b>B.</b> Option B only (magenta vignette)</span></label>
+      <label class="choice"><input type="radio" name="e10" class="wrong"><span><b>C.</b> Both</span></label>
+      <label class="choice"><input type="radio" name="e10" class="wrong"><span><b>D.</b> Neither</span></label>
+    </div>
+    <div class="explain explain-correct">✓ <b>Correct!</b> <b>Dashed magenta</b> = Class E down to the surface → auth required everywhere inside, at any altitude. <b>Magenta vignette</b> = Class E starts at 700 AGL → below 400 AGL you're in Class G, no auth needed. Remember: LINE STYLE matters more than color here.</div>
+    <div class="explain explain-wrong">✗ <b>Correct: A — dashed magenta only.</b> Dashed = E to surface (auth required). Fuzzy = E starts at 700 AGL (G below = no auth). Same color, opposite implications.</div>
+    <div class="qnav">
+      <a class="btn secondary" href="#e9">← Prev</a>
+      <a class="btn" href="#e-done">See results →</a>
+    </div>
+  </div>
+
+  <div class="card question" id="e-done" style="text-align:center;">
+    <h2>E&amp;E quiz complete</h2>
+    <p style="color:var(--muted)">If you missed any: the cheatsheet at the top of this tab is your friend. The dashed-vs-fuzzy distinction is what trips most pilots.</p>
+    <div class="qnav" style="justify-content:center;">
+      <a class="btn" href="#e1">Restart</a>
+    </div>
+  </div>
+
+</section>
+
+
 
 
 </main>
@@ -1247,6 +1704,7 @@
   function init() {
     shuffleSection('quiz', 'Question');
     shuffleSection('quiz2', 'Map');
+    shuffleSection('ee', 'Question');
 
     document.querySelectorAll('[data-shuffle]').forEach(btn => {
       btn.addEventListener('click', e => {
@@ -1258,6 +1716,9 @@
         } else if (target === 'quiz2') {
           shuffleSection('quiz2', 'Map');
           location.hash = 'm1';
+        } else if (target === 'ee') {
+          shuffleSection('ee', 'Question');
+          location.hash = 'e1';
         }
         window.scrollTo({ top: 0, behavior: 'smooth' });
       });
