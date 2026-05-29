@@ -1,0 +1,43 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+html,
+body {
+  height: 100%;
+}
+
+body {
+  background-color: #0a0a0b;
+  color: #f2f2f4;
+  /* Respect iPhone safe areas (notch / home indicator). */
+  padding: env(safe-area-inset-top) env(safe-area-inset-right)
+    env(safe-area-inset-bottom) env(safe-area-inset-left);
+  -webkit-tap-highlight-color: transparent;
+  overscroll-behavior-y: none;
+}
+
+/* Slim, dark scrollbar for the transcript. */
+::-webkit-scrollbar {
+  width: 6px;
+}
+::-webkit-scrollbar-thumb {
+  background: #26262b;
+  border-radius: 3px;
+}
+
+/* Subtle pulse used by the talk button when listening (wired up in Phase 2). */
+@keyframes pulse-ring {
+  0% {
+    box-shadow: 0 0 0 0 rgba(143, 196, 255, 0.35);
+  }
+  70% {
+    box-shadow: 0 0 0 18px rgba(143, 196, 255, 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(143, 196, 255, 0);
+  }
+}
+.listening {
+  animation: pulse-ring 1.4s infinite;
+}
