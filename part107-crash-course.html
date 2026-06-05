@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Part 107 — The 4-Hour Crash Course</title>
+<style>
+  :root{
+    --bg:#0d1117; --panel:#161b22; --panel2:#1c2330; --border:#2a3340;
+    --text:#e6edf3; --muted:#9aa7b4; --accent:#3b82f6; --good:#22c55e;
+    --bad:#ef4444; --warn:#f59e0b; --chip:#21262d;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    background:var(--bg);color:var(--text);line-height:1.6;-webkit-font-smoothing:antialiased}
+  .wrap{max-width:780px;margin:0 auto;padding:24px 18px 90px}
+  header{text-align:center;margin:6px 0 10px}
+  header h1{font-size:1.6rem;margin:0 0 6px}
+  header .sub{color:var(--muted);font-size:.95rem;margin:0}
+  .promptbox{background:var(--panel2);border:1px solid var(--border);border-left:3px solid var(--accent);
+    border-radius:0 12px 12px 0;padding:14px 16px;margin:18px 0;font-size:.9rem;color:var(--muted);font-style:italic}
+  .promptbox b{color:var(--text);font-style:normal}
+  .clock{display:flex;gap:8px;flex-wrap:wrap;justify-content:center;margin:18px 0}
+  .clock .seg{background:var(--chip);border:1px solid var(--border);border-radius:999px;
+    padding:6px 12px;font-size:.8rem;color:var(--muted)}
+  .clock .seg b{color:var(--accent)}
+  section.block{background:var(--panel);border:1px solid var(--border);border-radius:16px;
+    padding:22px;margin:18px 0}
+  .htag{display:inline-block;font-size:.72rem;letter-spacing:.08em;text-transform:uppercase;
+    color:var(--accent);font-weight:700;margin-bottom:4px}
+  h2{margin:2px 0 4px;font-size:1.25rem}
+  h3{margin:18px 0 6px;font-size:1.05rem}
+  .why{color:var(--muted);font-size:.9rem;margin:0 0 12px}
+  table{width:100%;border-collapse:collapse;margin:10px 0;font-size:.9rem}
+  th,td{text-align:left;padding:8px 10px;border-bottom:1px solid var(--border);vertical-align:top}
+  th{color:var(--muted);font-weight:600;font-size:.8rem;text-transform:uppercase;letter-spacing:.04em}
+  td:first-child{font-weight:700;white-space:nowrap;color:var(--text)}
+  .pill{display:inline-block;background:var(--chip);border:1px solid var(--border);border-radius:6px;
+    padding:1px 7px;font-size:.8rem;font-family:ui-monospace,SFMono-Regular,Menlo,monospace}
+  .num{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;color:var(--good);font-weight:700}
+  ul.tight{margin:6px 0;padding-left:20px}
+  ul.tight li{margin:4px 0}
+  .ignore{border-left:3px solid var(--bad)}
+  .ignore .htag{color:var(--bad)}
+  .exercise{border:1px solid var(--good);background:linear-gradient(180deg,#0f2e1c33,transparent)}
+  .exercise .htag{color:var(--good)}
+  .step{display:flex;gap:12px;margin:10px 0}
+  .step .n{flex:0 0 26px;height:26px;border-radius:7px;background:var(--good);color:#04210f;
+    display:flex;align-items:center;justify-content:center;font-weight:800;font-size:.85rem}
+  .callout{background:var(--panel2);border:1px solid var(--border);border-radius:10px;padding:12px 14px;margin:12px 0;font-size:.9rem}
+  .callout.warn{border-color:var(--warn)}
+  .colorkey{display:grid;grid-template-columns:1fr;gap:6px;margin:8px 0}
+  .ck{display:flex;align-items:center;gap:10px;font-size:.9rem}
+  .swatch{flex:0 0 70px;height:0;border-bottom-width:3px;border-bottom-style:solid;border-radius:2px}
+  .cta{display:flex;gap:12px;flex-wrap:wrap;justify-content:center;margin-top:14px}
+  .btn{display:inline-block;text-decoration:none;border-radius:10px;font-weight:600;padding:12px 18px;
+    color:#fff;background:var(--accent)}
+  .btn.ghost{background:transparent;color:var(--accent);border:1px solid var(--accent)}
+  a{color:var(--accent)}
+  footer{text-align:center;color:var(--muted);font-size:.78rem;margin-top:26px;line-height:1.6}
+  .check{accent-color:var(--good);width:16px;height:16px;margin-right:8px;vertical-align:-3px}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>🪂 Part 107 — The 4-Hour Crash Course</h1>
+    <p class="sub">Built with the "Learning Curve Destroyer" tutor method: get <em>functional</em>, not complete.</p>
+  </header>
+
+  <div class="promptbox">
+    <b>The method:</b> "You're a teacher who only has 4 hours with me and will never see me again.
+    Your only objective is to make me functional in <b>passing the FAA Part 107 exam</b> before the
+    time runs out. No theory without practical use. No filler. Tell me what to learn first, what to
+    completely ignore, and the one exercise that — done once — puts me ahead of 70% of people who've
+    been studying for months."
+  </div>
+
+  <div class="clock">
+    <span class="seg"><b>0:00–2:00</b> Sectionals + Airspace</span>
+    <span class="seg"><b>2:00–3:00</b> The hard numbers</span>
+    <span class="seg"><b>3:00–3:40</b> METAR / weather</span>
+    <span class="seg"><b>3:40–4:00</b> The Exercise</span>
+  </div>
+
+  <!-- ===== 1. LEARN FIRST ===== -->
+  <section class="block">
+    <span class="htag">Learn this first — half the exam lives here</span>
+    <h2>1 · Read a sectional chart &amp; nail airspace</h2>
+    <p class="why">Roughly <b>a third to a half</b> of the test is airspace and chart reading, and it's
+    where almost everyone bleeds points. Master this and you've basically passed. Everything else is easier.</p>
+
+    <h3>The only color code you must memorize</h3>
+    <div class="colorkey">
+      <div class="ck"><span class="swatch" style="border-color:#2f6df6"></span> <b>Solid blue ring</b> → Class&nbsp;B (big city). Needs ATC auth.</div>
+      <div class="ck"><span class="swatch" style="border-color:#c0397f"></span> <b>Solid magenta ring</b> → Class&nbsp;C. Needs ATC auth.</div>
+      <div class="ck"><span class="swatch" style="border-color:#2f6df6;border-bottom-style:dashed"></span> <b>Dashed blue ring</b> → Class&nbsp;D. Needs ATC auth.</div>
+      <div class="ck"><span class="swatch" style="border-color:#c0397f;border-bottom-style:dashed"></span> <b>Dashed magenta ring</b> → Class&nbsp;E to the <b>surface</b>. Needs ATC auth.</div>
+      <div class="ck"><span class="swatch" style="border-color:#c0397f;opacity:.5"></span> <b>Faded magenta band</b> → Class&nbsp;E starting at 700&nbsp;ft AGL. No auth needed for low drone ops.</div>
+      <div class="ck"><span class="swatch" style="border-color:#3a4658"></span> <b>No ring (most of the map)</b> → Class&nbsp;G, uncontrolled. <b>No authorization needed.</b></div>
+    </div>
+
+    <div class="callout">
+      <b>The decision you'll make over and over on the test:</b><br>
+      "Is my drone site in B, C, D, or surface-E?" → <b>You need ATC authorization</b> (get it instantly via
+      <span class="pill">LAANC</span> or apply through <span class="pill">FAA DroneZone</span>).<br>
+      "Is it in G, or faded-magenta E?" → <b>Just fly</b> (still obey altitude/VLOS rules).
+    </div>
+
+    <h3>Two more chart symbols they love to test</h3>
+    <ul class="tight">
+      <li><b>Airport color</b>: <span style="color:#5b8dff">blue airport</span> = has a control tower; <span style="color:#d0559a">magenta airport</span> = no tower.</li>
+      <li><b>Altitude fractions</b> in a class ring (e.g. <span class="pill">125 / 45</span>) = ceiling 12,500&nbsp;ft over floor 4,500&nbsp;ft <b>MSL</b> (hundreds of feet). A floor of <span class="pill">SFC</span> means surface.</li>
+      <li><b>MEF</b> (big faint numbers in each grid square, e.g. <span class="pill">2&sup1;</span>) = highest terrain/obstacle in that quadrant, MSL.</li>
+      <li><b>Obstruction</b> (tower): <b>bold number = top in MSL</b>, number in (parentheses) = height AGL.</li>
+    </ul>
+    <p class="why">Practical use: given any chart cutout, you can now state the airspace, whether you need authorization,
+    the floor/ceiling, and avoid the tallest obstacle. That's 90% of the chart questions.</p>
+  </section>
+
+  <!-- ===== 2. THE NUMBERS ===== -->
+  <section class="block">
+    <span class="htag">Learn second — free points, pure memorization</span>
+    <h2>2 · The hard numbers (these are gimmes)</h2>
+    <p class="why">Every one of these shows up almost verbatim. Memorize the table; don't overthink it.</p>
+    <table>
+      <tr><th>Limit</th><th>Value</th><th>Memory hook</th></tr>
+      <tr><td>Max altitude</td><td><span class="num">400 ft</span> AGL</td><td>…or 400 ft above a structure if within 400 ft of it</td></tr>
+      <tr><td>Max speed</td><td><span class="num">100 mph</span> (87 kt)</td><td>Highway speed</td></tr>
+      <tr><td>Min visibility</td><td><span class="num">3 SM</span></td><td>"3 to fly"</td></tr>
+      <tr><td>Cloud clearance</td><td><span class="num">500</span> below / <span class="num">2,000</span> horizontal</td><td>"5-2-oh, away you go"</td></tr>
+      <tr><td>Max weight</td><td><span class="num">&lt; 55 lb</span></td><td>Including payload, at takeoff</td></tr>
+      <tr><td>Min pilot age</td><td><span class="num">16</span></td><td>Like a driver's permit</td></tr>
+      <tr><td>Recurrent training</td><td>every <span class="num">24</span> calendar months</td><td>Free online, FAA</td></tr>
+      <tr><td>Accident report</td><td>within <span class="num">10 days</span></td><td>If serious injury OR ≥ <span class="num">$500</span> damage</td></tr>
+      <tr><td>Register if</td><td>≥ <span class="num">0.55 lb</span> (250 g)</td><td>Under 107, register regardless; mark # on exterior</td></tr>
+      <tr><td>Night/twilight</td><td>anti-collision lights visible <span class="num">3 SM</span></td><td>Allowed since the 2021 rule</td></tr>
+    </table>
+    <div class="callout">
+      <b>One-liners that are basically free questions:</b>
+      <ul class="tight">
+        <li>The <b>Remote PIC</b> is the final authority — always.</li>
+        <li>Small UAS <b>always yields</b> right-of-way to manned aircraft.</li>
+        <li><b>One</b> drone per pilot at a time. <b>No</b> hazmat. <b>No</b> careless/reckless ops.</li>
+        <li>You may <b>deviate from any rule in an in-flight emergency</b> (and file a report if asked).</li>
+        <li><b>FPV alone ≠ VLOS</b> — you or a visual observer must see the aircraft with your own eyes.</li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- ===== 3. WEATHER ===== -->
+  <section class="block">
+    <span class="htag">Learn third — small, decode-able chunk</span>
+    <h2>3 · Decode a METAR &amp; the 2 weather ideas they test</h2>
+    <p class="why">You don't need meteorology. You need to read one line of code and know two concepts.</p>
+    <h3>Read this METAR left to right</h3>
+    <p class="callout" style="font-family:ui-monospace,monospace;font-size:.85rem">
+      KOKC 011451Z <b style="color:#5b8dff">24008KT</b> <b style="color:#22c55e">3SM</b> <b style="color:#f59e0b">BKN015</b> 12/09 A2992
+    </p>
+    <ul class="tight">
+      <li><span style="color:#5b8dff">24008KT</span> → wind <b>from 240° true at 8 knots</b> (gusts shown as G, e.g. 24015G25KT).</li>
+      <li><span style="color:#22c55e">3SM</span> → visibility 3 statute miles → <b>exactly your legal minimum.</b></li>
+      <li><span style="color:#f59e0b">BKN015</span> → broken clouds at 1,500 ft → that's your <b>ceiling</b>. (FEW→SCT→BKN→OVC = thin → solid.)</li>
+      <li>12/09 → temp 12°C / dew point 9°C. <b>Close together = fog/low cloud risk.</b></li>
+    </ul>
+    <h3>The only two concepts</h3>
+    <ul class="tight">
+      <li><b>Density altitude</b>: <b>hot + high + humid = thin air = worse performance</b> (less lift, slower climb, less payload). Temperature matters most.</li>
+      <li><b>Stable vs unstable air</b>: stable → stratus clouds, steady wind, poor visibility/haze. Unstable → puffy cumulus, turbulence, good visibility, showers.</li>
+    </ul>
+    <p class="why">That's the whole weather section in practice. Skip the textbook.</p>
+  </section>
+
+  <!-- ===== IGNORE ===== -->
+  <section class="block ignore">
+    <span class="htag">Completely ignore (for now)</span>
+    <h2>4 · What to NOT waste your 4 hours on</h2>
+    <ul class="tight">
+      <li><b>Deep meteorology</b> — frontal systems, adiabatic lapse rates, cloud-formation theory. Learn the two concepts above and stop.</li>
+      <li><b>Manned-aircraft systems &amp; instruments</b> — altimeter settings math, VOR/radio navigation, engine systems. Not your test.</li>
+      <li><b>Manual weight-and-balance math</b> — for drones it's conceptual ("too heavy / bad CG = worse, less stable"), not a calculation.</li>
+      <li><b>Memorizing every special-use airspace</b> — just know: <b>Prohibited = never; Restricted = need permission; MOA/Warning/Alert = use caution</b>. Done.</li>
+      <li><b>Sectional chart minutiae</b> — VOR compass roses, airway routes, frequencies. You're not navigating an airliner.</li>
+      <li><b>Loading theory, aerodynamics derivations, history of the FAA.</b> Zero questions, infinite time-sink.</li>
+    </ul>
+    <div class="callout warn">If a study resource spends 30 minutes on any bullet above, skip ahead. That time belongs to sectionals.</div>
+  </section>
+
+  <!-- ===== THE EXERCISE ===== -->
+  <section class="block exercise">
+    <span class="htag">★ The one exercise that beats 70% of "studiers"</span>
+    <h2>5 · Do this once, today</h2>
+    <p class="why">Most people fail because they <em>read about</em> airspace instead of <em>reading charts</em>.
+    This single drill turns the hardest section into your strongest.</p>
+
+    <div class="step"><span class="n">1</span><div>Download the FAA's free <b>Airman Knowledge Testing Supplement (CT-8080-2H)</b> — it contains the <b>exact sectional figures used on the real exam</b>. (<a href="https://www.faa.gov/training_testing/testing/supplements" target="_blank" rel="noopener">faa.gov testing supplements</a>)</div></div>
+
+    <div class="step"><span class="n">2</span><div>Pick <b>10 random airports/points</b> across those figures. For each, say out loud and write down:
+      <ul class="tight">
+        <li>What <b>airspace class</b> is it? (use the color code above)</li>
+        <li><b>Do I need ATC authorization / LAANC?</b> (yes for B/C/D/surface-E, no for G)</li>
+        <li>What's the <b>floor &amp; ceiling</b> of that airspace?</li>
+        <li>What's the <b>tallest obstacle</b> nearby and its height?</li>
+      </ul></div></div>
+
+    <div class="step"><span class="n">3</span><div>Check yourself. Wherever you hesitated, that's your weak airspace type — repeat just those until it's instant.</div></div>
+
+    <div class="callout">
+      <b>Why this works:</b> the test reuses those very figures. If you can read them cold, the airspace
+      questions become free points — and that's the swing section between pass and fail.
+    </div>
+
+    <h3>Then prove it</h3>
+    <p class="why">Drill the numbers and airspace into recall with the companion quiz. Filter to
+    <b>Airspace</b> + <b>Charts &amp; Navigation</b> first, then run a full <b>Exam Mode</b> simulation.</p>
+    <div class="cta">
+      <a class="btn" href="part107-quiz.html">Open the practice quiz →</a>
+      <a class="btn ghost" href="https://www.faa.gov/uas/commercial_operators" target="_blank" rel="noopener">FAA Part 107 official page</a>
+    </div>
+  </section>
+
+  <!-- ===== 4-hour recap ===== -->
+  <section class="block">
+    <span class="htag">If you only remember one screen</span>
+    <h2>The 4-hour plan, condensed</h2>
+    <ul class="tight">
+      <li><b>Hour 1–2:</b> Color code + the LAANC decision + chart symbols. Do <b>The Exercise</b>.</li>
+      <li><b>Hour 3:</b> Memorize the numbers table. Drill the quiz on Regulations + Airspace.</li>
+      <li><b>Hour 3:40:</b> METAR decode + density altitude + stable/unstable.</li>
+      <li><b>Hour 4:</b> One full 60-question Exam-Mode run. Review every miss with its explanation.</li>
+    </ul>
+    <div class="callout">Realistic note: 4 focused hours makes you <b>functional and exam-ready for most people</b>.
+    The honest tutor adds — sit the official test only when you're consistently scoring <b>80%+</b> in Exam Mode,
+    so 70% to pass has a margin.</div>
+  </section>
+
+  <footer>
+    Study aid only — not official FAA material. The real Part 107 knowledge test is 60 questions, taken
+    in person at an FAA-approved (PSI) testing center; passing is 70%. Always verify against current
+    regulations at <a href="https://www.faa.gov/uas" target="_blank" rel="noopener">faa.gov/uas</a>.
+  </footer>
+</div>
+</body>
+</html>
