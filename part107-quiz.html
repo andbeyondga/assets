@@ -1,0 +1,587 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FAA Part 107 Practice Exam</title>
+<style>
+  :root{
+    --bg:#0d1117; --panel:#161b22; --panel2:#1c2330; --border:#2a3340;
+    --text:#e6edf3; --muted:#9aa7b4; --accent:#3b82f6; --accent2:#2563eb;
+    --good:#22c55e; --good-bg:#0f2e1c; --bad:#ef4444; --bad-bg:#341515;
+    --warn:#f59e0b; --chip:#21262d;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0}
+  body{
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    background:var(--bg); color:var(--text); line-height:1.5;
+    -webkit-font-smoothing:antialiased;
+  }
+  .wrap{max-width:760px;margin:0 auto;padding:20px 16px 80px}
+  header{text-align:center;margin:8px 0 18px}
+  header h1{font-size:1.5rem;margin:0 0 4px;letter-spacing:.2px}
+  header p{color:var(--muted);margin:0;font-size:.9rem}
+  .card{
+    background:var(--panel);border:1px solid var(--border);border-radius:14px;
+    padding:20px;margin-bottom:16px;
+  }
+  .btn{
+    display:inline-block;border:none;border-radius:10px;cursor:pointer;
+    font-size:1rem;font-weight:600;padding:12px 18px;color:#fff;
+    background:var(--accent);transition:filter .15s ease,transform .05s ease;
+  }
+  .btn:hover{filter:brightness(1.08)}
+  .btn:active{transform:translateY(1px)}
+  .btn.secondary{background:var(--chip);color:var(--text);border:1px solid var(--border)}
+  .btn.ghost{background:transparent;color:var(--accent);border:1px solid var(--accent)}
+  .btn:disabled{opacity:.45;cursor:not-allowed}
+  .row{display:flex;gap:10px;flex-wrap:wrap}
+  .center{justify-content:center}
+  .between{justify-content:space-between;align-items:center}
+  .muted{color:var(--muted)}
+  .small{font-size:.85rem}
+
+  /* Setup */
+  .modes{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:14px 0}
+  .mode{
+    border:1px solid var(--border);border-radius:12px;padding:14px;cursor:pointer;
+    background:var(--panel2);transition:border-color .15s,background .15s;
+  }
+  .mode.active{border-color:var(--accent);background:#13203a}
+  .mode h3{margin:0 0 4px;font-size:1rem}
+  .mode p{margin:0;font-size:.82rem;color:var(--muted)}
+  .cats{display:flex;flex-wrap:wrap;gap:8px;margin-top:8px}
+  .chip{
+    border:1px solid var(--border);background:var(--chip);color:var(--text);
+    padding:7px 12px;border-radius:999px;font-size:.82rem;cursor:pointer;user-select:none;
+  }
+  .chip.active{background:var(--accent);border-color:var(--accent);color:#fff}
+
+  /* Progress */
+  .progress{height:8px;background:var(--chip);border-radius:999px;overflow:hidden;margin-bottom:14px}
+  .progress>div{height:100%;background:var(--accent);width:0;transition:width .25s ease}
+  .topbar{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;font-size:.85rem;color:var(--muted)}
+  .cat-tag{background:var(--chip);border:1px solid var(--border);padding:3px 9px;border-radius:999px;font-size:.75rem;color:var(--muted)}
+
+  /* Question */
+  .qtext{font-size:1.12rem;font-weight:600;margin:6px 0 16px}
+  .opts{display:flex;flex-direction:column;gap:10px}
+  .opt{
+    display:flex;gap:12px;align-items:flex-start;text-align:left;width:100%;
+    border:1px solid var(--border);background:var(--panel2);color:var(--text);
+    border-radius:12px;padding:14px;cursor:pointer;font-size:.98rem;
+    transition:border-color .12s,background .12s;
+  }
+  .opt:hover:not(:disabled){border-color:#3b475a}
+  .opt .lab{
+    flex:0 0 26px;height:26px;border-radius:7px;background:var(--chip);
+    display:flex;align-items:center;justify-content:center;font-weight:700;font-size:.85rem;
+  }
+  .opt.correct{border-color:var(--good);background:var(--good-bg)}
+  .opt.correct .lab{background:var(--good);color:#04210f}
+  .opt.wrong{border-color:var(--bad);background:var(--bad-bg)}
+  .opt.wrong .lab{background:var(--bad);color:#2a0707}
+  .opt:disabled{cursor:default}
+
+  .explain{
+    margin-top:14px;border-left:3px solid var(--accent);background:var(--panel2);
+    border-radius:0 10px 10px 0;padding:12px 14px;font-size:.92rem;
+  }
+  .explain b{color:var(--text)}
+  .explain.good{border-color:var(--good)}
+  .explain.bad{border-color:var(--bad)}
+
+  .nav{display:flex;justify-content:space-between;margin-top:18px;gap:10px}
+
+  /* Results */
+  .score-big{font-size:3rem;font-weight:800;text-align:center;margin:6px 0}
+  .verdict{text-align:center;font-size:1.05rem;font-weight:600;margin-bottom:6px}
+  .pass{color:var(--good)} .fail{color:var(--warn)}
+  .breakdown{margin-top:16px}
+  .brow{display:flex;align-items:center;gap:10px;margin:8px 0;font-size:.9rem}
+  .brow .bn{flex:1}
+  .bbar{flex:0 0 120px;height:8px;background:var(--chip);border-radius:999px;overflow:hidden}
+  .bbar>div{height:100%}
+  .hidden{display:none}
+  footer{text-align:center;color:var(--muted);font-size:.75rem;margin-top:24px;line-height:1.6}
+  a{color:var(--accent)}
+  .flag{margin-left:auto;background:transparent;border:none;cursor:pointer;font-size:1.1rem;opacity:.5}
+  .flag.on{opacity:1}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>✈️ FAA Part 107 Practice Exam</h1>
+    <p>Remote Pilot Certificate (sUAS) &mdash; study &amp; test mode</p>
+  </header>
+
+  <!-- ===================== SETUP ===================== -->
+  <section id="setup" class="card">
+    <h2 style="margin-top:0">Set up your quiz</h2>
+
+    <div class="modes">
+      <div class="mode active" data-mode="study">
+        <h3>📖 Study Mode</h3>
+        <p>Instant feedback &amp; explanation after each question. Best for learning.</p>
+      </div>
+      <div class="mode" data-mode="exam">
+        <h3>📝 Exam Mode</h3>
+        <p>60 questions, answers revealed only at the end. Simulates the real test.</p>
+      </div>
+    </div>
+
+    <label class="small muted">Topics to include</label>
+    <div class="cats" id="catList"></div>
+
+    <div style="margin-top:16px">
+      <label class="small muted">Number of questions</label>
+      <div class="cats" id="countList">
+        <div class="chip" data-count="10">10</div>
+        <div class="chip active" data-count="20">20</div>
+        <div class="chip" data-count="40">40</div>
+        <div class="chip" data-count="0">All</div>
+      </div>
+    </div>
+
+    <div class="row" style="margin-top:8px">
+      <label class="small muted" style="display:flex;align-items:center;gap:8px;cursor:pointer">
+        <input type="checkbox" id="shuffleOpts" checked> Shuffle answer order
+      </label>
+    </div>
+
+    <div class="row center" style="margin-top:20px">
+      <button class="btn" id="startBtn">Start Quiz</button>
+    </div>
+    <p class="small muted" id="poolInfo" style="text-align:center;margin:12px 0 0"></p>
+  </section>
+
+  <!-- ===================== QUIZ ===================== -->
+  <section id="quiz" class="card hidden">
+    <div class="progress"><div id="bar"></div></div>
+    <div class="topbar">
+      <span id="counter">Question 1 of 20</span>
+      <span class="cat-tag" id="catTag">Regulations</span>
+    </div>
+    <div class="qtext" id="qtext"></div>
+    <div class="opts" id="opts"></div>
+    <div id="explain"></div>
+    <div class="nav">
+      <button class="btn secondary" id="prevBtn">‹ Back</button>
+      <div class="row">
+        <button class="flag" id="flagBtn" title="Flag for review">⚑</button>
+        <button class="btn" id="nextBtn">Next ›</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== RESULTS ===================== -->
+  <section id="results" class="card hidden">
+    <h2 style="margin-top:0;text-align:center">Results</h2>
+    <div class="score-big" id="scorePct">—</div>
+    <div class="verdict" id="verdict"></div>
+    <p class="small muted" style="text-align:center" id="scoreDetail"></p>
+    <div class="breakdown" id="breakdown"></div>
+    <div class="row center" style="margin-top:22px">
+      <button class="btn ghost" id="reviewBtn">Review Answers</button>
+      <button class="btn" id="restartBtn">New Quiz</button>
+    </div>
+  </section>
+
+  <footer>
+    The real FAA Part 107 Aeronautical Knowledge Test has 60 questions; you need
+    <b>70%</b> to pass. This is a study tool, not official FAA material &mdash;
+    always verify against current FAA regulations &amp; the
+    <a href="https://www.faa.gov/uas" target="_blank" rel="noopener">FAA UAS site</a>.
+  </footer>
+</div>
+
+<script>
+/* ============================================================
+   QUESTION BANK
+   Each: { q, options:[...], answer:index, cat, explain }
+   ============================================================ */
+const BANK = [
+  // ---------- Regulations ----------
+  {cat:"Regulations", q:"What is the maximum allowable groundspeed for a small unmanned aircraft operated under Part 107?",
+   options:["87 knots (100 mph)","100 knots (115 mph)","120 knots (138 mph)","55 knots (63 mph)"], answer:0,
+   explain:"Part 107 limits groundspeed to 87 knots (100 mph). Maximum altitude is 400 ft AGL (or within 400 ft of a structure)."},
+  {cat:"Regulations", q:"What is the maximum altitude a small UAS may be flown above ground level under Part 107 (away from structures)?",
+   options:["500 feet AGL","400 feet AGL","1,000 feet AGL","No limit during daylight"], answer:1,
+   explain:"400 ft AGL is the max, unless flown within a 400-ft radius of a structure, in which case you may fly up to 400 ft above that structure's top."},
+  {cat:"Regulations", q:"A small unmanned aircraft, including everything on board, must weigh less than:",
+   options:["25 pounds","55 pounds","75 pounds","Any weight if registered"], answer:1,
+   explain:"A 'small' UAS under Part 107 weighs less than 55 lbs (25 kg) including payload at takeoff."},
+  {cat:"Regulations", q:"How often must a Remote Pilot complete recurrent training to keep their certificate current?",
+   options:["Every 24 calendar months","Every 12 calendar months","Every 6 calendar months","Only once after initial test"], answer:0,
+   explain:"Recurrent online training (free, through FAA) must be completed every 24 calendar months to maintain currency."},
+  {cat:"Regulations", q:"To act as pilot in command of a small UAS under Part 107, you must be at least:",
+   options:["14 years old","16 years old","18 years old","21 years old"], answer:1,
+   explain:"You must be at least 16 years old to hold a Remote Pilot Certificate and act as PIC."},
+  {cat:"Regulations", q:"Under what condition may a Remote PIC operate a small UAS over a person not directly participating in the operation (without a waiver/category)?",
+   options:["Never under any circumstance","When the person is under a covered structure or inside a stationary covered vehicle","Only at night","Whenever the drone is below 100 feet"], answer:1,
+   explain:"You may fly over a non-participant if they are under a covered structure or inside a stationary vehicle that can protect them from a falling drone, or if operations meet an Operational Category (1-4) of the Operations Over People rule."},
+  {cat:"Regulations", q:"Who is directly responsible for and the final authority as to the operation of a small UAS under Part 107?",
+   options:["The visual observer","The FAA","The Remote Pilot in Command","The manufacturer"], answer:2,
+   explain:"The Remote PIC is directly responsible for and the final authority over the operation, similar to a manned-aircraft PIC."},
+  {cat:"Regulations", q:"You must report an accident to the FAA within 10 days if it results in serious injury or at least what amount of property damage?",
+   options:["$500","$1,000","$2,500","$500 to a person other than the operator"], answer:0,
+   explain:"Report within 10 days if there is serious injury/loss of consciousness, OR damage to any property (other than the UA) of at least $500 to repair or replace (fair market value)."},
+  {cat:"Regulations", q:"May a Remote PIC operate more than one small unmanned aircraft at the same time under Part 107?",
+   options:["Yes, unlimited","Yes, up to three","No, a person may not act as RPIC or VO for more than one UA at a time","Only with a visual observer"], answer:2,
+   explain:"Under Part 107 a person may not manipulate the controls of, or act as RPIC or VO for, more than one small UA operation at a time."},
+  {cat:"Regulations", q:"Carriage of hazardous material by a small UAS operated under Part 107 is:",
+   options:["Allowed with a waiver","Allowed if under 55 lbs total","Prohibited","Allowed for agricultural use only"], answer:2,
+   explain:"Part 107 prohibits carrying hazardous material. (Agricultural dispensing is regulated separately and is not the same as carrying hazmat.)"},
+
+  // ---------- Airspace ----------
+  {cat:"Airspace", q:"Before operating in Class B, C, D, or surface-area Class E airspace, a Remote PIC must:",
+   options:["File a flight plan with Flight Service","Obtain ATC authorization (e.g., via LAANC or DroneZone)","Simply notify the nearest tower by radio","Do nothing if below 400 feet"], answer:1,
+   explain:"Controlled airspace (B, C, D, and surface E) requires prior ATC authorization. LAANC provides near-real-time authorization; otherwise apply via FAA DroneZone."},
+  {cat:"Airspace", q:"On a sectional chart, Class B airspace is depicted by:",
+   options:["A solid magenta line","A solid blue line","A dashed magenta line","A dashed blue line"], answer:1,
+   explain:"Class B is shown with solid blue lines. Class C is solid magenta, Class D is dashed blue, and surface Class E is dashed magenta."},
+  {cat:"Airspace", q:"A dashed magenta line surrounding an airport on a sectional chart indicates:",
+   options:["Class B airspace","Class C airspace","Class D airspace","Class E airspace that begins at the surface"], answer:3,
+   explain:"A dashed magenta line denotes Class E surface area airspace. A magenta shaded (faded) ring denotes Class E starting at 700 ft AGL."},
+  {cat:"Airspace", q:"In which airspace class is ATC authorization NOT required for Part 107 operations?",
+   options:["Class C","Class D","Class G","Surface Class E"], answer:2,
+   explain:"Class G is uncontrolled airspace; no ATC authorization is needed. Most Part 107 flying happens in Class G."},
+  {cat:"Airspace", q:"The numbers '125' over '45' inside a blue segmented box near a Class C airport indicate the airspace:",
+   options:["Ceiling 12,500 ft, floor 4,500 ft MSL","Extends from 4,500 ft up to 12,500 ft MSL","Frequencies for ATC","Magnetic variation"], answer:0,
+   explain:"Class C/B altitudes are shown as a fraction: top number = ceiling, bottom = floor, in hundreds of feet MSL. 125/45 = 12,500 ft ceiling, 4,500 ft floor."},
+  {cat:"Airspace", q:"Special use airspace where flight is prohibited entirely (e.g., over sensitive national sites) is called:",
+   options:["A Restricted Area","A Prohibited Area","A Warning Area","An MOA"], answer:1,
+   explain:"A Prohibited Area (P-) forbids flight entirely. Restricted Areas (R-) may be entered with permission of the controlling agency; MOAs are Military Operations Areas."},
+  {cat:"Airspace", q:"A Temporary Flight Restriction (TFR) is published by the FAA via:",
+   options:["Sectional charts only","NOTAMs","The AIM","Aircraft owner's manual"], answer:1,
+   explain:"TFRs are issued as NOTAMs. Always check NOTAMs before a flight; TFRs may pop up around stadiums, VIP movement, wildfires, and disasters."},
+  {cat:"Airspace", q:"You plan to fly near a small private airport shown on the sectional in magenta. The magenta color of the airport symbol means the airport:",
+   options:["Has an operating control tower","Does not have an operating control tower","Is closed permanently","Is military"], answer:1,
+   explain:"Magenta airport symbols = no operating control tower. Blue airport symbols = airport has an operating control tower."},
+
+  // ---------- Weather ----------
+  {cat:"Weather", q:"What is the minimum flight visibility, in statute miles, required for Part 107 operations?",
+   options:["1 statute mile","3 statute miles","5 statute miles","No minimum"], answer:1,
+   explain:"Minimum flight visibility is 3 statute miles from the control station."},
+  {cat:"Weather", q:"Under Part 107, what cloud clearance must be maintained?",
+   options:["Clear of clouds entirely","500 ft below, 2,000 ft horizontal","1,000 ft below, 500 ft above","500 ft below and 2,000 ft horizontally from clouds"], answer:3,
+   explain:"You must stay at least 500 ft below clouds and 2,000 ft horizontally from clouds."},
+  {cat:"Weather", q:"In a METAR, the term 'BKN' refers to a sky condition that is:",
+   options:["Clear","Broken (5/8 to 7/8 cloud cover)","Overcast","Scattered"], answer:1,
+   explain:"BKN = broken, 5/8 to 7/8 sky coverage. FEW=1/8-2/8, SCT=3/8-4/8, OVC=overcast 8/8. A ceiling is the lowest BKN or OVC layer."},
+  {cat:"Weather", q:"The temperature/dew point spread is small and decreasing. This indicates:",
+   options:["Improving visibility","Increasing likelihood of fog or low clouds","Higher winds","No weather change"], answer:1,
+   explain:"When temperature and dew point converge, relative humidity rises and fog/low clouds/precipitation become more likely."},
+  {cat:"Weather", q:"In the METAR group '24008KT', the wind is:",
+   options:["From 240° true at 8 knots","From 080° at 24 knots","240 feet, 8 knots","Variable"], answer:0,
+   explain:"Wind is reported as direction (degrees true) + speed in knots. 24008KT = from 240° at 8 knots."},
+  {cat:"Weather", q:"What causes the greatest variation in density altitude?",
+   options:["Wind speed","Temperature","Time of day","Latitude"], answer:1,
+   explain:"Temperature has the largest effect on density altitude. High temperature, high humidity, and high elevation all raise density altitude and degrade performance."},
+  {cat:"Weather", q:"A stable atmosphere is most likely to produce which of the following?",
+   options:["Cumulus clouds and turbulence","Good visibility and gusty winds","Stratiform clouds, poor visibility, and steady winds","Thunderstorms"], answer:2,
+   explain:"Stable air → stratiform clouds, smooth/steady winds, and often poor visibility (haze/fog). Unstable air → cumuliform clouds, turbulence, good visibility, showery precip."},
+  {cat:"Weather", q:"Where would you find the most accurate, up-to-date weather and NOTAM briefing for a planned UAS flight?",
+   options:["A local TV broadcast","An FAA-approved source such as 1800wxbrief.com / Flight Service","Social media","The drone's app only"], answer:1,
+   explain:"Use FAA-approved sources (e.g., Flight Service at 1800wxbrief.com, aviationweather.gov) for official METARs, TAFs, and NOTAMs."},
+
+  // ---------- Loading & Performance ----------
+  {cat:"Loading & Performance", q:"How does adding payload (increasing weight) affect a small UAS's performance?",
+   options:["Increases endurance and maneuverability","Decreases performance: reduced climb, endurance, and maneuverability","No effect under 55 lbs","Improves stability only"], answer:1,
+   explain:"Greater weight reduces climb rate, endurance/range, maneuverability, and increases the energy in a crash. Always stay within manufacturer limits."},
+  {cat:"Loading & Performance", q:"Center of gravity (CG) that is loaded outside the manufacturer's limits will most likely cause:",
+   options:["Improved battery life","Unstable, difficult-to-control flight","Higher maximum altitude","No effect on multirotors"], answer:1,
+   explain:"An out-of-limits CG causes instability and control difficulty. Distribute payload so the CG stays within the manufacturer's specified range."},
+  {cat:"Loading & Performance", q:"As a battery discharges during flight, the Remote PIC should expect:",
+   options:["Increasing available power","Reduced available power and performance, requiring landing before depletion","No change until 0%","Longer flight times"], answer:1,
+   explain:"Battery output and performance decline as charge drops. Plan to land with reserve; lithium batteries can also be affected by cold temperatures."},
+  {cat:"Loading & Performance", q:"Operating a multirotor in high density altitude conditions (hot, high) will:",
+   options:["Improve lift","Reduce lift and motor efficiency, degrading performance","Have no effect on electric drones","Increase maximum payload"], answer:1,
+   explain:"Thinner air at high density altitude reduces propeller thrust/lift and cooling, degrading climb and payload capability even for electric aircraft."},
+  {cat:"Loading & Performance", q:"Why is it important to know your UAS's weight-and-balance and not exceed maximum gross weight?",
+   options:["For FAA registration fees","To preserve handling, structural integrity, and safe flight performance","It only matters for fixed-wing","To increase top speed"], answer:1,
+   explain:"Staying within weight and CG limits keeps the aircraft controllable, structurally safe, and within its certified performance envelope."},
+
+  // ---------- Operations ----------
+  {cat:"Operations", q:"Under Part 107, a small UAS must remain within visual line of sight (VLOS) of:",
+   options:["The remote PIC and/or visual observer, with vision unaided except by corrective lenses","Any bystander","A camera/FPV feed only","Within 100 ft only"], answer:0,
+   explain:"The RPIC and/or VO must be able to see the UA throughout flight with vision unaided (except corrective lenses). FPV alone does not satisfy VLOS."},
+  {cat:"Operations", q:"Civil twilight operations under Part 107 are permitted provided the small UAS is equipped with:",
+   options:["A transponder","Anti-collision lighting visible for at least 3 statute miles","A strobe of any brightness","Nothing extra"], answer:1,
+   explain:"For night and civil twilight operations, the aircraft must have anti-collision lighting visible for at least 3 statute miles, with intensity reducible if it benefits safety."},
+  {cat:"Operations", q:"What action should a Remote PIC take if a manned aircraft is approaching the area of operation?",
+   options:["Maintain altitude and continue","Yield the right of way; a small UAS must always give way to manned aircraft","Climb above the manned aircraft","Hover and wait for ATC"], answer:1,
+   explain:"Small UAS must always yield the right of way to all other aircraft. Maneuver away or land so as not to create a collision hazard."},
+  {cat:"Operations", q:"A Remote PIC may deviate from a Part 107 rule:",
+   options:["Whenever convenient","To the extent necessary to respond to an in-flight emergency","Only with a waiver in hand","Never"], answer:1,
+   explain:"§107.21 allows deviation from the rules to the extent necessary to meet an in-flight emergency; upon request you must submit a written report to the FAA."},
+  {cat:"Operations", q:"Before each flight, the Remote PIC must ensure that:",
+   options:["The drone is the newest model","All persons directly participating are informed of operating conditions, emergency procedures, contingency, roles, and potential hazards","Only that the battery is full","A flight plan is filed"], answer:1,
+   explain:"§107.49 preflight requires assessing the operating environment and briefing participants on conditions, emergency/contingency procedures, roles, and hazards, plus checking the aircraft condition."},
+  {cat:"Operations", q:"Operation of a small UAS from a moving vehicle is allowed under Part 107 only when:",
+   options:["Never","Over a sparsely populated area (and not transporting property for compensation)","On any public road","With two visual observers"], answer:1,
+   explain:"Flying from a moving vehicle/aircraft is permitted only over sparsely populated areas, and you may not carry another person's property for compensation from a moving vehicle."},
+  {cat:"Operations", q:"What is the primary purpose of a visual observer (VO) in a Part 107 operation?",
+   options:["To manipulate the controls","To assist the RPIC in seeing and avoiding other air traffic and hazards, maintaining VLOS","To file paperwork","To recharge batteries"], answer:1,
+   explain:"A VO helps the RPIC maintain VLOS and see-and-avoid. The RPIC and VO must be able to communicate effectively throughout the operation."},
+  {cat:"Operations", q:"If you take a medication that causes drowsiness, under Part 107 you should:",
+   options:["Fly anyway if you feel okay","Not act as RPIC or VO if you have a known condition or medication that would interfere with safe operation","Only fly short flights","Fly with a VO present"], answer:1,
+   explain:"§107.17 prohibits acting as RPIC/VO if you know or have reason to know of any physical or mental condition (including medication effects) that would interfere with safe operation."},
+  {cat:"Operations", q:"The 'IMSAFE' checklist is used by a Remote PIC to:",
+   options:["Inspect the aircraft","Self-assess fitness for flight (Illness, Medication, Stress, Alcohol, Fatigue, Emotion)","Plan the route","Calculate weight and balance"], answer:1,
+   explain:"IMSAFE is a personal-minimums self-assessment: Illness, Medication, Stress, Alcohol, Fatigue, Emotion — to judge whether you're fit to fly."},
+
+  // ---------- Charts & Navigation ----------
+  {cat:"Charts & Navigation", q:"What does the latitude/longitude grid on a sectional chart allow a Remote PIC to do?",
+   options:["Determine fuel burn","Pinpoint a precise geographic location for the operating area","Read the weather","Identify ATC frequencies"], answer:1,
+   explain:"Lat/long lines let you identify exact coordinates of your operating site, useful for authorizations, NOTAMs, and locating obstacles/airspace."},
+  {cat:"Charts & Navigation", q:"On a sectional chart, an obstruction (e.g., a tower) shows two numbers. The higher number in bold typically represents:",
+   options:["Latitude","The top of the obstruction in feet MSL","The top of the obstruction in feet AGL","Lighting type"], answer:1,
+   explain:"The bold number is the height of the top of the obstruction above MSL; the number in parentheses below it is the height AGL. Towers over 1,000 ft AGL warrant special caution."},
+  {cat:"Charts & Navigation", q:"The Maximum Elevation Figure (MEF) shown in each quadrangle of a sectional chart represents:",
+   options:["Highest terrain or obstacle elevation in that quadrant (MSL, hundreds of feet)","The legal flight ceiling","Average ground elevation","ATC sector altitude"], answer:0,
+   explain:"The MEF gives the highest known terrain or obstacle elevation within that latitude/longitude quadrangle, expressed in feet MSL (thousands + hundreds)."},
+  {cat:"Charts & Navigation", q:"AGL and MSL differ in that:",
+   options:["They are the same thing","MSL is height above mean sea level; AGL is height above the ground directly below","AGL is always higher","MSL only applies to drones"], answer:1,
+   explain:"MSL = altitude referenced to mean sea level (used on charts). AGL = height above the actual ground beneath you. Part 107's 400-ft limit is AGL."},
+
+  // ---------- Crew Resource & Physiology ----------
+  {cat:"Physiology & ADM", q:"Which is an example of a hazardous attitude that aeronautical decision making (ADM) seeks to counter?",
+   options:["Following checklists","'Macho' — 'I can do it, I'll show them'","Asking for help","Conservative planning"], answer:1,
+   explain:"The five hazardous attitudes are Anti-authority, Impulsivity, Invulnerability, Macho, and Resignation. ADM teaches recognizing them and applying antidotes."},
+  {cat:"Physiology & ADM", q:"Dehydration and fatigue affect a Remote Pilot by:",
+   options:["Improving focus","Degrading alertness, judgment, and reaction time","Only affecting manned pilots","Having no impact on UAS ops"], answer:1,
+   explain:"Fatigue, dehydration, stress, and illness all reduce alertness and decision-making quality — directly affecting safe UAS operation."},
+  {cat:"Physiology & ADM", q:"The antidote to the hazardous attitude of 'Invulnerability' ('It won't happen to me') is:",
+   options:["'Follow the rules. They are usually right.'","'It could happen to me.'","'Not so fast, think first.'","'I'm not helpless.'"], answer:1,
+   explain:"Invulnerability → antidote 'It could happen to me.' Each hazardous attitude has a specific antidote pilots are taught to apply."},
+  {cat:"Physiology & ADM", q:"Effective crew resource management (CRM) for a UAS team primarily involves:",
+   options:["Flying solo always","Clear communication and coordination among RPIC, VO, and crew","Letting bystanders help","Avoiding briefings"], answer:1,
+   explain:"CRM is the effective use of all available resources — people, equipment, information — emphasizing communication and coordination among the RPIC, VO, and crew."},
+
+  // ---------- Maintenance & Emergency ----------
+  {cat:"Maintenance & Emergency", q:"Who is responsible for determining whether a small UAS is in a condition for safe operation before flight?",
+   options:["The manufacturer","The FAA inspector","The Remote Pilot in Command","Any crewmember"], answer:2,
+   explain:"§107.15/107.49 make the RPIC responsible for ensuring the sUAS is in a condition for safe operation and for the preflight inspection."},
+  {cat:"Maintenance & Emergency", q:"Loss of the command-and-control (C2) link, causing the drone to enter return-to-home, is best mitigated by:",
+   options:["Ignoring it","Knowing the aircraft's lost-link behavior and pre-planning a safe RTH altitude and area","Flying farther away","Disabling failsafes"], answer:1,
+   explain:"Understand your aircraft's lost-link/failsafe behavior (e.g., RTH) and configure a safe return altitude and home point clear of obstacles before flight."},
+  {cat:"Maintenance & Emergency", q:"Lithium-polymer (LiPo) batteries that are swollen, damaged, or punctured should be:",
+   options:["Used until depleted","Removed from service and disposed of properly — they pose a fire hazard","Recharged immediately","Stored fully charged"], answer:1,
+   explain:"Damaged/swollen LiPo batteries are a fire risk and must be taken out of service and disposed of per manufacturer/local hazmat guidance. Store at proper charge and temperature."},
+  {cat:"Maintenance & Emergency", q:"Electromagnetic interference (e.g., near power lines or metal structures) can affect a drone primarily by:",
+   options:["Increasing battery life","Disrupting the compass/GPS and control link","Improving video quality","Reducing weight"], answer:1,
+   explain:"Strong magnetic/RF interference can corrupt compass and GPS data and degrade the control link, causing erratic flight. Calibrate away from interference and keep clear of such sources."},
+
+  // ---------- Registration & Certification ----------
+  {cat:"Registration & Cert", q:"A small UAS used under Part 107 must be registered if it weighs:",
+   options:["More than 0.55 lb (250 g) up to under 55 lb","Only if over 55 lb","Only if flown for hire","Registration is never required"], answer:0,
+   explain:"Aircraft weighing 0.55 lb (250 g) or more must be registered. Under Part 107 ALL aircraft must be registered regardless of weight, and the registration number must be marked on the exterior."},
+  {cat:"Registration & Cert", q:"Where must the FAA registration number be displayed on a small UAS?",
+   options:["Inside the battery compartment only","On an external surface of the aircraft, readable without tools (battery doors removable by hand are OK)","It need not be displayed","On the controller"], answer:1,
+   explain:"The registration number must be marked on an external surface, legible and accessible; opening a compartment is acceptable only if no tool is required (e.g., a hand-removable battery cover)."},
+  {cat:"Registration & Cert", q:"A person who already holds a Part 61 pilot certificate (and a current flight review) may obtain Part 107 privileges by:",
+   options:["Doing nothing","Completing the online 'Part 107 Small UAS Initial' training course (in lieu of the knowledge test)","Retaking a medical exam","Paying a fee only"], answer:1,
+   explain:"Part 61 certificate holders with a current flight review can complete the free FAA online sUAS training course instead of taking the in-person knowledge test."},
+  {cat:"Registration & Cert", q:"Remote ID requires most drones operating in U.S. airspace to broadcast identification and location information. Its purpose is to:",
+   options:["Improve video range","Allow the FAA, law enforcement, and others to identify drones in flight for safety/security","Increase max altitude","Replace registration"], answer:1,
+   explain:"Remote ID acts like a digital license plate, broadcasting identity and position so authorities can identify drones in flight. Most Part 107 operations require Remote ID compliance."},
+];
+
+/* ============================================================
+   STATE & LOGIC
+   ============================================================ */
+const $ = id => document.getElementById(id);
+let cfg = { mode:"study", cats:new Set(), count:20, shuffle:true };
+let quiz = [];        // active question objects (with shuffled options + order map)
+let answers = [];     // user's chosen index per question (null=unanswered)
+let flags = [];       // boolean per question
+let idx = 0;
+
+// Build category chips
+const CATS = [...new Set(BANK.map(q=>q.cat))];
+const catList = $("catList");
+CATS.forEach(c=>{
+  const el = document.createElement("div");
+  el.className="chip active"; el.textContent=c; el.dataset.cat=c;
+  el.onclick = ()=>{ el.classList.toggle("active"); updatePool(); };
+  catList.appendChild(el);
+  cfg.cats.add(c);
+});
+
+// Mode selection
+document.querySelectorAll(".mode").forEach(m=>{
+  m.onclick = ()=>{
+    document.querySelectorAll(".mode").forEach(x=>x.classList.remove("active"));
+    m.classList.add("active"); cfg.mode = m.dataset.mode;
+  };
+});
+// Count selection
+$("countList").querySelectorAll(".chip").forEach(c=>{
+  c.onclick = ()=>{
+    $("countList").querySelectorAll(".chip").forEach(x=>x.classList.remove("active"));
+    c.classList.add("active"); cfg.count = parseInt(c.dataset.count,10); updatePool();
+  };
+});
+
+function selectedCats(){
+  return [...catList.querySelectorAll(".chip.active")].map(c=>c.dataset.cat);
+}
+function poolFor(cats){ return BANK.filter(q=>cats.includes(q.cat)); }
+function updatePool(){
+  const cats = selectedCats();
+  const pool = poolFor(cats);
+  const want = cfg.count===0 ? pool.length : Math.min(cfg.count, pool.length);
+  $("poolInfo").textContent = `${pool.length} questions available in selected topics · quiz will use ${want}.`;
+  $("startBtn").disabled = pool.length===0;
+}
+updatePool();
+
+function shuffle(a){ a=[...a]; for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];} return a; }
+
+function buildQuiz(){
+  const cats = selectedCats();
+  let pool = shuffle(poolFor(cats));
+  const n = cfg.count===0 ? pool.length : Math.min(cfg.count, pool.length);
+  pool = pool.slice(0,n);
+  quiz = pool.map(q=>{
+    let order = q.options.map((_,i)=>i);
+    if(cfg.shuffle) order = shuffle(order);
+    return {
+      base:q,
+      order,                                   // display index -> original index
+      opts:order.map(i=>q.options[i]),
+      correct:order.indexOf(q.answer),         // correct display index
+    };
+  });
+  answers = new Array(quiz.length).fill(null);
+  flags = new Array(quiz.length).fill(false);
+  idx = 0;
+}
+
+/* ---------- Render ---------- */
+function render(){
+  const item = quiz[idx];
+  const q = item.base;
+  $("counter").textContent = `Question ${idx+1} of ${quiz.length}`;
+  $("catTag").textContent = q.cat;
+  $("bar").style.width = ((idx)/quiz.length*100)+"%";
+  $("qtext").textContent = q.q;
+
+  const answered = answers[idx]!==null;
+  const reveal = cfg.mode==="study" && answered;
+
+  const optsEl = $("opts"); optsEl.innerHTML="";
+  item.opts.forEach((text,i)=>{
+    const b = document.createElement("button");
+    b.className="opt";
+    const chosen = answers[idx]===i;
+    if(reveal){
+      if(i===item.correct) b.classList.add("correct");
+      else if(chosen) b.classList.add("wrong");
+      b.disabled = true;
+    } else if(chosen){
+      b.style.borderColor="var(--accent)";
+    }
+    b.innerHTML = `<span class="lab">${String.fromCharCode(65+i)}</span><span>${text}</span>`;
+    b.onclick = ()=>choose(i);
+    optsEl.appendChild(b);
+  });
+
+  // Explanation (study mode only)
+  const ex = $("explain"); ex.innerHTML="";
+  if(reveal){
+    const correct = answers[idx]===item.correct;
+    const d = document.createElement("div");
+    d.className = "explain "+(correct?"good":"bad");
+    d.innerHTML = `<b>${correct?"✓ Correct":"✗ Not quite"}.</b> ${q.explain}`;
+    ex.appendChild(d);
+  }
+
+  // Flag button
+  $("flagBtn").classList.toggle("on", flags[idx]);
+
+  // Nav buttons
+  $("prevBtn").disabled = idx===0;
+  const last = idx===quiz.length-1;
+  $("nextBtn").textContent = last ? "Finish ▸" : "Next ›";
+}
+
+function choose(i){
+  if(cfg.mode==="study" && answers[idx]!==null) return; // lock after answer in study mode
+  answers[idx]=i;
+  render();
+}
+
+$("flagBtn").onclick = ()=>{ flags[idx]=!flags[idx]; render(); };
+$("prevBtn").onclick = ()=>{ if(idx>0){idx--; render();} };
+$("nextBtn").onclick = ()=>{
+  if(idx<quiz.length-1){ idx++; render(); }
+  else finish();
+};
+
+/* ---------- Start / Finish ---------- */
+$("startBtn").onclick = ()=>{
+  buildQuiz();
+  if(quiz.length===0) return;
+  $("setup").classList.add("hidden");
+  $("results").classList.add("hidden");
+  $("quiz").classList.remove("hidden");
+  window.scrollTo(0,0);
+  render();
+};
+
+function finish(){
+  // tally
+  let correct=0; const byCat={};
+  quiz.forEach((item,i)=>{
+    const c = item.base.cat;
+    byCat[c] = byCat[c]||{c:0,t:0};
+    byCat[c].t++;
+    if(answers[i]===item.correct){ correct++; byCat[c].c++; }
+  });
+  const total=quiz.length;
+  const pct = Math.round(correct/total*100);
+  $("scorePct").textContent = pct+"%";
+  const pass = pct>=70;
+  const v=$("verdict");
+  v.textContent = pass ? "PASS ✓ (≥70%)" : "Below passing (need 70%)";
+  v.className = "verdict "+(pass?"pass":"fail");
+  $("scoreDetail").textContent = `${correct} of ${total} correct${answers.includes(null)?" · some questions left blank count as incorrect":""}.`;
+
+  const bd=$("breakdown"); bd.innerHTML="<h3 style='margin:0 0 6px;font-size:1rem'>By topic</h3>";
+  Object.keys(byCat).sort().forEach(c=>{
+    const o=byCat[c]; const p=Math.round(o.c/o.t*100);
+    const color = p>=70?"var(--good)":p>=50?"var(--warn)":"var(--bad)";
+    const row=document.createElement("div"); row.className="brow";
+    row.innerHTML = `<span class="bn">${c}</span>
+      <span class="bbar"><div style="width:${p}%;background:${color}"></div></span>
+      <span style="flex:0 0 70px;text-align:right">${o.c}/${o.t} (${p}%)</span>`;
+    bd.appendChild(row);
+  });
+
+  $("quiz").classList.add("hidden");
+  $("results").classList.remove("hidden");
+  window.scrollTo(0,0);
+}
+
+$("restartBtn").onclick = ()=>{
+  $("results").classList.add("hidden");
+  $("setup").classList.remove("hidden");
+  window.scrollTo(0,0);
+};
+
+// Review: reuse quiz view in a read-only, revealed state
+$("reviewBtn").onclick = ()=>{
+  cfg.mode="study";              // force reveal
+  idx=0;
+  $("results").classList.add("hidden");
+  $("quiz").classList.remove("hidden");
+  window.scrollTo(0,0);
+  render();
+};
+</script>
+</body>
+</html>
