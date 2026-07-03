@@ -39,6 +39,7 @@ export const mainNav: NavItem[] = [
   { label: "News", href: "/news" },
   { label: "About", href: "/about" },
   { label: "Contact", href: "/contact" },
+  { label: "Member Login", href: "/portal" },
 ];
 
 /** Secondary links surfaced in the footer. */
@@ -51,4 +52,5 @@ export const footerNav: NavItem[] = [
   { label: "Community Events", href: "/events" },
   { label: "Local Jobs", href: "/jobs" },
   { label: "News & Spotlights", href: "/news" },
+  { label: "Member Portal", href: "/portal" },
 ];

@@ -4,9 +4,11 @@ A modern, fully customizable public website and member directory for the
 Greater Haralson Chamber of Commerce (Haralson County, Georgia), replacing the
 locked-down GrowthZone front end.
 
-**Read-only by design.** This site displays members, events, jobs, and news.
-Payments, dues, member login, and record management stay in the association
-management system (AMS) — nothing here writes back.
+The public site displays members, events, jobs, and news. It also now
+includes a **member portal demo** — login, dues & invoices with simulated
+payments, listing edits, and job postings — so those flows can be tested end
+to end. The portal runs entirely against a local store; see
+[Member portal (demo)](#member-portal-demo) for credentials and test cards.
 
 ## Stack
 
@@ -30,6 +32,40 @@ npm start
 ```
 
 The demo runs entirely on local seed data — no API keys, no network calls.
+
+## Member portal (demo)
+
+Everything the original spec kept out of scope is included as a **fully
+simulated demo** so it can be tested: member login, a member portal, dues /
+billing / invoicing with a mock checkout, and write-back (listing edits and
+job postings). No real payment gateway is involved and nothing leaves your
+machine — state lives in `.data/portal.json` (gitignored; delete it to reset
+the demo).
+
+**Sign in** at `/portal/login` (or the "Member Login" nav item). Every member
+with an email in the seed data has an account; the password is always
+`chamber-demo`. Good starting points:
+
+| Business                  | Email                          | Dues status |
+| ------------------------- | ------------------------------ | ----------- |
+| The Mill Table            | `hello@themilltable.com`       | 2026 open — test paying |
+| Sweetwater Bakery         | `orders@sweetwaterbakery.com`  | 2026 open   |
+| Haralson Insurance Agency | `quotes@haralsoninsurance.com` | 2026 paid   |
+
+**Test the payment flow** from Dashboard → "Pay now" (or Dues & Billing):
+
+- `4242 4242 4242 4242` — succeeds (any future MM/YY, any CVC)
+- any Luhn-valid card ending `0002` (e.g. `4000 0000 0000 0002`) — declined
+- anything that fails a Luhn check — validation error
+
+**Test write-back:** edit your tagline under "My Listing" or post under
+"Post a Job", then check your public directory page or `/jobs` — the data
+layer merges portal writes over the seed data (public pages revalidate every
+15 s in production mode; instantly in `npm run dev`).
+
+Where it lives: `src/lib/portal/` (store, auth, types),
+`src/app/api/` (route handlers), `src/app/portal/` (pages). Each file's
+header comment marks what a live AMS integration would replace.
 
 ## Project layout
 

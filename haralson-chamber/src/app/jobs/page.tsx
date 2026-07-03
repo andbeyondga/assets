@@ -4,6 +4,10 @@ import { PageHero } from "@/components/PageHero";
 import { JobCard } from "@/components/JobCard";
 import { CtaBand } from "@/components/CtaBand";
 
+/** Revalidate so portal write-back (profile edits, new job postings)
+ *  shows up on the public site in production, not just dev. */
+export const revalidate = 15;
+
 export const metadata: Metadata = {
   title: "Local Jobs",
   description:

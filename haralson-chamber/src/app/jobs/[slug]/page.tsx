@@ -6,6 +6,10 @@ import { formatDate, jobTypeLabels, paragraphs } from "@/lib/format";
 import { Badge } from "@/components/Badge";
 import { JobCard } from "@/components/JobCard";
 
+/** Revalidate so portal write-back (profile edits, new job postings)
+ *  shows up on the public site in production, not just dev. */
+export const revalidate = 15;
+
 interface Props {
   params: Promise<{ slug: string }>;
 }

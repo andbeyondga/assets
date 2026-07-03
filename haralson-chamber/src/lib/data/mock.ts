@@ -14,12 +14,25 @@ import membersJson from "@/data/members.json";
 import eventsJson from "@/data/events.json";
 import jobsJson from "@/data/jobs.json";
 import newsJson from "@/data/news.json";
+import { getMemberOverrides, getPortalJobs } from "@/lib/portal/store";
 
 const categories = categoriesJson as Category[];
-const members = membersJson as Member[];
 const events = eventsJson as ChamberEvent[];
-const jobs = jobsJson as Job[];
 const news = newsJson as NewsPost[];
+
+/** Seed members with any profile edits made through the member portal
+ *  (demo write-back) merged on top. */
+function currentMembers(): Member[] {
+  const overrides = getMemberOverrides();
+  return (membersJson as Member[]).map((m) =>
+    overrides[m.slug] ? { ...m, ...overrides[m.slug] } : m,
+  );
+}
+
+/** Seed jobs plus any postings created through the member portal. */
+function currentJobs(): Job[] {
+  return [...(jobsJson as Job[]), ...getPortalJobs()];
+}
 
 /** Case/diacritic-insensitive match of a query against a member's
  *  searchable text (name, tagline, tags, city). */
@@ -48,7 +61,7 @@ function memberMatches(member: Member, search: string): boolean {
  */
 export class MockDataSource implements ChamberDataSource {
   async getMembers(query?: MemberQuery): Promise<Member[]> {
-    let result = members;
+    let result = currentMembers();
     if (query?.categorySlug) {
       result = result.filter((m) => m.categorySlug === query.categorySlug);
     }
@@ -62,7 +75,7 @@ export class MockDataSource implements ChamberDataSource {
   }
 
   async getMember(slug: string): Promise<Member | null> {
-    return members.find((m) => m.slug === slug) ?? null;
+    return currentMembers().find((m) => m.slug === slug) ?? null;
   }
 
   async getCategories(): Promise<Category[]> {
@@ -88,11 +101,11 @@ export class MockDataSource implements ChamberDataSource {
   }
 
   async getJobs(): Promise<Job[]> {
-    return [...jobs].sort((a, b) => b.postedAt.localeCompare(a.postedAt));
+    return [...currentJobs()].sort((a, b) => b.postedAt.localeCompare(a.postedAt));
   }
 
   async getJob(slug: string): Promise<Job | null> {
-    return jobs.find((j) => j.slug === slug) ?? null;
+    return currentJobs().find((j) => j.slug === slug) ?? null;
   }
 
   async getNews(): Promise<NewsPost[]> {
