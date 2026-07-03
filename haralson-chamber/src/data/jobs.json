@@ -1,0 +1,72 @@
+[
+  {
+    "id": "job-001",
+    "slug": "line-cook-the-mill-table",
+    "title": "Line Cook",
+    "company": "The Mill Table",
+    "memberSlug": "the-mill-table",
+    "location": "Bremen, GA",
+    "type": "full-time",
+    "pay": "$16–$19/hr based on experience",
+    "summary": "Scratch kitchen line cook for a busy downtown restaurant. Closed Mondays, no late nights past 9.",
+    "description": "The Mill Table is hiring a full-time line cook for our scratch kitchen. You'll work sauté and grill during lunch and dinner service, help with morning prep, and learn the bakery side if you're interested.\n\nWhat we're looking for: at least one year on a line (or culinary school plus real hustle), comfort with a scratch menu that changes seasonally, and the ability to keep a station clean when tickets stack up.\n\nWhat you get: $16–$19 an hour based on experience, a free shift meal, closed Mondays, kitchen closes at 8 so you're home by 9:30, and a week of paid vacation after your first year. We promote from within — our current sous chef started on fry.",
+    "postedAt": "2026-06-18",
+    "applyEmail": "hello@themilltable.com"
+  },
+  {
+    "id": "job-002",
+    "slug": "hvac-service-technician",
+    "title": "HVAC Service Technician",
+    "company": "Haralson Heating & Air",
+    "memberSlug": "haralson-heating-air",
+    "location": "Buchanan, GA — county-wide service area",
+    "type": "full-time",
+    "pay": "$52,000–$70,000/yr + take-home van",
+    "summary": "EPA-certified service tech for residential and light commercial. Take-home van, paid on-call rotation.",
+    "description": "Haralson Heating & Air is adding a service technician to keep up with a growing maintenance-plan customer base. You'll run 4–7 residential and light commercial calls a day — diagnostics, repairs, and tune-ups — inside Haralson County, so you're not burning your day on the interstate.\n\nRequirements: EPA 608 certification, 2+ years of service experience (not just install), a clean driving record, and the people skills to explain a repair to a homeowner without jargon.\n\nCompensation: $52,000–$70,000 depending on experience, plus performance bonuses, a take-home van with gas card, paid on-call rotation (one week in six), health insurance, and a simple IRA with match. Boot and tool allowances renewed yearly.",
+    "postedAt": "2026-06-25",
+    "applyUrl": "https://example.com/haralson-hvac/careers"
+  },
+  {
+    "id": "job-003",
+    "slug": "pharmacy-technician-tallapoosa",
+    "title": "Pharmacy Technician",
+    "company": "Tallapoosa Pharmacy",
+    "memberSlug": "tallapoosa-pharmacy",
+    "location": "Tallapoosa, GA",
+    "type": "part-time",
+    "pay": "$15–$17/hr",
+    "summary": "Part-time tech for an independent pharmacy, about 25 hours a week. Certification preferred; will train the right person.",
+    "description": "Tallapoosa Pharmacy is hiring a part-time pharmacy technician, roughly 25 hours a week across weekdays and alternating Saturday mornings.\n\nYou'll fill and label prescriptions, manage inventory, work the register, and coordinate our free in-town delivery route. PTCB certification is preferred, but we will sponsor training and the exam for someone with the right attention to detail and a genuine way with customers — half our patients we know by first name, and we intend to keep it that way.\n\nGreat fit for a pharmacy student at UWG, a parent who needs school-hours shifts, or a retiree who wants meaningful part-time work.",
+    "postedAt": "2026-06-29",
+    "applyEmail": "gene@tallapoosapharmacy.com"
+  },
+  {
+    "id": "job-004",
+    "slug": "staff-accountant-hutcheson-reeves",
+    "title": "Staff Accountant",
+    "company": "Hutcheson & Reeves CPAs",
+    "memberSlug": "hutcheson-reeves-cpas",
+    "location": "Bremen, GA (hybrid after 90 days)",
+    "type": "full-time",
+    "pay": "$55,000–$68,000/yr",
+    "summary": "Staff accountant for a growing small-business practice. CPA track supported, hybrid schedule after onboarding.",
+    "description": "Hutcheson & Reeves is hiring a staff accountant to serve our small-business clients — monthly bookkeeping, payroll processing, sales tax filings, and supporting the partners during tax season.\n\nRequirements: a bachelor's in accounting, 1–3 years of experience (public or industry), and solid QuickBooks skills. CPA candidates strongly encouraged — we pay for your review course and exam fees, and the partners actually protect your study time.\n\nThe honest part: February through April is intense, with Saturday hours. The rest of the year runs 8:30–5 with a hybrid schedule (two days remote) after your first 90 days. Salary $55,000–$68,000 plus busy-season bonus, health insurance, 401(k) with 3% match, and three weeks PTO.",
+    "postedAt": "2026-06-10",
+    "applyEmail": "office@hutchesonreeves.com"
+  },
+  {
+    "id": "job-005",
+    "slug": "farm-stand-crew-little-river",
+    "title": "Farm Stand & Fall Festival Crew",
+    "company": "Little River Farms",
+    "memberSlug": "little-river-farms",
+    "location": "Buchanan, GA",
+    "type": "seasonal",
+    "pay": "$13–$15/hr",
+    "summary": "Seasonal crew for the produce stand and pumpkin patch, August through November. Weekends required, all ages 16+.",
+    "description": "Little River Farms is hiring 8–10 seasonal crew members for our busiest stretch: late-summer produce season straight through the fall pumpkin patch, roughly August through Thanksgiving weekend.\n\nRoles include produce stand register and stocking, hayride loading, corn maze checkpoint, and weekend kettle corn (we train — it's more art than science). Weekend availability is required; weekday shifts are flexible around school schedules. Ages 16 and up welcome, and we hire a lot of first-job teenagers on purpose.\n\n$13–$15 an hour depending on role, a produce discount your grandmother will exploit, and an end-of-season bonus for anyone who finishes the run through Thanksgiving.",
+    "postedAt": "2026-07-01",
+    "applyUrl": "https://example.com/little-river-farms/jobs"
+  }
+]

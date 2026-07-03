@@ -1,0 +1,62 @@
+/* ============================================================================
+ * THEME CONFIG — edit this file to rebrand the site.
+ * ============================================================================
+ * Colors here become Tailwind utilities automatically (Tailwind v4 @theme):
+ *   --color-pine-700  ->  bg-pine-700, text-pine-700, border-pine-700, ...
+ * Fonts are loaded in src/app/layout.tsx (next/font); the variables below
+ * just point Tailwind's font-sans / font-display at them.
+ *
+ * Current palette: deep pine green (trust, rooted), warm clay (energy,
+ * hospitality), and cream/sand neutrals (warmth). Swap the hex values to
+ * rebrand without touching a single component.
+ * ========================================================================== */
+
+@theme {
+  /* --- Brand: primary (pine green) --- */
+  --color-pine-50: #f2f7f3;
+  --color-pine-100: #dfece2;
+  --color-pine-200: #c0d9c8;
+  --color-pine-300: #94bea3;
+  --color-pine-400: #659d7a;
+  --color-pine-500: #44805c;
+  --color-pine-600: #326647;
+  --color-pine-700: #28523b;
+  --color-pine-800: #224230;
+  --color-pine-900: #1d3729;
+  --color-pine-950: #0f1e16;
+
+  /* --- Brand: accent (warm clay / terracotta) --- */
+  --color-clay-50: #fdf6ef;
+  --color-clay-100: #fae9d9;
+  --color-clay-200: #f4d0b1;
+  --color-clay-300: #ecb080;
+  --color-clay-400: #e3874d;
+  --color-clay-500: #dc6a2b;
+  --color-clay-600: #ce5320;
+  --color-clay-700: #ab3f1d;
+  --color-clay-800: #89341e;
+  --color-clay-900: #6f2d1b;
+  --color-clay-950: #3c150c;
+
+  /* --- Neutrals (warm cream/sand instead of gray) --- */
+  --color-cream: #faf7f1;
+  --color-sand-50: #f9f6ef;
+  --color-sand-100: #f1ecdf;
+  --color-sand-200: #e4dcc7;
+  --color-sand-300: #d3c6a7;
+  --color-sand-400: #bfad85;
+  --color-sand-500: #b19a6d;
+  --color-sand-600: #a48961;
+  --color-sand-700: #897052;
+  --color-sand-800: #705c46;
+  --color-sand-900: #5b4c3b;
+  --color-sand-950: #30271e;
+
+  /* --- Text --- */
+  --color-ink: #24312a; /* near-black with a green cast */
+  --color-ink-soft: #55645c; /* secondary text */
+
+  /* --- Fonts (loaded via next/font in layout.tsx) --- */
+  --font-sans: var(--font-body), ui-sans-serif, system-ui, sans-serif;
+  --font-display: var(--font-heading), ui-serif, Georgia, serif;
+}

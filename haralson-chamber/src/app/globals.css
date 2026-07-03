@@ -1,0 +1,26 @@
+@import "tailwindcss";
+@import "./theme.css";
+
+body {
+  background: var(--color-cream);
+  color: var(--color-ink);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Headings use the display serif by default. */
+h1,
+h2,
+h3 {
+  font-family: var(--font-display);
+}
+
+/* Visible focus for keyboard users, consistent everywhere. */
+:focus-visible {
+  outline: 2px solid var(--color-clay-600);
+  outline-offset: 2px;
+}
+
+::selection {
+  background: var(--color-pine-200);
+}

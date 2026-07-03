@@ -1,0 +1,50 @@
+[
+  {
+    "id": "cat-restaurants-food",
+    "slug": "restaurants-food",
+    "name": "Restaurants & Food",
+    "description": "From meat-and-threes to coffee shops, the places that feed Haralson County."
+  },
+  {
+    "id": "cat-retail-shopping",
+    "slug": "retail-shopping",
+    "name": "Retail & Shopping",
+    "description": "Boutiques, hardware stores, and hometown shops worth the trip downtown."
+  },
+  {
+    "id": "cat-health-wellness",
+    "slug": "health-wellness",
+    "name": "Health & Wellness",
+    "description": "Clinics, pharmacies, therapists, and gyms keeping our community healthy."
+  },
+  {
+    "id": "cat-professional-services",
+    "slug": "professional-services",
+    "name": "Professional Services",
+    "description": "Accountants, attorneys, insurance agents, and the folks who keep business running."
+  },
+  {
+    "id": "cat-home-construction",
+    "slug": "home-construction",
+    "name": "Home & Construction",
+    "description": "Builders, roofers, HVAC, and landscaping pros for home and commercial projects."
+  },
+  {
+    "id": "cat-automotive",
+    "slug": "automotive",
+    "name": "Automotive",
+    "description": "Sales, service, tires, and repair shops that keep Haralson County moving."
+  },
+  {
+    "id": "cat-agriculture-outdoors",
+    "slug": "agriculture-outdoors",
+    "name": "Agriculture & Outdoors",
+    "description": "Farms, feed stores, nurseries, and outfitters rooted in our rural heritage."
+  },
+  {
+    "id": "cat-community-nonprofit",
+    "slug": "community-nonprofit",
+    "name": "Community & Nonprofits",
+    "description": "The organizations, foundations, and volunteers that make this a place worth calling home."
+  }
+]
