@@ -1,0 +1,135 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>The Inn Between</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=VT323&family=Courier+Prime:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --paper: #efe6cc; --paper-dark: #d9cba4; --ink: #2a1a0c; --rust: #9a3a1a; --gold: #c9a24a;
+    --teal: #2f8a7e; --pink: #ff4fa0; --bg: #050403;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; height: 100%; background: var(--bg); overflow: hidden; color: #f4efe2; }
+  body { font-family: "Courier Prime", "Courier New", monospace; cursor: default; user-select: none; -webkit-user-select: none; }
+  #gl { position: fixed; inset: 0; width: 100%; height: 100%; display: block; }
+
+  /* VCR on-screen display */
+  .osd { position: fixed; font-family: "VT323", "Courier New", monospace; color: #f4f4f0; font-size: clamp(22px, 3.2vw, 38px);
+         text-shadow: 2px 2px 0 #000, -1px -1px 0 #000; letter-spacing: 2px; pointer-events: none; z-index: 46; }
+  #vcr-play { top: 3.5vh; left: 4vw; }
+  #vcr-date { bottom: 4vh; right: 4vw; text-align: right; }
+  #vcr-ff { top: 3.5vh; right: 4vw; display: none; }
+
+  #crosshair { position: fixed; left: 50%; top: 50%; width: 4px; height: 4px; margin: -2px; background: rgba(255,250,235,.55); border-radius: 50%; z-index: 20; pointer-events: none; }
+  #prompt { position: fixed; left: 50%; top: 56%; transform: translateX(-50%); z-index: 21; pointer-events: none;
+            font-family: "VT323", monospace; font-size: clamp(18px, 2.4vw, 28px); color: #f4efe2; text-shadow: 2px 2px 0 #000; letter-spacing: 1px; white-space: nowrap; }
+  #notice { position: fixed; left: 50%; bottom: 26vh; transform: translateX(-50%); z-index: 22; pointer-events: none; max-width: min(720px, 90vw);
+            font-family: "Courier Prime", monospace; font-size: clamp(14px, 1.8vw, 19px); color: #efe6cc; text-align: center;
+            background: rgba(10,6,2,.62); padding: 8px 16px; opacity: 0; transition: opacity .6s; }
+  #notice.on { opacity: 1; }
+
+  /* broadcast lower third: bold white uppercase, black outline, like a safety film */
+  #caption { position: fixed; left: 0; right: 0; bottom: 10vh; z-index: 45; text-align: center; pointer-events: none; padding: 0 16px; opacity: 0; transition: opacity .25s; }
+  #caption.on { opacity: 1; }
+  #caption .tag { display: inline-block; font-family: "VT323", monospace; font-size: clamp(14px, 1.7vw, 20px); background: #f4efe2; color: #111; padding: 0 10px; margin-bottom: 8px; letter-spacing: 2px; }
+  #caption .tag.pa { background: var(--gold); }
+  #caption .text { font-family: "Arial Black", "Helvetica Neue", Helvetica, Arial, sans-serif; font-weight: 900; text-transform: uppercase;
+                   font-size: clamp(17px, 2.5vw, 32px); line-height: 1.22; color: #fff; max-width: 1100px; margin: 0 auto;
+                   -webkit-text-stroke: 1.5px #000; paint-order: stroke fill;
+                   text-shadow: 3px 3px 0 #000, -2px -2px 0 #000, 2px -2px 0 #000, -2px 2px 0 #000; }
+
+  #watch { position: fixed; left: 2.5vw; bottom: 3vh; width: 150px; height: 150px; z-index: 20; pointer-events: none; transition: transform .25s ease-out; transform-origin: left bottom; }
+  #watch.raised { transform: scale(1.9) translateY(-6%); }
+
+  #flash { position: fixed; inset: 0; z-index: 60; display: none; pointer-events: none; }
+  #flash canvas { width: 100%; height: 100%; }
+
+  /* full-screen broadcast cards */
+  #card { position: fixed; inset: 0; z-index: 35; display: none; background: #000; }
+  #card canvas { position: absolute; inset: 0; width: 100%; height: 100%; }
+  #card .over { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 24px; }
+  .bigtitle { font-family: "Arial Black", Helvetica, sans-serif; font-weight: 900; text-transform: uppercase; color: #fff; letter-spacing: 3px;
+              font-size: clamp(22px, 4vw, 54px); -webkit-text-stroke: 2px #000; paint-order: stroke fill; text-shadow: 4px 4px 0 #000; }
+  .subtitle { font-family: "VT323", monospace; font-size: clamp(18px, 2.4vw, 30px); color: #e8dcc0; letter-spacing: 3px; margin-top: 12px; text-shadow: 2px 2px 0 #000; }
+  .press { font-family: "VT323", monospace; font-size: clamp(20px, 2.6vw, 32px); color: #fff; margin-top: 7vh; animation: blink 1.2s steps(1) infinite; text-shadow: 2px 2px 0 #000; cursor: pointer; pointer-events: auto; }
+  @keyframes blink { 50% { opacity: 0; } }
+
+  .lethality { border: 10px solid; border-image: repeating-linear-gradient(45deg, #e8b020 0 18px, #111 18px 36px) 10; background: #1a120a; padding: 4vh 5vw; max-width: 760px; }
+  .lethality .l1 { font-family: "Arial Black", sans-serif; color: #f4efe2; font-size: clamp(16px, 2vw, 22px); letter-spacing: 4px; }
+  .lethality .l2 { font-family: "Arial Black", sans-serif; color: #e8b020; font-size: clamp(40px, 8vw, 96px); line-height: 1; margin: 1vh 0; }
+  .lethality .l3 { font-family: "Arial Black", sans-serif; color: #f4efe2; font-size: clamp(18px, 2.6vw, 30px); letter-spacing: 3px; }
+  .lethality .l4 { font-family: "Courier Prime", monospace; color: #c9b88a; font-size: clamp(12px, 1.4vw, 15px); margin-top: 2vh; }
+
+  /* inn paperwork */
+  #paper-wrap { position: fixed; inset: 0; z-index: 40; display: none; align-items: center; justify-content: center; background: rgba(5,3,1,.55); padding: 16px; }
+  #paper { background: var(--paper); color: var(--ink); width: min(620px, 100%); max-height: 92vh; overflow-y: auto; padding: 28px 32px 24px;
+           box-shadow: 0 18px 50px rgba(0,0,0,.6), inset 0 0 60px rgba(120,90,40,.25); position: relative; transform: rotate(-.6deg);
+           background-image: repeating-linear-gradient(0deg, transparent 0 27px, rgba(80,120,140,.12) 27px 28px); }
+  #paper .letterhead { display: flex; align-items: center; gap: 14px; border-bottom: 2px solid var(--ink); padding-bottom: 10px; margin-bottom: 14px; }
+  #paper .letterhead canvas { width: 56px; height: 56px; flex: none; }
+  #paper .lh-name { font-family: Georgia, serif; font-weight: bold; font-size: 22px; letter-spacing: 3px; }
+  #paper .lh-sub { font-size: 12px; letter-spacing: 2px; }
+  #paper h2 { font-family: Georgia, serif; font-size: 18px; letter-spacing: 3px; margin: 0 0 10px; text-transform: uppercase; }
+  #paper .body { font-size: 15px; line-height: 1.5; white-space: pre-wrap; }
+  #paper .speaker { font-style: italic; color: #5a3a1a; margin-bottom: 8px; }
+  #paper .opts { margin-top: 16px; display: flex; flex-direction: column; gap: 6px; }
+  #paper .opt { background: transparent; border: 1px solid rgba(42,26,12,.45); color: var(--ink); text-align: left; padding: 8px 12px; font: inherit; font-size: 15px; cursor: pointer; }
+  #paper .opt:hover, #paper .opt:focus { background: rgba(154,58,26,.12); outline: none; border-color: var(--rust); }
+  #paper .opt .n { display: inline-block; width: 26px; color: var(--rust); font-weight: bold; }
+  #paper .field { display: flex; gap: 10px; align-items: baseline; margin: 10px 0; border-bottom: 1px dotted rgba(42,26,12,.5); padding-bottom: 4px; }
+  #paper .field label { font-size: 12px; letter-spacing: 2px; width: 150px; flex: none; }
+  #paper .field input { flex: 1; border: none; background: transparent; font: inherit; font-size: 18px; color: #1a2a6a; outline: none; font-family: "Courier Prime", monospace; min-width: 0; }
+  #paper .field .val { font-size: 16px; }
+  #paper .stamps { display: flex; flex-wrap: wrap; gap: 10px; margin: 12px 0; min-height: 40px; }
+  .stamp { font-family: "Arial Black", sans-serif; font-size: 13px; letter-spacing: 2px; padding: 4px 10px; border: 3px double; transform: rotate(-4deg); opacity: .85; text-transform: uppercase; }
+  .stamp.blue { color: #1a3a8a; border-color: #1a3a8a; }
+  .stamp.red { color: #b0202a; border-color: #b0202a; transform: rotate(3deg); }
+  .stamp.green { color: #1a6a3a; border-color: #1a6a3a; }
+  .stamp.big { position: absolute; right: 26px; top: 90px; font-size: 26px; padding: 8px 16px; transform: rotate(-12deg); animation: thump .25s ease-out; background: rgba(239,230,204,.6); }
+  @keyframes thump { from { transform: scale(2.2) rotate(-12deg); opacity: 0; } to { transform: scale(1) rotate(-12deg); opacity: .9; } }
+  #paper .small { font-size: 12px; color: #5a4a3a; margin-top: 14px; }
+  #paper .rules li { margin-bottom: 4px; }
+  #paper .twocol { display: grid; grid-template-columns: 1fr 1fr; gap: 6px 14px; font-size: 14px; }
+  #paper .plaque { background: linear-gradient(135deg, #8a6424, #d9b25a 45%, #c99a42 55%, #6e4c18); color: #3a240a; padding: 26px; border: 8px solid #2a1608; font-family: Georgia, serif; }
+  #paper .plaque h2 { text-align: center; }
+  #paper .plaque ol { font-weight: bold; font-size: 17px; line-height: 1.5; }
+  #paper .close { position: absolute; right: 10px; top: 6px; background: none; border: none; font: inherit; font-size: 13px; color: #5a4a3a; cursor: pointer; }
+  @media (max-width: 520px) {
+    #paper { padding: 20px 18px; }
+    #paper .twocol { grid-template-columns: 1fr; }
+    #paper .field label { width: 110px; }
+    #watch { width: 110px; height: 110px; }
+  }
+</style>
+</head>
+<body>
+<canvas id="gl"></canvas>
+
+<div id="vcr-play" class="osd">PLAY &#9654;</div>
+<div id="vcr-ff" class="osd">&#9654;&#9654;</div>
+<div id="vcr-date" class="osd"></div>
+<div id="crosshair"></div>
+<div id="prompt"></div>
+<div id="notice"></div>
+<div id="caption"><div class="tag">&#9673; AN EDUCATIONAL BROADCAST</div><div class="text"></div></div>
+<canvas id="watch" width="300" height="300"></canvas>
+
+<div id="flash"><canvas width="640" height="480"></canvas></div>
+<div id="card"><canvas width="960" height="720"></canvas><div class="over"></div></div>
+<div id="paper-wrap"><div id="paper"></div></div>
+
+<script src="vendor/three.min.js"></script>
+<script src="js/textures.js"></script>
+<script src="js/data.js"></script>
+<script src="js/audio.js"></script>
+<script src="js/vhs.js"></script>
+<script src="js/world.js"></script>
+<script src="js/entities.js"></script>
+<script src="js/ui.js"></script>
+<script src="js/ending.js"></script>
+<script src="js/game.js"></script>
+</body>
+</html>
