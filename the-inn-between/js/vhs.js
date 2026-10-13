@@ -97,12 +97,12 @@ window.INN = window.INN || {};
     this.bA = rt(240, 135); this.bB = rt(240, 135);
     this.uniforms = {
       tDiffuse: { value: this.rt.texture }, tBloom: { value: this.bA.texture },
-      time: { value: 0 }, desat: { value: 0 }, glitch: { value: 0 }, bloom: { value: 1.15 },
+      time: { value: 0 }, desat: { value: 0 }, glitch: { value: 0 }, bloom: { value: 0.85 },
       staticAmt: { value: 0 }, hueShift: { value: 0 }, fade: { value: 1 }, trackY: { value: 0.5 },
       darken: { value: 0 }, res: { value: new THREE.Vector2(960, 540) },
     };
     this.matFinal = new THREE.ShaderMaterial({ uniforms: this.uniforms, vertexShader: vert, fragmentShader: frag, depthTest: false, depthWrite: false });
-    this.matBright = new THREE.ShaderMaterial({ uniforms: { tDiffuse: { value: this.rt.texture }, threshold: { value: 0.62 } }, vertexShader: vert, fragmentShader: brightFrag, depthTest: false, depthWrite: false });
+    this.matBright = new THREE.ShaderMaterial({ uniforms: { tDiffuse: { value: this.rt.texture }, threshold: { value: 0.74 } }, vertexShader: vert, fragmentShader: brightFrag, depthTest: false, depthWrite: false });
     this.matBlur = new THREE.ShaderMaterial({ uniforms: { tDiffuse: { value: null }, dir: { value: new THREE.Vector2() } }, vertexShader: vert, fragmentShader: blurFrag, depthTest: false, depthWrite: false });
     this.quad = new THREE.Mesh(new THREE.PlaneGeometry(2, 2), this.matFinal);
     this.qScene = new THREE.Scene(); this.qScene.add(this.quad);

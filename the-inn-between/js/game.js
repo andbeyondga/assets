@@ -936,7 +936,7 @@ window.INN = window.INN || {};
       l.position.copy(f.pos);
       l.color.setHex(f.color || 0xfff2d8);
       const d = Math.sqrt(f.pos.distanceToSquared(p));
-      let inten = f.neon ? 1.1 : f.dim ? 0.35 : f.warm ? 0.7 : 0.85;
+      let inten = f.neon ? 0.85 : f.dim ? 0.35 : f.warm ? 0.7 : 0.75;
       if (f.neon && f.pos === W.poolNeonLight.pos && (!R || !R.poolClosed)) inten = 0.6;
       inten *= Math.max(0, Math.min(1, (17 - d) / 5));
       if (fl && fl.f === f && fl.off) inten *= 0.05;

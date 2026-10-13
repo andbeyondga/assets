@@ -75,7 +75,7 @@ window.INN = window.INN || {};
     M.food = L({ color: 0xd8a050 });
     M.coffee = L({ color: 0x2a1a0a });
     M.white = L({ color: 0xf0ece0 });
-    M.stucco = L({ color: 0xe8c9a6 });
+    M.stucco = L({ color: 0xf0bfae });
     M.terrazzo = L({ map: Tex.terrazzo() });
     M.grass = L({ map: Tex.grass() });
     M.vines = L({ map: Tex.vines(), alphaTest: 0.45, side: THREE.DoubleSide });
@@ -1096,7 +1096,8 @@ window.INN = window.INN || {};
         doorsAlong(side, y, false);
         // vines trailing over the parapets
         for (let s = side.ta + 0.6; s < side.tb - 0.6; s += 0.9 + rnd() * 0.9) {
-          const L = 1.2 + rnd() * 3.2;
+          // long enough to trail, never low enough to brush a guest's face
+          const L = Math.min(1.2 + rnd() * 3.2, y + 1.1 - 2.8);
           const d = side.wall + side.dir * (D + 0.52);
           const yc = y + 1.1 - L / 2;
           const uv = [0, 1 - L / 4.6, 1, 1];

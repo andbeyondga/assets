@@ -2,7 +2,7 @@
 
 A first-person liminal-horror exploration prototype. No combat, no weapons, no chases. You have stepped off the road into a 1970s motor inn that exists outside time. The inn is not haunted. It is administered.
 
-One floor, twenty rooms, an atrium, a pool, an arcade, a dining room, four shifting exits. A single run takes 15 to 25 minutes.
+One floor of twenty rooms around the front desk, a pool, an arcade, a dining room and four shifting exits; a six-story Garden Court north of the desk; and beyond it the Wings, corridors of rooms that are generated as you walk and never end. A single run takes 15 to 25 minutes, unless you get lost.
 
 ## Running it
 
@@ -19,7 +19,7 @@ Use headphones. The sound design is half the game.
 | --- | --- |
 | W A S D / arrows | Walk |
 | Mouse | Look (click the picture to capture the mouse) |
-| Shift | Hurry (mind the atrium) |
+| Shift | Sprint (mind the atrium) |
 | E | Use, take, speak, read |
 | F or Tab | Guest folio (inventory, stamps, rules on file) |
 | Q (hold) | Raise your wristwatch |
@@ -48,8 +48,16 @@ If the page is embedded somewhere that refuses mouse capture, the game falls bac
 | Arcade | One game per cycle. | A second game before the next breakfast bell |
 | Dining | One plate per cycle. | A second plate in the same service |
 | Dining | Do not enter the kitchen. | Pushing the kitchen door |
+| Garden Court | Keep to the paths. | Standing in a planting bed |
+| Garden Court | Do not call the glass elevator. | Pressing its call button |
 
 The broadcast states a subtly false rule at most twice per stay (pool reflection "ten seconds", arcade "take a turn", and so on). The plaques are always right, and the checkout attendant asks about the rules as posted.
+
+## The Garden Court and the Wings
+
+Walk north from the front desk down the promenade. The Garden Court is a six-story atrium court: stacked balconies of rooms on every side, planters trailing vines, palms, a fountain, a glass elevator that moves on its own, and a skylight with nothing above it. Some guests watch from the balconies.
+
+Openings on the west, east and north sides of the court lead into the Wings. They are a lattice of corridors built in chunks around you as you move and dropped behind you, like a voxel world. Every corridor is decided by a hash of its grid position, so the same crossing is always in the same place. Some stretches have gone dark. Some doors stand open onto nothing. Once in a while a door carries your own room number. Every crossing has a hanging sign pointing back to the lobby.
 
 ## Things the broadcast never mentions
 
@@ -71,8 +79,10 @@ index.html        page shell, broadcast and paperwork styling
 js/textures.js    every texture, painted on canvases at boot (carpet, paneling, emblem, test card)
 js/data.js        posted rules, room ledger, vending stock, desk forms, broadcast copy
 js/audio.js       synthesized sound: hum, hiss, muzak, bells, PA chime, housekeeping cart, whispers
-js/vhs.js         the videotape post-process (grain, chroma, tracking, desaturation)
-js/world.js       floor plan, room modules, common areas, exits, colliders, zones
+js/vhs.js         post-process: bloom, then a light videotape treatment (grain, chroma, tracking, desaturation)
+js/batch.js       merges static geometry per material to keep draw calls low
+js/world.js       floor plan, room modules, common areas, Garden Court, exits, colliders, zones
+js/wings.js       the endless generated corridors, streamed in chunks
 js/entities.js    guests, staff, and the player's body for the television in 114
 js/ui.js          captions, wristwatch, folio and forms, test cards, subliminal frames
 js/ending.js      the highway at dawn
