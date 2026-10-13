@@ -154,7 +154,7 @@ window.INN = window.INN || {};
     this.spec = spec;
     this.area = spec.area;
     this.baseRy = spec.ry || 0;
-    this.g.position.set(spec.x, 0, spec.z);
+    this.g.position.set(spec.x, spec.y || 0, spec.z);
     this.g.rotation.y = this.baseRy;
     this.phase = Math.random() * 10;
     this.targetRy = this.baseRy;

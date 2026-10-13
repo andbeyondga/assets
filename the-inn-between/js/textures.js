@@ -445,7 +445,64 @@ window.INN = window.INN || {};
     return toTexture(c, false);
   }
 
+  // ------------------------------------------------- the Garden Court
+  function terrazzo() {
+    const c = canvas(256, 256), g = c.getContext('2d');
+    g.fillStyle = '#e4d6bc'; g.fillRect(0, 0, 256, 256);
+    const chips = ['#b0603a', '#2f8a7e', '#3a2a1a', '#c99a4a', '#f4ece0', '#8a9a7a'];
+    for (let i = 0; i < 1400; i++) {
+      g.fillStyle = chips[Math.floor(rnd() * chips.length)];
+      g.globalAlpha = 0.55 + rnd() * 0.45;
+      const s = 1 + rnd() * 4;
+      g.beginPath(); g.ellipse(rnd() * 256, rnd() * 256, s, s * (0.5 + rnd() * 0.6), rnd() * 3, 0, TAU); g.fill();
+    }
+    g.globalAlpha = 1;
+    g.fillStyle = 'rgba(160,140,110,0.6)'; g.fillRect(0, 0, 256, 2); g.fillRect(0, 0, 2, 256);
+    return toTexture(c);
+  }
+
+  function grass() {
+    const c = canvas(128, 128), g = c.getContext('2d');
+    g.fillStyle = '#3e5a26'; g.fillRect(0, 0, 128, 128);
+    for (let i = 0; i < 2600; i++) {
+      const k = 0.6 + rnd() * 0.9;
+      g.fillStyle = `rgba(${70 * k | 0},${110 * k | 0},${40 * k | 0},0.9)`;
+      g.fillRect(rnd() * 128, rnd() * 128, 1, 2 + rnd() * 4);
+    }
+    return toTexture(c);
+  }
+
+  // trailing vines on a transparent ground, for the balcony planters
+  function vines() {
+    const c = canvas(128, 512), g = c.getContext('2d');
+    g.clearRect(0, 0, 128, 512);
+    for (let s = 0; s < 7; s++) {
+      let x = 10 + rnd() * 108;
+      const len = 180 + rnd() * 330;
+      for (let y = 0; y < len; y += 5) {
+        x += (rnd() - 0.5) * 3;
+        g.fillStyle = `rgba(${40 + rnd() * 30 | 0},${90 + rnd() * 60 | 0},${30 + rnd() * 20 | 0},1)`;
+        g.beginPath(); g.ellipse(x + (rnd() - 0.5) * 10, y, 3 + rnd() * 4, 2 + rnd() * 3, rnd() * 3, 0, TAU); g.fill();
+      }
+    }
+    const t = toTexture(c, false);
+    return t;
+  }
+
+  function skylight() {
+    const c = canvas(256, 256), g = c.getContext('2d');
+    const gr = g.createLinearGradient(0, 0, 256, 256);
+    gr.addColorStop(0, '#ffe4ec'); gr.addColorStop(0.5, '#fff4e0'); gr.addColorStop(1, '#d8f4ee');
+    g.fillStyle = gr; g.fillRect(0, 0, 256, 256);
+    g.fillStyle = '#3a2a22';
+    for (let i = 0; i <= 256; i += 64) { g.fillRect(i - 3, 0, 6, 256); g.fillRect(0, i - 3, 256, 6); }
+    g.fillStyle = 'rgba(58,42,34,0.5)';
+    for (let i = 32; i < 256; i += 64) { g.fillRect(i - 1, 0, 2, 256); g.fillRect(0, i - 1, 256, 2); }
+    return toTexture(c);
+  }
+
   INN.Tex = {
+    terrazzo, grass, vines, skylight,
     canvas, toTexture, carpet, wood, wallpaper, tile, ceiling, shag, fabric,
     drawEmblem, drawTestCard, drawClock, sign, neon, plaque, residentsPlaque,
     doorPlate, dndCard, vendingFront, noiseTexture, skyGradient,

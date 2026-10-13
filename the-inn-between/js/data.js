@@ -20,6 +20,11 @@ window.INN = window.INN || {};
       lines: ['If a machine is already playing itself, do not interrupt it.', 'One game per guest per cycle.'],
       short: ['Do not interrupt a machine that is playing itself.', 'One game per cycle.'],
     },
+    garden: {
+      title: 'THE GARDEN COURT',
+      lines: ['Keep to the paths. Do not step into the planting beds.', 'Do not call the glass elevator. It is not for guests.'],
+      short: ['Garden Court: keep to the paths.', 'Do not call the glass elevator.'],
+    },
     dining: {
       title: 'THE DINING ROOM',
       lines: ['One plate per guest per cycle.', 'Do not enter the kitchen.'],
@@ -90,6 +95,7 @@ window.INN = window.INN || {};
     { q: 'When is breakfast?', form: 'FORM 6-A', body: 'THE CONTINENTAL BREAKFAST IS SERVED IN THE DINING ROOM AT THE BELL, ONCE EACH CYCLE, FROM SIX O’CLOCK.\n\nA GUEST WHO MISSES TWO BREAKFASTS IN A ROW WILL FEEL IT.\n\nVENDING IS PROVIDED AS A COURTESY. VENDING IS NOT BREAKFAST.' },
     { q: 'Who else is staying here?', form: 'FORM 9-G', body: 'OTHER GUESTS ARE NOT YOUR CONCERN, AND YOU ARE NOT THEIRS.\n\nPLEASE KEEP IT THAT WAY.\n\nSEE POSTED RULES.' },
     { q: 'What is behind the doors marked Do Not Disturb?', form: 'FORM 0', body: '\n\n\n\n(THIS FORM HAS BEEN LEFT BLANK.)' },
+    { q: 'What is past the Garden Court?', form: 'FORM 22-W', body: 'THE WINGS.\n\nTHE WINGS ARE MAINTAINED FOR FUTURE GUESTS. THEY CONTINUE.\n\nSIGNS AT EVERY CROSSING INDICATE THE WAY BACK TO THE LOBBY. THE MANAGEMENT RECOMMENDS THAT GUESTS FOLLOW THEM.' },
     { q: 'Can I trust the announcements?', form: 'FORM 11-B', body: 'ANNOUNCEMENTS ARE PROVIDED FOR YOUR COMFORT.\n\nTHE POSTED RULES ARE THE RULES.' },
   ];
 
@@ -116,6 +122,8 @@ window.INN = window.INN || {};
     { id: 'atrium', text: 'During the evening program, guests may hurry through the atrium.' },
     { id: 'dining', text: 'The kitchen is pleased to offer a second plate to every guest this cycle.' },
     { id: 'poolclose', text: 'For your enjoyment, the pool will remain open until midnight.' },
+    { id: 'garden', text: 'Guests are welcome to stroll among the plantings in the Garden Court.' },
+    { id: 'elevator', text: 'The glass elevator is now in service. Guests may call it from the Garden Court.' },
   ];
 
   // Checkout questions. One correct answer each. "pa" marks the answer the broadcast may have taught.
@@ -125,6 +133,8 @@ window.INN = window.INN || {};
     atrium: { q: 'How does a guest cross the atrium?', a: ['At a walk.', 'Quickly, in the evening.', 'Along the walls.'], correct: 0, pa: 1 },
     dining: { q: 'How many plates may a guest take at breakfast?', a: ['One.', 'Two.', 'As many as are offered.'], correct: 0, pa: 1 },
     poolclose: { q: 'At what hour does the pool close?', a: ['Eleven o’clock.', 'Midnight.', 'It does not close.'], correct: 0, pa: 1 },
+    garden: { q: 'Where may a guest walk in the Garden Court?', a: ['On the paths.', 'Among the plantings.', 'Anywhere they like.'], correct: 0, pa: 1 },
+    elevator: { q: 'Who may ride the glass elevator?', a: ['No guest.', 'Any guest who calls it.', 'Guests with a key.'], correct: 0, pa: 1 },
   };
 
   INN.SUBLIMINAL = ['STAY', 'KEY', 'WELCOME', '48', 'RETURN', 'ROOM', 'YOU', 'SERVICE', 'REMAIN'];

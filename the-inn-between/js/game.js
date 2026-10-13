@@ -9,7 +9,7 @@ window.INN = window.INN || {};
   const HOURS_PER_SEC = 0.1;      // one game hour = ten real seconds
   const START_T = 20;             // check-in: 8 PM, day one
   const EYE = 1.6;
-  const WALK = 2.5, RUN = 4.6;
+  const WALK = 2.5, RUN = 6.2;
 
   const STORE_KEY = 'innBetween.v1';
   function load() { try { return JSON.parse(localStorage.getItem(STORE_KEY)) || {}; } catch (e) { return {}; } }
@@ -29,7 +29,7 @@ window.INN = window.INN || {};
     r.setSize(innerWidth, innerHeight, false);
     G.vhs = new INN.VHS(r);
     G.vhs.resize(innerWidth, innerHeight);
-    G.camera = new THREE.PerspectiveCamera(70, innerWidth / innerHeight, 0.1, 120);
+    G.camera = new THREE.PerspectiveCamera(85, innerWidth / innerHeight, 0.1, 160);
     G.camera.layers.set(0);
     addEventListener('resize', () => {
       r.setSize(innerWidth, innerHeight, false);
@@ -61,7 +61,7 @@ window.INN = window.INN || {};
     const scene = G.scene = new THREE.Scene();
     scene.background = new THREE.Color(0x0c0805);
     scene.fog = new THREE.Fog(0x120b06, 5, 34);
-    scene.add(new THREE.AmbientLight(0x8a7458, 0.62));
+    G.ambient = new THREE.AmbientLight(0x8a7458, 0.62); scene.add(G.ambient);
     scene.add(new THREE.HemisphereLight(0xffe2c0, 0x3a2010, 0.22));
     scene.add(G.camera);
     G.lights = [];
@@ -95,6 +95,7 @@ window.INN = window.INN || {};
     G.tvCam.layers.enable(1);
 
     // cached interactable positions for cheap proximity tests
+    G.wings = new INN.Wings(world);
     world.interactables.forEach((m) => { m.updateWorldMatrix(true, false); m.userData.wp = new V3().setFromMatrixPosition(m.matrixWorld); });
 
     // ---------------------------------------------------------- run state
@@ -437,6 +438,8 @@ window.INN = window.INN || {};
     effects(dt);
     updateExits();
     stalker(dt);
+    G.wings.update(P.pos, dt);
+    atmosphere(dt);
     ambience(dt);
     targeting();
     // watch & OSD
@@ -547,6 +550,11 @@ window.INN = window.INN || {};
       R.poolStayT += dt;
       if (R.poolStayT > 8) { breakRule('pool', 1); R.poolStayT = -10; }
     }
+    // GARDEN COURT 1: keep to the paths
+    if (z.area === 'garden' && G.world.planters.some((b) => P.pos.x > b.x0 + 0.1 && P.pos.x < b.x1 - 0.1 && P.pos.z > b.z0 + 0.1 && P.pos.z < b.z1 - 0.1)) {
+      R.bedT = (R.bedT || 0) + dt;
+      if (R.bedT > 0.4) { breakRule('garden', 0); R.bedT = -6; }
+    } else if ((R.bedT || 0) > 0) R.bedT = 0;
     // POOL 1: your reflection, five seconds
     reflection(dt);
   }
@@ -732,7 +740,9 @@ window.INN = window.INN || {};
       if (d < 7 || (!inView && s.t > 4) || s.t > 30) { s.g.visible = false; s.t = 0; }
       return;
     }
-    if (s.t < 25 || !z || (z.area !== 'west' && z.area !== 'east')) return;
+    if (s.t < 25 || !z) return;
+    if (z.area === 'wing') return wingStalker(s, P);
+    if (z.area !== 'west' && z.area !== 'east') return;
     const minX = z.area === 'west' ? -61 : 13, maxX = z.area === 'west' ? -13 : 57;
     const dir = Math.random() < 0.5 ? -1 : 1;
     const x = Math.max(minX, Math.min(maxX, P.pos.x + dir * (16 + Math.random() * 6)));
@@ -742,6 +752,31 @@ window.INN = window.INN || {};
     s.g.position.set(x, 0, 0);
     s.faceInstant(P.pos.x, P.pos.z);
     s.g.visible = true; s.t = 0;
+  }
+
+  // in the wings, the guest waits at the far end of whatever corridor you are in
+  function wingStalker(s, P) {
+    const axis = G.wings.axisAt(P.pos.x, P.pos.z);
+    for (let tries = 0; tries < 4; tries++) {
+      const d = (Math.random() < 0.5 ? -1 : 1) * (15 + Math.random() * 8);
+      const x = axis === 'x' ? P.pos.x + d : Math.round((P.pos.x - 12) / 24) * 24 + 12;
+      const z = axis === 'z' ? P.pos.z + d : Math.round((P.pos.z + 62) / 24) * 24 - 62;
+      if (!G.wings.isCorridor(x, z) || inFrustum(new V3(x, 1.5, z))) continue;
+      s.g.position.set(x, 0, z);
+      s.faceInstant(P.pos.x, P.pos.z);
+      s.g.visible = true; s.t = 0;
+      return;
+    }
+  }
+
+  // the court opens up: longer sight lines, more light; the wings close back in
+  function atmosphere(dt) {
+    const a = G.run.zone ? G.run.zone.area : '';
+    const fog = G.scene.fog, k = Math.min(1, dt * 1.5);
+    const far = a === 'garden' ? 140 : a === 'wing' ? 30 : 34, near = a === 'garden' ? 30 : 5;
+    fog.far += (far - fog.far) * k; fog.near += (near - fog.near) * k;
+    const amb = a === 'garden' ? 1.0 : a === 'wing' ? 0.5 : 0.62;
+    G.ambient.intensity += (amb - G.ambient.intensity) * k;
   }
 
   const _frustum = new THREE.Frustum(), _pm = new THREE.Matrix4();
@@ -765,11 +800,12 @@ window.INN = window.INN || {};
       else R.muzakT = 5;
     }
     if (dnd && Audio.muzakOn) Audio.stopMuzak(true);
-    const vol = { atrium: 0.75, dining: 0.7, arcade: 0.55, pool: 0.45, room: 0.2, copy: 0.05 }[area];
+    const vol = { atrium: 0.75, garden: 0.6, dining: 0.7, arcade: 0.55, pool: 0.45, room: 0.2, copy: 0.05, wing: 0.25, promenade: 0.45 }[area];
     Audio.setMuzakVolume(vol == null ? 0.35 : vol);
     const every = (k, a, b, fn) => { A[k] = (A[k] == null ? a + Math.random() * (b - a) : A[k]) - dt; if (A[k] <= 0) { A[k] = a + Math.random() * (b - a); fn(); } };
     every('ice', 30, 70, () => Audio.iceMachine(new V3(-13, 1, 1.1)));
     every('steps', 30, 80, () => otherFootsteps());
+    if (area === 'garden') every('fountain', 0.8, 2.2, () => Audio.slosh(G.world.fountainPos));
     if (area === 'pool') { every('drip', 1.5, 5, () => Audio.drip(new V3(20 + Math.random() * 14, -0.3, -20 + Math.random() * 13))); every('slosh', 6, 14, () => Audio.slosh(new V3(27, -0.3, -13))); }
     if (area === 'dining' && R.breakfastActive) every('sizzle', 3, 7, () => Audio.sizzle(new V3(0, 1.4, 32.5)));
     if (area === 'arcade') every('blip', 0.3, 1.2, () => { const m = G.world.arcade[pick([...R.selfPlaying])]; if (m) Audio.gameBlip(m.pos); });
@@ -805,6 +841,12 @@ window.INN = window.INN || {};
     if (G.clerk) G.clerk.update(dt, t);
     Object.values(G.attendants || {}).forEach((a) => a.update(dt, t));
     if (W.water) W.water.material.emissive.setHSL(0.5, 0.7, 0.13 + Math.sin(t * 0.7) * 0.02);
+    if (W.elevatorCab) {
+      // the glass car rises and settles, floor by floor, carrying no guest
+      const cyc = (t * 0.04) % 2, f = cyc < 1 ? cyc : 2 - cyc;
+      const target = Math.round(f * 5) * 3.6;
+      W.elevatorCab.position.y += (target - W.elevatorCab.position.y) * Math.min(1, dt * 0.6);
+    }
     if (W.elevatorNeedle) W.elevatorNeedle.rotation.z = Math.sin(t * 0.05) * 1.3 + Math.sin(t * 0.31) * 0.05;
     if (R) {
       W.poolNeonClosed.visible = R.poolClosed;
@@ -1002,6 +1044,7 @@ window.INN = window.INN || {};
       case 'elevator': return 'CALL ELEVATOR';
       case 'stairs': return 'OPEN STAIRWELL';
       case 'glassdoor': case 'gate': case 'servicedoor': return 'TRY DOOR';
+      case 'glasselevator': return 'CALL ELEVATOR';
       case 'kitchen': return 'PUSH DOOR · KITCHEN';
       case 'plate': return R.breakfastActive ? 'TAKE A PLATE' : 'PLATES';
       case 'vending': return 'MAKE A SELECTION · ' + INN.VENDING[it.key].title;
@@ -1111,6 +1154,11 @@ window.INN = window.INN || {};
     glassdoor() { UI.notice('Beyond the glass there is no parking lot. There is a pink light, very far away.'); },
     gate() { UI.notice('The gate is chained. Beyond it, the dark smells of chlorine and highway.'); },
     servicedoor() { UI.notice('SERVICE ENTRANCE. It does not open from this side.'); },
+    glasselevator() {
+      breakRule('garden', 1);
+      Audio.deskBell(new V3(2.25, 1.2, -75.8));
+      UI.notice('Far above, the car stops. It does not come down. Someone inside turns to look at the button you pressed.', 6);
+    },
     kitchen() {
       breakRule('dining', 1);
       Audio.click(new V3(7, 1, 31.9));

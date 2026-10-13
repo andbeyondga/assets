@@ -75,6 +75,16 @@ window.INN = window.INN || {};
     M.food = L({ color: 0xd8a050 });
     M.coffee = L({ color: 0x2a1a0a });
     M.white = L({ color: 0xf0ece0 });
+    M.stucco = L({ color: 0xe8c9a6 });
+    M.terrazzo = L({ map: Tex.terrazzo() });
+    M.grass = L({ map: Tex.grass() });
+    M.vines = L({ map: Tex.vines(), alphaTest: 0.45, side: THREE.DoubleSide });
+    M.leaf = L({ color: 0x3f6e2c });
+    M.leafDark = L({ color: 0x2a4c22 });
+    M.trunk = L({ color: 0x6a4c34 });
+    M.glass = new THREE.MeshPhongMaterial({ color: 0xa8e0d8, transparent: true, opacity: 0.2, shininess: 110, specular: 0xffffff, depthWrite: false });
+    M.skylight = new THREE.MeshBasicMaterial({ map: Tex.skylight() });
+    M.cabGlow = new THREE.MeshBasicMaterial({ color: 0xffd9a0 });
   };
 
   // ----------------------------------------------------------- helpers
@@ -170,6 +180,7 @@ window.INN = window.INN || {};
       wood: [[M.wood, 0, 99]],
       arcade: [[M.woodDark, 0, 99]],
       plain: [[M.cream, 0, 99]],
+      lobby: [[M.wood, 0, 1.05], [M.stucco, 1.05, 99]],
     }[style] || [[M.cream, 0, 99]];
     for (const [mat, a, b] of parts) {
       const ya = Math.max(y0, a), yb = Math.min(y1, b);
@@ -256,6 +267,9 @@ window.INN = window.INN || {};
     this.buildArcade();
     this.buildDining();
     this.buildExits();
+    this.buildPromenade();
+    this.buildGardenCourt();
+    this.zone('THE WINGS', 'corridor', -1e5, -1e5, 1e5, -44, { area: 'wing' });
   };
 
   // ----------------------------------------------------------- atrium
@@ -265,7 +279,7 @@ window.INN = window.INN || {};
     this.ceil(-12, -12, 12, 12, H);
     this.wall('z', -12, -12, 12, H, 'corr', 'corr', [{ c: 0, w: 3, h: 2.7 }]);
     this.wall('z', 12, -12, 12, H, 'corr', 'corr', [{ c: 0, w: 3, h: 2.7 }]);
-    this.wall('x', -12, -12, 12, H, 'corr', 'corr', []);
+    this.wall('x', -12, -12, 12, H, 'corr', 'corr', [{ c: -9, w: 3, h: 3.0 }]);
     this.wall('x', 12, -12, 12, H, 'corr', 'corr', [{ c: 0, w: 3, h: 2.7 }]);
     this.zone('THE ATRIUM', 'atrium', -12, -12, 12, 12, { area: 'atrium', ceiling: H });
 
@@ -355,7 +369,7 @@ window.INN = window.INN || {};
     sofa(6, 3, Math.PI / 2, M.harvest); chair(9, 5.5, -Math.PI / 2, M.rustFab); chair(9, 2, -Math.PI / 2, M.rustFab);
     this.box(0.9, 0.4, 0.9, M.darkGlass, 7.6, 0.2, 3.8, { collide: true });
     // floor lamps & plants
-    for (const [x, z] of [[-10.5, -10.5], [10.5, 10.5], [-10.5, 10.5], [10.5, -6]]) {
+    for (const [x, z] of [[10.5, 10.5], [-10.5, 10.5], [10.5, -6]]) {
       this.cyl(0.3, 0.35, 0.6, M.orange, x, 0.3, z, { collide: true });
       const p = new THREE.Mesh(new THREE.ConeGeometry(0.5, 1.6, 7), M.plant); p.position.set(x, 1.4, z); this.add(p);
     }
@@ -987,6 +1001,221 @@ window.INN = window.INN || {};
     const attendantPos = new THREE.Vector3(0, 0, -0.75).applyMatrix4(g.matrixWorld);
     const lampPos = new THREE.Vector3(-0.3, 1.5, 0.05).applyMatrix4(g.matrixWorld);
     this.exits[id] = { id, name, group: g, shade, shadeOn, shadeOff, bell, attendantPos, attendantRy: ry, lampPos, standPos, x, z };
+  };
+
+  // ----------------------------------------------------------- the promenade
+  // A long, tall hall from the front desk to the Garden Court. Slightly too long.
+  P.buildPromenade = function () {
+    const M = this.M, H = 3.4;
+    this.floor(-10.5, -44, -7.5, -12, M.carpet, 2.4);
+    this.ceil(-10.5, -44, -7.5, -12, H);
+    this.wall('z', -10.5, -44, -12, H, 'corr', 'corr');
+    this.wall('z', -7.5, -44, -12, H, 'corr', 'corr');
+    for (let z = -15; z > -44; z -= 5) this.fixture(-9, H, z, 'z', 1.3, null, true);
+    this.zone('THE PROMENADE', 'corridor', -10.5, -44, -7.5, -12, { area: 'promenade' });
+    this.signMesh(Tex.sign('THE GARDEN COURT ↑', { w: 512, h: 96 }), 2.6, 0.48, -9, 3.45, -11.86, 0);
+    this.plaques.garden = this.plaqueMesh('garden', -7.62, 1.55, -42.2, -Math.PI / 2);
+    // framed postcards of the inn as it was
+    for (const z of [-20, -30]) {
+      const c = Tex.canvas(256, 180), g = c.getContext('2d');
+      const gr = g.createLinearGradient(0, 0, 0, 180); gr.addColorStop(0, '#f2a0b0'); gr.addColorStop(0.6, '#f7d48e'); gr.addColorStop(1, '#2f8a7e');
+      g.fillStyle = gr; g.fillRect(0, 0, 256, 180);
+      g.fillStyle = '#3a2a22'; g.fillRect(40, 70, 176, 80);
+      g.fillStyle = '#ffd890'; for (let i = 0; i < 8; i++) for (let j = 0; j < 3; j++) if ((i + j * 3 + z) % 4) g.fillRect(50 + i * 21, 80 + j * 22, 10, 12);
+      g.fillStyle = '#ff4fa0'; g.font = 'italic bold 22px Georgia'; g.textAlign = 'center'; g.fillText('The Inn Between', 128, 50);
+      g.strokeStyle = '#c9a24a'; g.lineWidth = 10; g.strokeRect(0, 0, 256, 180);
+      this.signMesh(new THREE.CanvasTexture(c), 1.1, 0.78, -10.38, 1.7, z, Math.PI / 2);
+    }
+  };
+
+  // ----------------------------------------------------------- the Garden Court
+  // A six-story atrium court: stacked balconies of rooms, planters, palms, a fountain,
+  // a glass elevator that is not for guests, and a skylight with nothing above it.
+  P.buildGardenCourt = function () {
+    const M = this.M;
+    const X0 = -30, X1 = 30, Z0 = -76, Z1 = -44, H = 24, FH = 3.6, D = 2.6, FLOORS = 5;
+    const b = new INN.Batch();
+    let seed = 7;
+    const rnd = () => { seed = (seed * 16807) % 2147483647; return (seed - 1) / 2147483646; };
+
+    this.floor(X0, Z0, X1, Z1, M.terrazzo, 3);
+    this.plane(X1 - X0, Z1 - Z0, M.ceiling, 0, H, (Z0 + Z1) / 2, Math.PI / 2, 0, { tile: 1.2 });
+    this.plane(36, 18, M.skylight, 0, H - 0.05, (Z0 + Z1) / 2, Math.PI / 2, 0, { tile: 4.5 });
+    this.wall('x', Z1, X0, X1, H, 'lobby', 'plain', [{ c: -9, w: 3, h: 3.0 }]);
+    this.wall('x', Z0, X0, X1, H, 'plain', 'lobby', [{ c: -12, w: 3, h: 2.7 }, { c: 12, w: 3, h: 2.7 }]);
+    this.wall('z', X0, Z0, Z1, H, 'plain', 'lobby', [{ c: -62, w: 3, h: 2.7 }]);
+    this.wall('z', X1, Z0, Z1, H, 'lobby', 'plain', [{ c: -62, w: 3, h: 2.7 }]);
+    this.zone('THE GARDEN COURT', 'garden', X0, Z0, X1, Z1, { area: 'garden', ceiling: H });
+    const openings = [[-9, Z1], [-12, Z0], [12, Z0], [X0, -62], [X1, -62]];
+    const nearOpening = (x, z) => openings.some(([ox, oz]) => Math.abs(ox - x) < 2.4 && Math.abs(oz - z) < 2.4);
+
+    // the sides of the court, as rows of rooms on every floor
+    // ta/tb: where the planters run (kept out of the corners); the north side parts around the elevator shaft
+    const sides = [
+      { axis: 'x', wall: Z0, dir: 1, a: X0, b: -1.8, ta: X0 + D, tb: -1.8 },
+      { axis: 'x', wall: Z0, dir: 1, a: 1.8, b: X1, ta: 1.8, tb: X1 - D },
+      { axis: 'x', wall: Z1, dir: -1, a: X0, b: X1, ta: X0 + D, tb: X1 - D },
+      { axis: 'z', wall: X0, dir: 1, a: Z0 + D, b: Z1 - D, ta: Z0 + D, tb: Z1 - D },
+      { axis: 'z', wall: X1, dir: -1, a: Z0 + D, b: Z1 - D, ta: Z0 + D, tb: Z1 - D },
+    ];
+    // box helper in side-local terms: along [s0,s1], depth [d0,d1] measured from the wall, height [y0,y1]
+    const sbox = (side, mat, s0, s1, d0, d1, y0, y1, tile) => {
+      const w0 = side.wall + side.dir * d0, w1 = side.wall + side.dir * d1;
+      if (side.axis === 'x') b.box(mat, s0, s1, y0, y1, Math.min(w0, w1), Math.max(w0, w1), tile);
+      else b.box(mat, Math.min(w0, w1), Math.max(w0, w1), y0, y1, s0, s1, tile);
+    };
+    const doorsAlong = (side, y, ground) => {
+      const len = side.b - side.a;
+      const n = Math.floor(len / 4);
+      const off = side.a + (len - (n - 1) * 4) / 2;
+      for (let i = 0; i < n; i++) {
+        const p = off + i * 4;
+        const px = side.axis === 'x' ? p : side.wall + side.dir * 0.2, pz = side.axis === 'x' ? side.wall + side.dir * 0.2 : p;
+        if (ground && (nearOpening(px, pz) || (side.wall === Z0 && Math.abs(p) < 3.2))) continue;
+        sbox(side, M.woodDark, p - 0.47, p + 0.47, 0.1, 0.16, y, y + 2.15, 1);
+        sbox(side, M.brass, p + 0.3, p + 0.36, 0.1, 0.2, y + 0.98, y + 1.04);
+        sbox(side, M.brass, p - 0.12, p + 0.12, 0.1, 0.18, y + 1.6, y + 1.72);
+        // a warm sconce between doors
+        sbox(side, M.lampShade, p + 1.85, p + 2.15, 0.1, 0.24, y + 1.9, y + 2.25);
+        if (ground && i % 2 === 0) {
+          const sx = side.axis === 'x' ? p + 2 : side.wall + side.dir * 0.6, sz = side.axis === 'x' ? side.wall + side.dir * 0.6 : p + 2;
+          this.fixtures.push({ mesh: null, pos: new THREE.Vector3(sx, y + 2.0, sz), flickerable: false, color: 0xffc890, warm: true });
+        }
+      }
+    };
+    sides.forEach((side) => doorsAlong(side, 0, true));
+    for (let k = 1; k <= FLOORS; k++) {
+      const y = FH * k;
+      sides.forEach((side) => {
+        sbox(side, M.stucco, side.a, side.b, 0.1, D, y - 0.38, y, 1.2);           // gallery floor
+        sbox(side, M.carpetRoom, side.a, side.b, 0.1, D - 0.2, y, y + 0.02, 2);   // gallery carpet
+        sbox(side, M.stucco, side.a, side.b, D - 0.22, D, y, y + 0.95, 1.2);      // parapet
+        sbox(side, M.wood, side.a, side.b, D - 0.3, D + 0.06, y + 0.95, y + 1.03, 1); // cap rail
+        sbox(side, M.woodDark, side.ta, side.tb, D, D + 0.5, y + 0.55, y + 0.95, 1);  // planter trough
+        sbox(side, M.grass, side.ta, side.tb, D, D + 0.5, y + 0.95, y + 1.18, 0.8);   // foliage
+        doorsAlong(side, y, false);
+        // vines trailing over the parapets
+        for (let s = side.ta + 0.6; s < side.tb - 0.6; s += 0.9 + rnd() * 0.9) {
+          const L = 1.2 + rnd() * 3.2;
+          const d = side.wall + side.dir * (D + 0.52);
+          const yc = y + 1.1 - L / 2;
+          const uv = [0, 1 - L / 4.6, 1, 1];
+          if (side.axis === 'x') b.plane(M.vines, 0.8, L, s, yc, d, 0, 0, 0, null, uv);
+          else b.plane(M.vines, 0.8, L, d, yc, s, 0, Math.PI / 2, 0, null, uv);
+        }
+      });
+    }
+    // the court floor: planting beds you are asked to keep out of
+    this.planters = [];
+    const beds = [[-26, -72, -15, -66], [15, -72, 26, -66], [-26, -58, -15, -50], [15, -58, 26, -50]];
+    const palm = (x, z, h) => {
+      let px = x, pz = z, lean = (rnd() - 0.5) * 0.08, lz = (rnd() - 0.5) * 0.08;
+      for (let i = 0; i < 6; i++) {
+        const seg = h / 6;
+        b.mesh(M.trunk, new THREE.CylinderGeometry(0.2 - i * 0.015, 0.24 - i * 0.015, seg, 7), px, seg * (i + 0.5), pz);
+        px += lean * seg; pz += lz * seg;
+      }
+      for (let f = 0; f < 9; f++) {
+        const g = new THREE.ConeGeometry(0.45, 4.2, 4); g.translate(0, 2.1, 0);
+        b.mesh(f % 2 ? M.leaf : M.leafDark, g, px, h, pz, 0, (f / 9) * Math.PI * 2 + rnd() * 0.3, 1.1 + rnd() * 0.5, 1, 1, 0.35);
+      }
+    };
+    const fern = (x, z) => {
+      for (let f = 0; f < 7; f++) {
+        const g = new THREE.ConeGeometry(0.18, 1.3, 3); g.translate(0, 0.65, 0);
+        b.mesh(f % 2 ? M.leaf : M.leafDark, g, x, 0.05, z, 0, f * 0.9, 0.7 + rnd() * 0.5);
+      }
+    };
+    beds.forEach(([x0, z0, x1, z1]) => {
+      this.planters.push({ x0, z0, x1, z1 });
+      b.box(M.grass, x0, x1, 0, 0.04, z0, z1, 1.5);
+      b.box(M.cream, x0 - 0.25, x1 + 0.25, 0, 0.3, z0 - 0.25, z0, 1);
+      b.box(M.cream, x0 - 0.25, x1 + 0.25, 0, 0.3, z1, z1 + 0.25, 1);
+      b.box(M.cream, x0 - 0.25, x0, 0, 0.3, z0, z1, 1);
+      b.box(M.cream, x1, x1 + 0.25, 0, 0.3, z0, z1, 1);
+      palm(x0 + 2.5 + rnd() * 2, (z0 + z1) / 2 + (rnd() - 0.5) * 2, 9 + rnd() * 5);
+      palm(x1 - 2.5 - rnd() * 2, (z0 + z1) / 2 + (rnd() - 0.5) * 2, 7 + rnd() * 6);
+      for (let i = 0; i < 6; i++) fern(x0 + 0.8 + rnd() * (x1 - x0 - 1.6), z0 + 0.8 + rnd() * (z1 - z0 - 1.6));
+    });
+    // tall potted palms by the walls
+    for (const [x, z] of [[-27, -47], [27, -47], [-27, -73], [27, -73], [-4.5, -46.5], [4, -73.4]]) {
+      b.mesh(M.orange, new THREE.CylinderGeometry(0.5, 0.4, 0.8, 10), x, 0.4, z);
+      this.collider(x - 0.5, z - 0.5, x + 0.5, z + 0.5);
+      palm(x, z, 5 + rnd() * 3);
+    }
+    // the fountain
+    const fx = 0, fz = -61;
+    b.mesh(M.tilePool, new THREE.CylinderGeometry(3.3, 3.5, 0.6, 32), fx, 0.3, fz);
+    b.mesh(M.white, new THREE.CylinderGeometry(0.35, 0.45, 2.6, 12), fx, 1.3, fz);
+    b.mesh(M.white, new THREE.CylinderGeometry(1.4, 0.5, 0.35, 20), fx, 1.6, fz);
+    b.mesh(M.white, new THREE.CylinderGeometry(0.75, 0.3, 0.3, 16), fx, 2.6, fz);
+    this.collider(fx - 3.5, fz - 3.5, fx + 3.5, fz + 3.5);
+    const water = new THREE.Mesh(new THREE.CircleGeometry(3.1, 32), M.water);
+    water.rotation.x = -Math.PI / 2; water.position.set(fx, 0.55, fz); this.add(water);
+    for (let i = 0; i < 10; i++) {
+      const a = i / 10 * Math.PI * 2;
+      b.mesh(M.glass, new THREE.CylinderGeometry(0.03, 0.06, 1.1, 5), fx + Math.cos(a) * 1.3, 1.0, fz + Math.sin(a) * 1.3);
+    }
+    this.fountainPos = new THREE.Vector3(fx, 1, fz);
+    // globe lamp posts along the paths
+    for (const [x, z] of [[-6, -48], [6, -48], [-6, -74], [6, -74], [-10, -62], [10, -62], [-27, -62], [27, -62]]) {
+      b.mesh(M.chrome, new THREE.CylinderGeometry(0.06, 0.08, 3.2, 8), x, 1.6, z);
+      b.mesh(M.lampShade, new THREE.SphereGeometry(0.32, 12, 8), x, 3.4, z);
+      this.collider(x - 0.15, z - 0.15, x + 0.15, z + 0.15);
+      this.fixtures.push({ mesh: null, pos: new THREE.Vector3(x, 3.1, z), flickerable: false, color: 0xffd8a0, warm: true });
+    }
+    // benches
+    const bench = (x, z, ry) => {
+      const g = new THREE.Group(); g.position.set(x, 0, z); g.rotation.y = ry; this.add(g);
+      this.box(2.2, 0.08, 0.6, M.wood, 0, 0.45, 0, { parent: g });
+      this.box(2.2, 0.5, 0.08, M.wood, 0, 0.75, -0.3, { parent: g });
+      this.box(0.08, 0.45, 0.5, M.metal, -1, 0.22, 0, { parent: g });
+      this.box(0.08, 0.45, 0.5, M.metal, 1, 0.22, 0, { parent: g });
+      const c = Math.abs(Math.sin(ry)) > 0.5;
+      this.collider(x - (c ? 0.4 : 1.15), z - (c ? 1.15 : 0.4), x + (c ? 0.4 : 1.15), z + (c ? 1.15 : 0.4));
+    };
+    bench(-5, -55.5, Math.PI); bench(5, -66.5, 0); bench(-12.5, -66, Math.PI / 2);
+
+    // the glass elevator, not for guests
+    const ex = 0, ez0 = Z0 + 0.1, ez1 = Z0 + 2.9;
+    for (const [x, z] of [[-1.6, ez0], [1.6, ez0], [-1.6, ez1], [1.6, ez1]]) b.box(M.chrome, x - 0.07, x + 0.07, 0, H, z - 0.07, z + 0.07);
+    b.box(M.glass, -1.55, 1.55, 0, H, ez1 - 0.02, ez1 + 0.02);
+    b.box(M.glass, -1.62, -1.58, 0, H, ez0, ez1);
+    b.box(M.glass, 1.58, 1.62, 0, H, ez0, ez1);
+    this.collider(-1.7, Z0, 1.7, ez1 + 0.1);
+    const cab = new THREE.Group(); this.add(cab);
+    this.box(3.0, 0.15, 2.6, M.chrome, ex, 0.07, (ez0 + ez1) / 2, { parent: cab });
+    this.box(3.0, 0.15, 2.6, M.chrome, ex, 2.6, (ez0 + ez1) / 2, { parent: cab });
+    this.box(2.8, 2.4, 0.05, M.cabGlow, ex, 1.35, ez0 + 0.15, { parent: cab });
+    this.box(0.4, 1.7, 0.3, M.black, ex + 0.4, 0.95, ez0 + 0.6, { parent: cab });
+    const head = new THREE.Mesh(new THREE.SphereGeometry(0.15, 10, 8), M.black); head.position.set(ex + 0.4, 1.95, ez0 + 0.6); cab.add(head);
+    this.elevatorCab = cab;
+    this.fixtures.push({ mesh: null, pos: new THREE.Vector3(ex, 1.5, ez1 + 1), flickerable: false, color: 0xffd9a0, warm: true, cab: true });
+    const call = this.box(0.16, 0.26, 0.06, M.brass, 2.25, 1.2, Z0 + 0.13);
+    this.interact(call, { type: 'glasselevator' });
+
+    b.flush(this.root);
+
+    // signs and neon
+    this.signMesh(Tex.neon('The Garden Court', '#3fe0d0', { underline: '#ff4fa0' }), 9, 2.25, 9, 7.2, Z1 - 0.12, Math.PI, { transparent: true, additive: true });
+    this.signMesh(Tex.sign('WEST WING', { w: 384, h: 96 }), 1.8, 0.45, X0 + 0.12, 3.1, -62, Math.PI / 2);
+    this.signMesh(Tex.sign('EAST WING', { w: 384, h: 96 }), 1.8, 0.45, X1 - 0.12, 3.1, -62, -Math.PI / 2);
+    this.signMesh(Tex.sign('NORTH WING', { w: 384, h: 96 }), 1.8, 0.45, -12, 3.1, Z0 + 0.12, 0);
+    this.signMesh(Tex.sign('NORTH WING', { w: 384, h: 96 }), 1.8, 0.45, 12, 3.1, Z0 + 0.12, 0);
+    this.signMesh(Tex.sign('↓ FRONT DESK', { w: 384, h: 96 }), 1.8, 0.45, -9, 3.3, Z1 - 0.12, Math.PI);
+
+    // guests: on the benches, by the fountain, and watching from the balconies
+    const gs = (s) => this.guestSpots.push(Object.assign({ area: 'garden' }, s));
+    gs({ type: 'almost', x: -5.4, z: -55.6, ry: Math.PI, pose: 'sit' });
+    gs({ type: 'armored', x: 5.5, z: -66.4, ry: 0, pose: 'sit' });
+    gs({ type: 'tall', x: 4.6, z: -57, ry: Math.atan2(-4.6, -4), pose: 'stand' });
+    gs({ type: 'almost', x: -6, z: Z0 + D - 0.6, y: FH * 2, ry: 0, pose: 'stand', lookDown: true });
+    gs({ type: 'tall', x: X0 + D - 0.6, z: -55, y: FH * 3, ry: Math.PI / 2, pose: 'stand' });
+    gs({ type: 'armored', x: X1 - D + 0.6, z: -67, y: FH, ry: -Math.PI / 2, pose: 'stand' });
+    gs({ type: 'almost', x: 14, z: Z1 - D + 0.6, y: FH * 4, ry: Math.PI, pose: 'stand', lookDown: true });
+    gs({ type: 'tall', x: 19, z: Z0 + D - 0.6, y: FH * 5, ry: 0, pose: 'stand' });
+    gs({ type: 'tentacle', x: X0 + D - 0.6, z: -70, y: FH, ry: Math.PI / 2, pose: 'stand' });
+    this.soundSpots.push({ kind: 'fountain', pos: this.fountainPos });
   };
 
   // ----------------------------------------------------------- queries
