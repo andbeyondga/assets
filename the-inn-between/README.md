@@ -28,6 +28,17 @@ Use headphones. The sound design is half the game.
 
 If the page is embedded somewhere that refuses mouse capture, the game falls back to click-and-drag to look.
 
+### On a phone or tablet
+
+Touch controls switch on automatically on devices without a mouse (keyboard and mouse play is unchanged). Hold the phone sideways.
+
+- Left thumb, anywhere on the left half: a thumbstick appears where you touch. Push lightly to walk slowly.
+- Right thumb: drag to look. A quick tap uses whatever is under the dot.
+- USE, RUN (toggle), FOLIO, and pause buttons sit on the right. Tap the watch to raise it.
+- Tap the screen during the opening broadcast to fast-forward.
+
+Phones get a lighter picture (smaller internal resolution, one bloom pass, fewer lights, a shorter view distance into the Wings) to hold frame rate.
+
 ## How a stay works
 
 1. **Claim a room.** Any door with a key hanging beside it is available. Taking the key starts that room's clock.

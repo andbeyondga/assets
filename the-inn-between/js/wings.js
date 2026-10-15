@@ -81,6 +81,7 @@ window.INN = window.INN || {};
     // only the part of the inn north of the front desk can reach the wings
     if (pos.z > -20) { if (this.loaded.size) this.unloadAll(); return; }
     const want = new Map();
+    const LOAD_R = this.loadR || 54, DROP_R = this.dropR || 72;
     const i0 = Math.floor((pos.x - LOAD_R - X_OFF) / SP), i1 = Math.ceil((pos.x + LOAD_R - X_OFF) / SP);
     const j0 = Math.max(0, Math.floor((Z_OFF - pos.z - LOAD_R) / SP)), j1 = Math.ceil((Z_OFF - pos.z + LOAD_R) / SP);
     for (let i = i0; i <= i1; i++) for (let j = j0; j <= j1; j++) {

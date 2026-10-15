@@ -110,6 +110,7 @@ window.INN = window.INN || {};
   };
 
   UI.hud = function (on) {
+    document.body.classList.toggle('playing', !!on);
     ['vcr-play', 'vcr-date'].forEach((id) => { $(id).style.display = on ? '' : 'none'; });
     UI.crosshair.style.display = on ? '' : 'none';
     UI.watch.style.display = on ? '' : 'none';
@@ -182,7 +183,7 @@ window.INN = window.INN || {};
     UI.paperClosable = o.closable !== false;
     UI.onPaperClose = o.onClose || null;
     let html = (o.letterhead !== false ? letterhead() : '');
-    if (UI.paperClosable) html += '<button class="close" data-close>[ESC] CLOSE</button>';
+    if (UI.paperClosable) html += '<button class="close" data-close>' + (INN.Game && INN.Game.touch ? 'CLOSE' : '[ESC] CLOSE') + '</button>';
     if (o.title) html += '<h2>' + o.title + '</h2>';
     if (o.speaker) html += '<div class="speaker">' + o.speaker + '</div>';
     if (o.html) html += o.html;

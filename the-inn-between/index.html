@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>The Inn Between</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=VT323&family=Courier+Prime:wght@400;700&display=swap" rel="stylesheet">
@@ -97,6 +97,48 @@
   #paper .plaque h2 { text-align: center; }
   #paper .plaque ol { font-weight: bold; font-size: 17px; line-height: 1.5; }
   #paper .close { position: absolute; right: 10px; top: 6px; background: none; border: none; font: inherit; font-size: 13px; color: #5a4a3a; cursor: pointer; }
+
+  /* ---------- touch devices only (body.touch is set by js/touch.js) ---------- */
+  #gl { touch-action: none; }
+  #touch-ui { display: none; }
+  body.touch.playing #touch-ui { display: block; }
+  #touch-ui { position: fixed; inset: 0; z-index: 30; pointer-events: none; -webkit-user-select: none; -webkit-touch-callout: none; }
+  #stick-zone, #look-zone { position: absolute; top: 0; bottom: 0; pointer-events: auto; touch-action: none; }
+  #stick-zone { left: 0; width: 45%; }
+  #look-zone { right: 0; width: 55%; }
+  #stick { position: absolute; width: 120px; height: 120px; margin: -60px 0 0 -60px; border-radius: 50%; border: 2px solid rgba(244,239,226,.35); background: rgba(10,6,2,.25); display: none; pointer-events: none; }
+  #stick.on { display: block; }
+  #stick-knob { position: absolute; left: 50%; top: 50%; width: 52px; height: 52px; border-radius: 50%; background: rgba(244,239,226,.55); transform: translate(-50%,-50%); }
+  .tbtn { position: absolute; pointer-events: auto; touch-action: none; font-family: "VT323", monospace; font-size: 22px; letter-spacing: 2px; color: #f4efe2;
+          background: rgba(10,6,2,.45); border: 2px solid rgba(244,239,226,.45); border-radius: 50%; width: 78px; height: 78px; padding: 0; text-shadow: 1px 1px 0 #000; }
+  .tbtn.small { width: 58px; height: 58px; font-size: 17px; }
+  .tbtn.on { background: rgba(201,162,74,.55); border-color: #e8c372; }
+  .tbtn.ready { background: rgba(47,138,126,.6); border-color: #9ff0e8; }
+  #t-use { right: calc(28px + env(safe-area-inset-right, 0px)); bottom: calc(34px + env(safe-area-inset-bottom, 0px)); width: 92px; height: 92px; font-size: 26px; }
+  #t-run { right: calc(132px + env(safe-area-inset-right, 0px)); bottom: calc(24px + env(safe-area-inset-bottom, 0px)); }
+  #t-folio { right: calc(40px + env(safe-area-inset-right, 0px)); bottom: calc(140px + env(safe-area-inset-bottom, 0px)); }
+  #t-pause { right: calc(18px + env(safe-area-inset-right, 0px)); top: calc(14px + env(safe-area-inset-top, 0px)); }
+  body.touch #watch { left: auto; right: calc(88px + env(safe-area-inset-right, 0px)); top: calc(10px + env(safe-area-inset-top, 0px)); bottom: auto; width: 84px; height: 84px; transform-origin: right top; z-index: 31; }
+  body.touch #watch.raised { transform: scale(2.2); }
+  body.touch #vcr-date { bottom: auto; top: calc(3.5vh + env(safe-area-inset-top, 0px)); right: auto; left: 50%; transform: translateX(-50%); font-size: 18px; }
+  body.touch #vcr-play { left: calc(4vw + env(safe-area-inset-left, 0px)); font-size: 22px; }
+  body.touch #caption { bottom: auto; top: calc(44px + env(safe-area-inset-top, 0px)); padding: 0 190px 0 24px; z-index: 39; }
+  body.touch #caption .tag { margin-bottom: 4px; font-size: 13px; }
+  body.touch #caption .text { font-size: clamp(13px, 2.2vw, 20px); -webkit-text-stroke: 1px #000; }
+  body.touch #notice { bottom: auto; top: 18vh; }
+  body.touch #prompt { top: 58%; font-size: 18px; }
+  body.touch #paper { max-height: 88vh; padding: 18px 18px 16px; }
+  body.touch #paper .opt { padding: 10px 12px; }
+  body.touch #paper .letterhead { padding-bottom: 6px; margin-bottom: 8px; }
+  body.touch #paper .letterhead canvas { width: 40px; height: 40px; }
+  body.touch #paper .lh-name { font-size: 18px; }
+  body.touch #paper .field { margin: 4px 0; }
+  body.touch #paper h2 { margin-bottom: 6px; }
+  body.touch #paper .small { margin-top: 8px; }
+  #rotate { display: none; position: fixed; inset: 0; z-index: 70; background: #000; align-items: center; justify-content: center; flex-direction: column; }
+  #rotate canvas { width: min(90vw, 480px); height: auto; }
+  #rotate .rot-text { font-family: "VT323", monospace; color: #f4efe2; font-size: 22px; letter-spacing: 2px; margin-top: 16px; text-align: center; padding: 0 16px; }
+  @media (orientation: portrait) { body.touch.playing #rotate { display: flex; } }
   @media (max-width: 520px) {
     #paper { padding: 20px 18px; }
     #paper .twocol { grid-template-columns: 1fr; }
@@ -131,6 +173,7 @@
 <script src="js/wings.js"></script>
 <script src="js/entities.js"></script>
 <script src="js/ui.js"></script>
+<script src="js/touch.js"></script>
 <script src="js/ending.js"></script>
 <script src="js/game.js"></script>
 </body>

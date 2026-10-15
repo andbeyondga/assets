@@ -23,18 +23,22 @@ window.INN = window.INN || {};
   // =============================================================== boot
   G.boot = function () {
     UI.init();
+    // phones and tablets get touch controls and a lighter picture; desktop is unchanged
+    G.touch = INN.Touch.detect();
+    if (G.touch) INN.Touch.init(G);
     const canvas = document.getElementById('gl');
     const r = G.renderer = new THREE.WebGLRenderer({ canvas, antialias: false, powerPreference: 'high-performance' });
     r.setPixelRatio(1);
     r.setSize(innerWidth, innerHeight, false);
-    G.vhs = new INN.VHS(r);
+    G.vhs = new INN.VHS(r, { light: G.touch });
     G.vhs.resize(innerWidth, innerHeight);
     G.camera = new THREE.PerspectiveCamera(85, innerWidth / innerHeight, 0.1, 160);
     G.camera.layers.set(0);
+    fitFov();
     addEventListener('resize', () => {
       r.setSize(innerWidth, innerHeight, false);
       G.vhs.resize(innerWidth, innerHeight);
-      G.camera.aspect = innerWidth / innerHeight; G.camera.updateProjectionMatrix();
+      G.camera.aspect = innerWidth / innerHeight; fitFov();
       if (G.ending) { G.ending.camera.aspect = innerWidth / innerHeight; G.ending.camera.updateProjectionMatrix(); }
     });
     UI.voice = G.store.voice !== false;
@@ -45,6 +49,14 @@ window.INN = window.INN || {};
     G.last = performance.now();
     requestAnimationFrame(G.frame);
   };
+
+  // 85 degrees tall, but on very wide phone screens keep the sides from stretching past ~120
+  function fitFov() {
+    const a = innerWidth / innerHeight;
+    const maxH = 120 * Math.PI / 180;
+    const v = a > 1.85 ? Math.min(85, 2 * Math.atan(Math.tan(maxH / 2) / a) * 180 / Math.PI) : 85;
+    G.camera.fov = v; G.camera.updateProjectionMatrix();
+  }
 
   G.showBootCard = function () {
     G.state = 'boot';
@@ -65,7 +77,7 @@ window.INN = window.INN || {};
     scene.add(new THREE.HemisphereLight(0xffe2c0, 0x3a2010, 0.22));
     scene.add(G.camera);
     G.lights = [];
-    for (let i = 0; i < 8; i++) { const l = new THREE.PointLight(0xfff0d8, 0, 10, 1.3); scene.add(l); G.lights.push(l); }
+    for (let i = 0; i < (G.touch ? 6 : 8); i++) { const l = new THREE.PointLight(0xfff0d8, 0, 10, 1.3); scene.add(l); G.lights.push(l); }
 
     const residents = G.store.residents || [];
     const world = G.world = new INN.World(scene, { residents });
@@ -96,6 +108,7 @@ window.INN = window.INN || {};
 
     // cached interactable positions for cheap proximity tests
     G.wings = new INN.Wings(world);
+    if (G.touch) { G.wings.loadR = 40; G.wings.dropR = 56; }
     world.interactables.forEach((m) => { m.updateWorldMatrix(true, false); m.userData.wp = new V3().setFromMatrixPosition(m.matrixWorld); });
 
     // ---------------------------------------------------------- run state
@@ -203,6 +216,7 @@ window.INN = window.INN || {};
     if (G.state !== 'boot') return;
     removeEventListener('keydown', G.bootKey);
     Audio.init();
+    INN.Touch.firstGesture();
     G.state = 'intro';
     G.introCam = { t: 0 };
     UI.card('static');
@@ -333,6 +347,7 @@ window.INN = window.INN || {};
 
   G.requestLock = function () {
     const c = G.renderer.domElement;
+    if (G.touch) return;
     if (G.dragLook || !c.requestPointerLock) { G.dragLook = true; return; }
     try {
       const p = c.requestPointerLock();
@@ -364,7 +379,7 @@ window.INN = window.INN || {};
     const menu = () => UI.paper({
       title: 'Guest Services',
       closable: true,
-      html: '<div class="body">CONTROLS ON FILE:\nW A S D · WALK        MOUSE · LOOK\nSHIFT · HURRY         E · USE / TAKE / SPEAK\nF · FOLIO             Q (HOLD) · CONSULT WATCH\nESC · PAUSE BROADCAST\n\nGUEST: ' + UI.esc(G.name).toUpperCase() + '\nCURRENT LOCATION: ' + (R.zone ? R.zone.name : 'UNKNOWN') + '</div>',
+      html: G.touch ? '<div class="body">CONTROLS ON FILE:\nLEFT THUMB · WALK\nRIGHT THUMB · LOOK (TAP TO USE)\nUSE · TAKE / SPEAK / READ\nRUN · HURRY (MIND THE ATRIUM)\nFOLIO · YOUR PAPERWORK\nTAP THE WATCH · CONSULT IT\n\nGUEST: ' + UI.esc(G.name).toUpperCase() + '\nCURRENT LOCATION: ' + (R.zone ? R.zone.name : 'UNKNOWN') + '</div>' : '<div class="body">CONTROLS ON FILE:\nW A S D · WALK        MOUSE · LOOK\nSHIFT · HURRY         E · USE / TAKE / SPEAK\nF · FOLIO             Q (HOLD) · CONSULT WATCH\nESC · PAUSE BROADCAST\n\nGUEST: ' + UI.esc(G.name).toUpperCase() + '\nCURRENT LOCATION: ' + (R.zone ? R.zone.name : 'UNKNOWN') + '</div>',
       options: [
         { label: 'Resume the broadcast.', fn: () => UI.closePaper() },
         { label: 'Narration: ' + (UI.voice ? 'AUDIBLE (change to captions only)' : 'CAPTIONS ONLY (change to audible)'), fn: () => { UI.voice = !UI.voice; G.store.voice = UI.voice; save(G.store); menu(); } },
@@ -424,6 +439,7 @@ window.INN = window.INN || {};
   G.update = function (dt) {
     const R = G.run, P = G.player;
     R.playTime += dt;
+    INN.Touch.frame(G);
     movePlayer(dt);
     // time
     R.T += dt * HOURS_PER_SEC;
@@ -464,10 +480,16 @@ window.INN = window.INN || {};
     if (k.KeyS || k.ArrowDown) fz += 1;
     if (k.KeyA || k.ArrowLeft) fx -= 1;
     if (k.KeyD || k.ArrowRight) fx += 1;
+    // the thumbstick is analog: a light push is a slow walk
+    let analog = 1;
+    if (INN.Touch.move.active) {
+      const m = INN.Touch.move, mag = Math.min(1, Math.hypot(m.x, m.y));
+      if (mag > 0.15) { fx += m.x; fz += m.y; analog = mag; }
+    }
     const len = Math.hypot(fx, fz);
     P.moving = len > 0;
     P.running = P.moving && (k.ShiftLeft || k.ShiftRight);
-    let speed = P.running ? RUN : WALK;
+    let speed = (P.running ? RUN : WALK) * analog;
     if (R.effects.slow > 0) speed *= 0.6;
     if (len > 0) {
       fx /= len; fz /= len;
@@ -1011,7 +1033,7 @@ window.INN = window.INN || {};
       if (hits.length) G.target = hits[0].object;
     }
     const label = G.target ? labelFor(G.target.userData.it) : '';
-    UI.prompt(label ? '[E] ' + label : (!G.locked && !G.dragLook ? 'CLICK TO RESUME THE BROADCAST' : ''));
+    UI.prompt(label ? (G.touch ? '' : '[E] ') + label : (!G.locked && !G.dragLook && !G.touch ? 'CLICK TO RESUME THE BROADCAST' : ''));
   }
 
   function isVisibleChain(o) {

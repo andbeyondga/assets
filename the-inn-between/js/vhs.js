@@ -91,8 +91,9 @@ window.INN = window.INN || {};
     return new THREE.WebGLRenderTarget(w, h, { minFilter: THREE.LinearFilter, magFilter: THREE.LinearFilter });
   }
 
-  function VHS(renderer) {
+  function VHS(renderer, opts) {
     this.renderer = renderer;
+    this.light = !!(opts && opts.light); // phones: smaller picture, one blur pass
     this.rt = rt(960, 540);
     this.bA = rt(240, 135); this.bB = rt(240, 135);
     this.uniforms = {
@@ -114,7 +115,7 @@ window.INN = window.INN || {};
 
   VHS.prototype.resize = function (w, h) {
     // still soft, but closer to a clean broadcast
-    const lines = Math.min(900, Math.max(480, Math.round(h * 0.85)));
+    const lines = this.light ? Math.min(540, Math.max(400, Math.round(h * 0.9))) : Math.min(900, Math.max(480, Math.round(h * 0.85)));
     const width = Math.round(lines * (w / h));
     this.rt.setSize(width, lines);
     this.uniforms.res.value.set(width, lines);
@@ -158,7 +159,7 @@ window.INN = window.INN || {};
     if (!this.bloomTexel) this.bloomTexel = new THREE.Vector2(1 / 240, 1 / 135);
     this.pass(this.matBright, this.bA);
     const bu = this.matBlur.uniforms;
-    for (let i = 0; i < 2; i++) {
+    for (let i = 0; i < (this.light ? 1 : 2); i++) {
       const s = 1 + i * 1.5;
       bu.tDiffuse.value = this.bA.texture; bu.dir.value.set(this.bloomTexel.x * s, 0); this.pass(this.matBlur, this.bB);
       bu.tDiffuse.value = this.bB.texture; bu.dir.value.set(0, this.bloomTexel.y * s); this.pass(this.matBlur, this.bA);
