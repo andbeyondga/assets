@@ -501,7 +501,139 @@ window.INN = window.INN || {};
     return toTexture(c);
   }
 
+  // ------------------------------------------------- the grand hotel look
+  // dark damask: emerald walls with a faint gold figure
+  function damask(bg, fg, gold) {
+    const c = canvas(256, 256), g = c.getContext('2d');
+    g.fillStyle = bg; g.fillRect(0, 0, 256, 256);
+    const motif = (cx, cy, s) => {
+      g.save(); g.translate(cx, cy); g.scale(s, s);
+      g.beginPath();
+      g.moveTo(0, -44); g.bezierCurveTo(22, -30, 26, -6, 8, 6); g.bezierCurveTo(26, 14, 22, 36, 0, 48);
+      g.bezierCurveTo(-22, 36, -26, 14, -8, 6); g.bezierCurveTo(-26, -6, -22, -30, 0, -44);
+      g.fill();
+      g.restore();
+    };
+    for (const [x, y] of [[64, 64], [192, 192], [192, -64], [-64, 192], [192, 64 + 256], [64, 64 + 256], [64 + 256, 64], [-64, -64]]) {
+      g.fillStyle = fg; motif(x, y, 1.15);
+      g.fillStyle = gold; g.globalAlpha = 0.18; motif(x, y, 0.55); g.globalAlpha = 1;
+    }
+    for (const [x, y] of [[192, 64], [64, 192]]) { g.fillStyle = fg; g.globalAlpha = 0.7; motif(x, y, 0.5); g.globalAlpha = 1; }
+    for (let i = 0; i < 1800; i++) { g.fillStyle = `rgba(0,0,0,${rnd() * 0.12})`; g.fillRect(rnd() * 256, rnd() * 256, 2, 2); }
+    return toTexture(c);
+  }
+
+  // a big spiral medallion carpet: one spiral per tile, crimson, cream and moss
+  function spiralCarpet(cols) {
+    const size = 512, c = canvas(size, size), g = c.getContext('2d');
+    const img = g.createImageData(size, size), d = img.data;
+    const P = cols.map(hex);
+    for (let y = 0; y < size; y++) for (let x = 0; x < size; x++) {
+      const dx = (x - size / 2) / (size / 2), dy = (y - size / 2) / (size / 2);
+      const r = Math.hypot(dx, dy), a = Math.atan2(dy, dx);
+      // corners share a quarter-spiral so tiles meet cleanly
+      const ex = Math.min(x, size - x) / (size / 2), ey = Math.min(y, size - y) / (size / 2);
+      const rc = Math.hypot(ex, ey);
+      let v;
+      if (r < 0.92) {
+        v = Math.sin(a * 1 + r * 28 + Math.sin(a * 6) * 0.4);
+        v += 0.35 * Math.sin(a * 14 + r * 40);
+      } else {
+        v = Math.sin(rc * 22 + Math.atan2(ey, ex) * 4) * 0.8;
+      }
+      const t = (v + 1.35) / 2.7;
+      let col = P[Math.max(0, Math.min(P.length - 1, Math.floor(t * P.length)))];
+      const edge = Math.abs(r - 0.94) < 0.02 ? 0.5 : 0;
+      const fib = (rnd() - 0.5) * 28;
+      const i = (y * size + x) * 4;
+      d[i] = col[0] * (1 - edge) + fib; d[i + 1] = col[1] * (1 - edge) + fib * 0.8; d[i + 2] = col[2] * (1 - edge) + fib * 0.7; d[i + 3] = 255;
+    }
+    g.putImageData(img, 0, 0);
+    return toTexture(c);
+  }
+
+  // coffered dark wood ceiling
+  function coffer() {
+    const c = canvas(256, 256), g = c.getContext('2d');
+    g.fillStyle = '#1a120c'; g.fillRect(0, 0, 256, 256);
+    g.fillStyle = '#2a1c12'; g.fillRect(20, 20, 216, 216);
+    g.fillStyle = '#140d08'; g.fillRect(36, 36, 184, 184);
+    g.strokeStyle = 'rgba(201,162,74,0.25)'; g.lineWidth = 2; g.strokeRect(36, 36, 184, 184);
+    for (let i = 0; i < 900; i++) { g.fillStyle = `rgba(80,50,30,${rnd() * 0.15})`; g.fillRect(rnd() * 256, rnd() * 256, 3, 1); }
+    return toTexture(c);
+  }
+
+  function checker(a, b) {
+    const c = canvas(256, 256), g = c.getContext('2d');
+    for (let i = 0; i < 2; i++) for (let j = 0; j < 2; j++) {
+      g.fillStyle = (i + j) % 2 ? a : b; g.fillRect(i * 128, j * 128, 128, 128);
+    }
+    // marble veins
+    for (let k = 0; k < 18; k++) {
+      g.strokeStyle = `rgba(255,240,220,${0.04 + rnd() * 0.08})`; g.lineWidth = 0.6 + rnd();
+      g.beginPath(); let x = rnd() * 256, y = rnd() * 256; g.moveTo(x, y);
+      for (let s = 0; s < 6; s++) { x += (rnd() - 0.5) * 70; y += (rnd() - 0.3) * 50; g.lineTo(x, y); }
+      g.stroke();
+    }
+    g.fillStyle = 'rgba(0,0,0,0.5)'; g.fillRect(0, 0, 256, 1); g.fillRect(0, 128, 256, 1); g.fillRect(0, 0, 1, 256); g.fillRect(128, 0, 1, 256);
+    return toTexture(c);
+  }
+
+  function leather() {
+    const c = canvas(128, 128), g = c.getContext('2d');
+    g.fillStyle = '#4a1a12'; g.fillRect(0, 0, 128, 128);
+    for (let i = 0; i < 4; i++) for (let j = 0; j < 4; j++) {
+      const x = i * 32 + (j % 2 ? 16 : 0), y = j * 32;
+      const gr = g.createRadialGradient(x + 16, y + 16, 2, x + 16, y + 16, 18);
+      gr.addColorStop(0, 'rgba(120,50,36,0.9)'); gr.addColorStop(1, 'rgba(20,6,4,0.6)');
+      g.fillStyle = gr; g.fillRect(x, y, 32, 32);
+      g.fillStyle = '#1a0604'; g.beginPath(); g.arc(x, y, 2, 0, TAU); g.fill();
+    }
+    return toTexture(c);
+  }
+
+  // a soft round glow, for the strings of tiny bulbs
+  function bulb() {
+    const c = canvas(64, 64), g = c.getContext('2d');
+    const gr = g.createRadialGradient(32, 32, 0, 32, 32, 32);
+    gr.addColorStop(0, 'rgba(255,250,235,1)'); gr.addColorStop(0.2, 'rgba(255,220,160,0.9)');
+    gr.addColorStop(0.5, 'rgba(255,170,90,0.25)'); gr.addColorStop(1, 'rgba(255,140,60,0)');
+    g.fillStyle = gr; g.fillRect(0, 0, 64, 64);
+    return toTexture(c, false);
+  }
+
+  // a shaft of light falling through haze
+  function shaft() {
+    const c = canvas(64, 256), g = c.getContext('2d');
+    const gr = g.createLinearGradient(0, 0, 0, 256);
+    gr.addColorStop(0, 'rgba(200,255,230,0.55)'); gr.addColorStop(1, 'rgba(120,200,170,0)');
+    g.fillStyle = gr; g.fillRect(0, 0, 64, 256);
+    const side = g.createLinearGradient(0, 0, 64, 0);
+    side.addColorStop(0, 'rgba(0,0,0,1)'); side.addColorStop(0.5, 'rgba(0,0,0,0)'); side.addColorStop(1, 'rgba(0,0,0,1)');
+    g.globalCompositeOperation = 'destination-out'; g.fillStyle = side; g.fillRect(0, 0, 64, 256);
+    return toTexture(c, false);
+  }
+
+  // marquee face: green neon lettering, rows of red chaser bulbs underneath
+  function marquee(text, phase) {
+    const c = canvas(1024, 256), g = c.getContext('2d');
+    g.fillStyle = '#0c120e'; g.fillRect(0, 0, 1024, 256);
+    g.textAlign = 'center'; g.textBaseline = 'middle';
+    g.font = 'bold 120px "Futura","Century Gothic","Trebuchet MS",sans-serif';
+    g.fillStyle = '#5dffa0'; g.shadowColor = '#3dff8a';
+    for (const b of [36, 18, 8]) { g.shadowBlur = b; g.fillText(text, 512, 100); }
+    g.shadowBlur = 0; g.fillStyle = '#eafff0'; g.fillText(text, 512, 100);
+    for (let row = 0; row < 3; row++) for (let i = 0; i < 48; i++) {
+      const on = (i + row + phase) % 3 !== 0;
+      g.fillStyle = on ? '#ff3a2a' : '#3a0c08';
+      g.shadowColor = '#ff2a1a'; g.shadowBlur = on ? 12 : 0;
+      g.beginPath(); g.arc(14 + i * 21, 190 + row * 20, 6, 0, TAU); g.fill();
+    }
+    return toTexture(c, false);
+  }
+
   INN.Tex = {
+    damask, spiralCarpet, coffer, checker, leather, bulb, shaft, marquee,
     terrazzo, grass, vines, skylight,
     canvas, toTexture, carpet, wood, wallpaper, tile, ceiling, shag, fabric,
     drawEmblem, drawTestCard, drawClock, sign, neon, plaque, residentsPlaque,

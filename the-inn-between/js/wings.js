@@ -208,7 +208,9 @@ window.INN = window.INN || {};
           f.box(b, this.dark, p - 0.47, p + 0.47, face, face - side * 0.005, 0, 2.12);
           continue;
         }
-        f.box(b, M.woodDark, p - 0.47, p + 0.47, face, face - side * 0.05, 0, 2.12, 1);
+        f.box(b, M.door, p - 0.47, p + 0.47, face, face - side * 0.05, 0, 2.12, 1);
+        // a red-shaded sconce beside the door
+        f.box(b, M.redShade, p + 0.72, p + 0.92, face, face - side * 0.2, 1.65, 1.88);
         f.box(b, M.brass, p + 0.3, p + 0.36, face - side * 0.05, face - side * 0.11, 0.98, 1.04);
         // the number: usually a stranger's, once in a while your own
         let n = 2000 + Math.floor(hash(s.i * 31 + k, s.j * 17 + side, 9) * 7800);
@@ -228,16 +230,27 @@ window.INN = window.INN || {};
         b.plane(pm, 0.28, 0.14, x, 1.62, z, 0, f.faceIn(pl.side), 0, null, [idx / 8, 0, (idx + 1) / 8, 1]);
       });
     }
+    // potted ferns between the doors
+    for (let p = s0 + 6, kk = 0; p < s1 - 1; p += 6, kk++) {
+      if (seed(40 + kk) > 0.4) continue;
+      const side = seed(60 + kk) < 0.5 ? -1 : 1;
+      const [x, z] = f.toW(p, side * (HALF - 0.32));
+      b.mesh(M.brass, new THREE.CylinderGeometry(0.26, 0.2, 0.45, 10), x, 0.22, z);
+      for (let q = 0; q < 7; q++) {
+        const g = new THREE.ConeGeometry(0.12, 1.0, 3); g.translate(0, 0.5, 0);
+        b.mesh(q % 2 ? M.leaf : M.leafDark, g, x, 0.42, z, 0, q * 0.9, 0.75);
+      }
+      W.collider(x - 0.28, z - 0.28, x + 0.28, z + 0.28);
+    }
     b.flush(group);
-    // fluorescent tubes, unless this stretch has gone dark
+    // pendant lamps, unless this stretch has gone dark
     const fixtures = [];
     for (let p = s0 + 3; p < s1 - 1; p += 6) fixtures.push(p);
     fixtures.forEach((p, idx) => {
       if (darkStretch && idx !== Math.floor(fixtures.length / 2)) return;
       const [x, z] = f.toW(p, 0);
-      const g = s.axis === 'x' ? new THREE.BoxGeometry(1.3, 0.06, 0.32) : new THREE.BoxGeometry(0.32, 0.06, 1.3);
-      const m = new THREE.Mesh(g, M.fixture); m.position.set(x, H - 0.03, z); group.add(m);
-      W.fixtures.push({ mesh: m, pos: new THREE.Vector3(x, H - 0.28, z), flickerable: true, color: 0xfff2d8 });
+      const pd = W.pendant(x, H, z, group);
+      W.fixtures.push({ mesh: pd.glow, pos: new THREE.Vector3(x, H - pd.drop - 0.25, z), flickerable: true, color: 0xffd2a0 });
     });
     // now and then: a snack machine, a little wrong
     if (seed(4) < 0.08 && s1 - s0 > 12) {
@@ -289,8 +302,8 @@ window.INN = window.INN || {};
       wall(Math.min(px, px + cx * T), Math.max(px, px + cx * T), Math.min(pz, pz + cz * T), Math.max(pz, pz + cz * T));
     }
     b.flush(group);
-    const m = new THREE.Mesh(new THREE.BoxGeometry(0.9, 0.06, 0.9), M.fixture); m.position.set(x, H - 0.03, z); group.add(m);
-    W.fixtures.push({ mesh: m, pos: new THREE.Vector3(x, H - 0.28, z), flickerable: true, color: 0xfff2d8 });
+    const pd = W.pendant(x, H, z, group);
+    W.fixtures.push({ mesh: pd.glow, pos: new THREE.Vector3(x, H - pd.drop - 0.25, z), flickerable: true, color: 0xffd2a0 });
   };
 
   // ------------------------------------------------------------- the way back

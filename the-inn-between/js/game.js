@@ -71,10 +71,10 @@ window.INN = window.INN || {};
   G.buildRun = function (fresh) {
     if (G.scene) disposeScene(G.scene);
     const scene = G.scene = new THREE.Scene();
-    scene.background = new THREE.Color(0x0c0805);
-    scene.fog = new THREE.Fog(0x120b06, 5, 34);
-    G.ambient = new THREE.AmbientLight(0x8a7458, 0.62); scene.add(G.ambient);
-    scene.add(new THREE.HemisphereLight(0xffe2c0, 0x3a2010, 0.22));
+    scene.background = new THREE.Color(0x0b1712);
+    scene.fog = new THREE.Fog(0x0b1712, 5, 32);
+    G.ambient = new THREE.AmbientLight(0x8a9070, 0.5); scene.add(G.ambient);
+    scene.add(new THREE.HemisphereLight(0xffd8b0, 0x0e2a1c, 0.25));
     scene.add(G.camera);
     G.lights = [];
     for (let i = 0; i < (G.touch ? 6 : 8); i++) { const l = new THREE.PointLight(0xfff0d8, 0, 10, 1.3); scene.add(l); G.lights.push(l); }
@@ -817,12 +817,16 @@ window.INN = window.INN || {};
   }
 
   // the court opens up: longer sight lines, more light; the wings close back in
+  const _fogC = new THREE.Color();
   function atmosphere(dt) {
     const a = G.run.zone ? G.run.zone.area : '';
     const fog = G.scene.fog, k = Math.min(1, dt * 1.5);
-    const far = a === 'garden' ? 140 : a === 'wing' ? 30 : 34, near = a === 'garden' ? 30 : 5;
+    // green haze in the court (deep enough that the balconies never end), a colder haze in the wings
+    const far = a === 'garden' ? 82 : a === 'wing' ? 28 : 32, near = a === 'garden' ? 6 : 5;
     fog.far += (far - fog.far) * k; fog.near += (near - fog.near) * k;
-    const amb = a === 'garden' ? 1.0 : a === 'wing' ? 0.5 : 0.62;
+    _fogC.setHex(a === 'garden' ? 0x12301f : a === 'wing' ? 0x0a1519 : 0x0b1712);
+    fog.color.lerp(_fogC, k); G.scene.background.copy(fog.color);
+    const amb = a === 'garden' ? 0.62 : a === 'wing' ? 0.42 : 0.5;
     G.ambient.intensity += (amb - G.ambient.intensity) * k;
   }
 
@@ -888,6 +892,12 @@ window.INN = window.INN || {};
     if (G.clerk) G.clerk.update(dt, t);
     Object.values(G.attendants || {}).forEach((a) => a.update(dt, t));
     if (W.water) W.water.material.emissive.setHSL(0.5, 0.7, 0.13 + Math.sin(t * 0.7) * 0.02);
+    if (W.marqueeMat) {
+      // the marquee bulbs chase
+      const ph = Math.floor(t * 4) % 3;
+      if (ph !== W._mqPh) { W._mqPh = ph; W.marqueeMat.map = W.marqueeTex[ph]; W.marqueeMat.needsUpdate = true; }
+      W.marqueeBulbs.material.opacity = 0.75 + 0.25 * Math.sin(t * 9);
+    }
     if (W.elevatorCab) {
       // the glass car rises and settles, floor by floor, carrying no guest
       const cyc = (t * 0.04) % 2, f = cyc < 1 ? cyc : 2 - cyc;

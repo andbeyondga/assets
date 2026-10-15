@@ -70,8 +70,11 @@ window.INN = window.INN || {};
       col += b * bloom * vec3(1.05, 0.95, 0.9);
 
       // faded 1974 postcard grade
-      col = col * 0.95 + vec3(0.02, 0.016, 0.024);
-      col = mix(col, col * vec3(1.05, 0.99, 0.92), 0.5);
+      // cinematic split tone: emerald shadows, amber highlights, a little contrast
+      float lum = dot(col, vec3(0.299, 0.587, 0.114));
+      col *= mix(vec3(0.84, 1.03, 0.95), vec3(1.08, 0.98, 0.84), smoothstep(0.12, 0.7, lum));
+      col = (col - 0.5) * 1.07 + 0.5;
+      col = max(col, 0.0) + vec3(0.004, 0.014, 0.011);
       float l = dot(col, vec3(0.299, 0.587, 0.114));
       col = mix(col, vec3(l), desat);
       if (hueShift > 0.0) col = hueRotate(col, hueShift);

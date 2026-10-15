@@ -67,7 +67,9 @@ The broadcast states a subtly false rule at most twice per stay (pool reflection
 
 ## The Garden Court and the Wings
 
-Walk north from the front desk down the promenade. The Garden Court is a six-story atrium court: stacked balconies of rooms on every side, planters trailing vines, palms, a fountain, a glass elevator that moves on its own, and a skylight with nothing above it. Some guests watch from the balconies.
+Walk north from the front desk down the promenade, under a green neon marquee with red chaser bulbs. The Garden Court is an atrium twelve stories tall that disappears into green haze: crimson doors with a lamp beside each one, brass railings, strings of tiny bulbs along every balcony, and a jungle floor of trees, palms and ferns on red and black marble, with a fountain and a glass elevator that moves on its own. Some guests watch from the balconies.
+
+The look throughout is a dark grand hotel: emerald damask walls, coffered wood ceilings, spiral medallion carpet, brass cone pendant lamps, crimson doors, a cinematic grade with emerald shadows and amber highlights.
 
 Openings on the west, east and north sides of the court lead into the Wings. They are a lattice of corridors built in chunks around you as you move and dropped behind you, like a voxel world. Every corridor is decided by a hash of its grid position, so the same crossing is always in the same place. Some stretches have gone dark. Some doors stand open onto nothing. Once in a while a door carries your own room number. Every crossing has a hanging sign pointing back to the lobby.
 
