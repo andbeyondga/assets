@@ -98,6 +98,16 @@
   #paper .plaque ol { font-weight: bold; font-size: 17px; line-height: 1.5; }
   #paper .close { position: absolute; right: 10px; top: 6px; background: none; border: none; font: inherit; font-size: 13px; color: #5a4a3a; cursor: pointer; }
 
+  #paper .slots { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin: 4px 0 10px; }
+  #paper .slot { border: 2px dashed rgba(42,26,12,.4); min-height: 86px; padding: 6px 4px; text-align: center; position: relative; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; }
+  #paper .slot.done { border-style: solid; border-color: rgba(26,106,58,.6); }
+  #paper .slot-label { font-size: 11px; letter-spacing: 2px; font-weight: bold; }
+  #paper .slot-empty { font-size: 9px; letter-spacing: 1px; color: #8a7a6a; }
+  #paper .slot-stamp { font-size: 10px; padding: 3px 5px; transform: rotate(-8deg); line-height: 1.2; }
+  #paper .noted-row { display: flex; align-items: center; gap: 8px; margin-bottom: 10px; }
+  #paper .noted { display: inline-block; min-width: 64px; height: 22px; border: 1px dashed rgba(176,32,42,.4); font-family: "Arial Black", sans-serif; font-size: 11px; color: #b0202a; text-align: center; line-height: 20px; transform: rotate(-3deg); }
+  #paper .noted.on { border: 3px double #b0202a; }
+  @media (max-width: 520px) { #paper .slots { grid-template-columns: repeat(2, 1fr); } }
   #skip-intro { position: fixed; z-index: 47; display: none; right: calc(4vw + env(safe-area-inset-right, 0px)); top: calc(3.5vh + env(safe-area-inset-top, 0px));
                  font-family: "VT323", "Courier New", monospace; font-size: clamp(18px, 2.4vw, 28px); letter-spacing: 2px; color: #f4f4f0;
                  background: rgba(0,0,0,.35); border: 2px solid rgba(244,244,240,.6); padding: 4px 14px; cursor: pointer; text-shadow: 2px 2px 0 #000; }
@@ -179,6 +189,7 @@
 <script src="js/ui.js"></script>
 <script src="js/touch.js"></script>
 <script src="js/ending.js"></script>
+<script src="js/stay.js"></script>
 <script src="js/game.js"></script>
 </body>
 </html>

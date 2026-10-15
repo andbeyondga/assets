@@ -89,28 +89,26 @@ window.INN = window.INN || {};
 
   // The front desk answers questions with printed forms.
   INN.FORMS = [
-    { q: 'How do I check out?', form: 'FORM 3-C', body: 'CHECK-OUT IS AVAILABLE TO GUESTS WHO HAVE:\n(A) REMAINED THROUGH ONE HOUSEKEEPING SERVICE,\n(B) TAKEN BREAKFAST,\n(C) RETURNED THEIR KEY TO ITS DOOR.\n\nAN ATTENDANT WILL MEET QUALIFYING GUESTS AT THE LIVE EXIT. PLEASE HAVE YOUR ANSWERS READY.' },
-    { q: 'Where is the exit?', form: 'FORM 7', body: 'EXITS ARE MAINTAINED AT:\nWEST STAIRWELL · EAST VESTIBULE · POOL GATE · SERVICE DOOR.\n\nONE EXIT IS LIVE AT ANY TIME. A LIVE EXIT IS INDICATED BY A LIT GREEN LAMP.\n\nEXITS ARE RELOCATED FOR YOUR CONVENIENCE.' },
-    { q: 'What is housekeeping?', form: 'FORM 48-H', body: 'HOUSEKEEPING IS A SERVICE.\n\nHOUSEKEEPING ARRIVES FORTY-EIGHT HOURS AFTER A KEY IS TAKEN. THE GUEST SHOULD NOT BE PRESENT IN THE ROOM, OR VISIBLE IN THE HALLWAY OUTSIDE IT.\n\nTHIS FORM IS NOT A DESCRIPTION OF HOUSEKEEPING.' },
-    { q: 'When is breakfast?', form: 'FORM 6-A', body: 'THE CONTINENTAL BREAKFAST IS SERVED IN THE DINING ROOM AT THE BELL, ONCE EACH CYCLE, FROM SIX O’CLOCK.\n\nA GUEST WHO MISSES TWO BREAKFASTS IN A ROW WILL FEEL IT.\n\nVENDING IS PROVIDED AS A COURTESY. VENDING IS NOT BREAKFAST.' },
-    { q: 'Who else is staying here?', form: 'FORM 9-G', body: 'OTHER GUESTS ARE NOT YOUR CONCERN, AND YOU ARE NOT THEIRS.\n\nPLEASE KEEP IT THAT WAY.\n\nSEE POSTED RULES.' },
+    { q: 'How do I check out?', form: 'FORM 3-C', body: 'CHECK-OUT IS BY APPOINTMENT WITH THE CONCIERGE.\n\nTHE CONCIERGE WILL SEE GUESTS WHOSE FOLIO CARRIES FOUR STAMPS, ONE FROM EACH AMENITY MANAGER.\n\nAN EARLY DEPARTURE MAY BE ARRANGED, AS A COURTESY, FOR GUESTS WITH FEWER.' },
+    { q: 'How do I reach the amenities?', form: 'FORM 2-E', body: 'BY ELEVATOR.\n\nTHE HALLWAYS BETWEEN MUST BE IN ORDER. A GUEST WHO FINDS ANYTHING OUT OF ORDER SHOULD TURN BACK. A GUEST WHO FINDS NOTHING OUT OF ORDER SHOULD CONTINUE.\n\nGUESTS WHO GUESS WRONG WILL BE RETURNED TO THE BEGINNING. THIS IS FOR THEIR SAFETY.' },
+    { q: 'Who are the Managers?', form: 'FORM 14-M', body: 'EACH AMENITY IS MANAGED.\n\nMANAGERS EXPECT GUESTS TO KNOW THE HOUSE RULES. THE HOUSE RULES ARE NOT POSTED. THE OTHER GUESTS KNOW THEM.\n\nWATCH THE OTHER GUESTS.' },
+    { q: 'What happens if I disappoint a Manager?', form: 'FORM 9-N', body: 'THE BROADCAST WILL EXPERIENCE TECHNICAL DIFFICULTIES. THE GUEST WILL BE RETURNED TO THEIR ROOM, AND NOTED.\n\nA GUEST NOTED THREE TIMES HAS DECIDED TO STAY WITH US.\n\nHOUSE RULES MAY BE REVISED AFTER AN INCIDENT.' },
+    { q: 'Can I trust the announcements?', form: 'FORM 11-B', body: 'ANNOUNCEMENTS ARE PROVIDED FOR YOUR COMFORT.' },
     { q: 'What is behind the doors marked Do Not Disturb?', form: 'FORM 0', body: '\n\n\n\n(THIS FORM HAS BEEN LEFT BLANK.)' },
-    { q: 'What is past the Garden Court?', form: 'FORM 22-W', body: 'THE WINGS.\n\nTHE WINGS ARE MAINTAINED FOR FUTURE GUESTS. THEY CONTINUE.\n\nSIGNS AT EVERY CROSSING INDICATE THE WAY BACK TO THE LOBBY. THE MANAGEMENT RECOMMENDS THAT GUESTS FOLLOW THEM.' },
-    { q: 'Can I trust the announcements?', form: 'FORM 11-B', body: 'ANNOUNCEMENTS ARE PROVIDED FOR YOUR COMFORT.\n\nTHE POSTED RULES ARE THE RULES.' },
+    { q: 'Who else is staying here?', form: 'FORM 9-G', body: 'OTHER GUESTS ARE NOT YOUR CONCERN, AND YOU ARE NOT THEIRS.\n\nPLEASE KEEP IT THAT WAY.' },
   ];
 
   // The opening broadcast. A routine highway safety film.
   INN.INTRO = [
     'Good evening, traveler.',
     'You have stepped off the road. This is normal. Many do.',
-    'You are now a guest of the Inn Between.',
-    'The Inn is not haunted. The Inn is administered.',
+    'You are now a guest of the Inn Between. The Inn is not haunted. The Inn is administered.',
     'Please observe the following.',
-    'One. A key hanging on a door means the room is available. Take the key, and the room is yours.',
-    'Two. Housekeeping arrives forty-eight hours after you take your key. Do not be in the room. Do not be seen in the hallway outside it.',
-    'Three. Breakfast is served at the bell, once each cycle. A guest who misses two breakfasts will feel it.',
-    'Four. Our common areas have rules. They are posted by the door. The posted rules are the rules.',
-    'Five. To leave, find an attendant at a live exit. You will need one housekeeping service, one breakfast, and your key returned to its door.',
+    'One. Your room has been prepared. Your key is in your folio.',
+    'Two. The Inn\u2019s amenities are reached by elevator. The hallways between must be in order. If anything is out of order, turn back. If nothing is, continue.',
+    'Three. Each amenity is run by a Manager. Managers expect you to know the house rules. The house rules are not posted. The other guests know them.',
+    'Four. Collect a stamp from each Manager. Four stamps, and the Concierge will see you.',
+    'Five. Announcements are provided for your comfort.',
     '@LETHALITY',
     'Thank you. Please complete your registration card.',
   ];

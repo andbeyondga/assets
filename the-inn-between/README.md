@@ -42,51 +42,23 @@ Phones get a lighter picture (smaller internal resolution, one bloom pass, fewer
 
 ## How a stay works
 
-1. **Claim a room.** Any door with a key hanging beside it is available. Taking the key starts that room's clock.
-2. **The 48-hour rule.** One game hour is ten real seconds. Housekeeping arrives exactly 48 hours after you take the key (the red hand on your watch). You must not be in the room, or in the hallway within sight of its door. You will hear the cart. You will never see it.
-3. **Breakfast.** A bell at 6:00 each cycle. Miss two in a row and your composure starts draining. Vending machines sell food that is almost right; eating it has wrong effects (lost hours, a corridor that repeats, colors that drift, footsteps that follow yours). Three wrong foods and you stay.
-4. **Common areas have posted rules.** Read the plaque by each door. Breaking a rule never triggers a scare. It triggers attention: guests stop ignoring you, turn to face you when you enter, and one of them starts appearing at the end of corridors.
-5. **Check out.** One exit is live at a time, marked by a lit green lamp. It moves. An attendant appears there only once your folio shows a housekeeping service, a breakfast, and your key hung back on its door. Answer the attendant's questions correctly. A wrong answer stamps your folio EXTENDED STAY and the loop restarts, harder.
+The game is built as a run of about 30 minutes: a hub, the hallways between, and the amenities, each run by a Manager. This build is the first playable slice, with one amenity open (the Pool). The other three are listed on the elevator as not yet in service.
 
-## Rules as enforced (from `js/data.js`, checked in `js/game.js`)
+1. **Check in.** Your room is assigned at the desk. The clerk answers questions with printed forms.
+2. **Take the elevator** beside the front desk to an amenity.
+3. **Walk the hallway between.** It is always the same corridor: eight crimson doors (401 to 408), five brass pendants, the Founder's portrait with his eyes closed, a clock, a guest reading on a bench, a snack machine, two ferns. Sometimes something is out of order. If anything is, turn back. If nothing is, continue. A correct call moves the count on the sign forward; a wrong one sends you back to zero. Five in a row the first time (two after that) and the last hallway ends at the amenity's doors. There are 19 kinds of anomaly, from a wrong door number to knocking from inside 407.
+4. **Learn the house rules by watching.** Nothing is posted. The guests know the rules and follow them. The announcements lie about them.
+5. **Beat the Manager** and get a stamp in your folio.
+6. **Check out.** Four stamps and the Concierge will see you at the front desk. With fewer, the Concierge can arrange an early departure as a courtesy, after a few questions about the house rules.
 
-| Area | Rule | How it is enforced |
-| --- | --- | --- |
-| Atrium | Walk. Do not run. | Hurrying in the atrium for half a second |
-| Atrium | Do not speak to seated guests. | Using E on a seated atrium guest |
-| Pool | Do not look at your reflection for more than five seconds. | Camera ray hitting the water from the edge for 5 s |
-| Pool | Closes at 11:00. Do not remain after closing. | In the pool zone 23:00 to 05:00 for 8 s |
-| Arcade | Do not interrupt a machine playing itself. | Using a cabinet in self-play |
-| Arcade | One game per cycle. | A second game before the next breakfast bell |
-| Dining | One plate per cycle. | A second plate in the same service |
-| Dining | Do not enter the kitchen. | Pushing the kitchen door |
-| Garden Court | Keep to the paths. | Standing in a planting bed |
-| Garden Court | Do not call the glass elevator. | Pressing its call button |
+### The Pool and the Lifeguard
 
-The broadcast states a subtly false rule at most twice per stay (pool reflection "ten seconds", arcade "take a turn", and so on). The plaques are always right, and the checkout attendant asks about the rules as posted.
+- House rules, never posted: stand perfectly still at the signal, never look at the water, walk on the deck.
+- Before the test, guests circle the deck with their heads turned away from the water and freeze at the signal. Look at the water too long and they all turn to look at you.
+- Ring the bell by the entrance for the swim test: to the Lifeguard's chair and back, while the whistle blows, something splashes, and your reflection waves at you.
+- After an incident the rules are revised: the signal becomes the Lifeguard's raised arm, the whistle now blows for nothing, and the announcements still say to stop at the whistle.
 
-## The Garden Court and the Wings
-
-Walk north from the front desk down the promenade, under a green neon marquee with red chaser bulbs. The Garden Court is an atrium twelve stories tall that disappears into green haze: crimson doors with a lamp beside each one, brass railings, strings of tiny bulbs along every balcony, and a jungle floor of trees, palms and ferns on red and black marble, with a fountain and a glass elevator that moves on its own. Some guests watch from the balconies.
-
-The look throughout is a dark grand hotel: emerald damask walls, coffered wood ceilings, spiral medallion carpet, brass cone pendant lamps, crimson doors, a cinematic grade with emerald shadows and amber highlights.
-
-Openings on the west, east and north sides of the court lead into the Wings. They are a lattice of corridors built in chunks around you as you move and dropped behind you, like a voxel world. Every corridor is decided by a hash of its grid position, so the same crossing is always in the same place. Some stretches have gone dark. Some doors stand open onto nothing. Once in a while a door carries your own room number. Every crossing has a hanging sign pointing back to the lobby.
-
-## Things the broadcast never mentions
-
-Four rooms carry a DO NOT DISTURB placard. Nothing stops you opening them. Looking costs composure; taking anything costs much more, and the attendant will ask about it.
-
-- **101**: an exact copy of the corridor, running somewhere it should not. The stairs at the end are the only shortcut to an exit.
-- **106**: every wall covered in clocks set to your check-in time.
-- **111**: a room furnished for something with different anatomy.
-- **114**: rows of empty seats facing a television that shows you, from behind.
-
-## Losing
-
-Composure runs out, housekeeping finds you, or you eat three wrong things. There is no death screen. The broadcast returns: THE GUEST HAS DECIDED TO STAY WITH US. Your name is engraved on the brass plaque beside the front desk for the next broadcast (stored in your browser's local storage).
-
-## Files
+### Files
 
 ```
 index.html        page shell, broadcast and paperwork styling
@@ -100,7 +72,8 @@ js/wings.js       the endless generated corridors, streamed in chunks
 js/entities.js    guests, staff, and the player's body for the television in 114
 js/ui.js          captions, wristwatch, folio and forms, test cards, subliminal frames
 js/ending.js      the highway at dawn
-js/game.js        time, rules, housekeeping, breakfast, attention, checkout, main loop
+js/stay.js        the stay: hub, the hallway between and its anomalies, the Pool and the Lifeguard, NOTED, stamps, the Concierge
+js/game.js        engine, input, time, zones, attention, folio, endings, main loop (and the original timer mode)
 ```
 
 Narration uses the browser's built-in speech voice when available; switch to captions only on the registration card or in the pause menu.

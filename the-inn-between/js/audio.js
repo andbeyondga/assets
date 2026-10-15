@@ -375,6 +375,30 @@ window.INN = window.INN || {};
     tone(440 * Math.pow(2, Math.floor(Math.random() * 8) / 6), 0.08, 'square', 0.03, pos);
   };
 
+  // the lifeguard's pea whistle: a shrill trill
+  A.whistle = function (pos, long) {
+    if (!A.ready) return;
+    const ctx = A.ctx, t = ctx.currentTime, dur = long ? 1.6 : 0.55;
+    const o = ctx.createOscillator(); o.type = 'square'; o.frequency.value = 2650;
+    const trill = ctx.createOscillator(); trill.frequency.value = 34;
+    const td = ctx.createGain(); td.gain.value = 140; trill.connect(td); td.connect(o.frequency);
+    const am = ctx.createGain(); am.gain.value = 0;
+    const amo = ctx.createOscillator(); amo.frequency.value = 34; const amd = ctx.createGain(); amd.gain.value = 0.04;
+    amo.connect(amd); amd.connect(am.gain);
+    const bp = ctx.createBiquadFilter(); bp.type = 'bandpass'; bp.frequency.value = 2700; bp.Q.value = 3;
+    const g = ctx.createGain();
+    g.gain.setValueAtTime(0, t); g.gain.linearRampToValueAtTime(0.5, t + 0.02); g.gain.setValueAtTime(0.5, t + dur - 0.08); g.gain.linearRampToValueAtTime(0, t + dur);
+    o.connect(bp); bp.connect(am); am.connect(g); g.connect(out(pos, 0.8));
+    am.gain.setValueAtTime(0.06, t);
+    [o, trill, amo].forEach((s) => { s.start(t); s.stop(t + dur + 0.05); });
+  };
+  A.knock = function (pos) {
+    if (!A.ready) return;
+    for (let i = 0; i < 3; i++) { tone(95, 0.18, 'sine', 0.5, pos, { delay: i * 0.32, slide: 60 }); burst(0.06, 700, 1, 0.3, pos, { delay: i * 0.32 }); }
+  };
+  A.splash = function (pos) { if (A.ready) { burst(0.7, 1400, 0.5, 0.25, pos, { attack: 0.01, wet: 1 }); burst(1.2, 400, 0.6, 0.12, pos, { delay: 0.1, attack: 0.2, wet: 1 }); } };
+  A.squeak = function (pos) { if (A.ready) tone(1900, 0.25, 'triangle', 0.05, pos, { slide: 2300 }); };
+
   A.sheets = function (pos) { if (A.ready) burst(0.9, 1400, 0.4, 0.12, pos, { attack: 0.3 }); };
 
   // housekeeping cart: a squeaking wheel and rattling bottles that never appear

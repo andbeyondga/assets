@@ -18,6 +18,9 @@ window.INN = window.INN || {};
   const G = INN.Game = {
     state: 'boot', keys: {}, locked: false, dragLook: false, mouseDown: false,
     store: load(), name: '', vehicle: '', level: 0, extendedStays: 0,
+    // the stay: hub, hallways and amenity Managers (js/stay.js). The original timer-driven
+    // version (48-hour housekeeping, breakfast clock, shifting exits) is kept behind this flag.
+    SLICE: true,
   };
 
   // =============================================================== boot
@@ -90,6 +93,7 @@ window.INN = window.INN || {};
     keyRooms.forEach((n, i) => { const rm = world.rooms[n]; rm.hasKey = i < nKeys; rm.key.visible = rm.hasKey; });
 
     // guests, staff, the player's own body
+    if (G.SLICE) world.guestSpots = world.guestSpots.filter((s) => s.area !== 'pool');
     G.guests = world.guestSpots.map((s) => { const gg = new INN.Guest(s); scene.add(gg.g); world.interact(gg.hit, { type: 'guest', guest: gg }); return gg; });
     G.clerk = new INN.Guest({ type: 'uniform', x: world.clerkSpot.x, z: world.clerkSpot.z, ry: 0, pose: 'stand', area: 'desk' });
     scene.add(G.clerk.g); world.interact(G.clerk.hit, { type: 'clerk' });
@@ -133,6 +137,10 @@ window.INN = window.INN || {};
     R.checkInText = fmtClock(R.T, true);
     // the arcade: two machines are already playing themselves
     shuffleArcade();
+    if (G.SLICE) {
+      INN.Stay.setup(G);
+      world.interactables.forEach((m) => { m.updateWorldMatrix(true, false); m.userData.wp = new V3().setFromMatrixPosition(m.matrixWorld); });
+    } else {
     // schedule the inn
     sched(START_T + 0.4, () => {
       if (R.falseRules.some((f) => f.id === 'poolclose')) G.pa('Good evening, and welcome to the Inn Between. We hope you enjoy your stay.');
@@ -150,6 +158,7 @@ window.INN = window.INN || {};
     const lieTimes = [START_T + 4.5 + Math.random() * 3, START_T + 22 + Math.random() * 8];
     picks.forEach((f, i) => sched(lieTimes[i], () => { if (R.falseSaid.size < 2) { R.falseSaid.add(f.id); G.pa(f.text); } }));
     applyExitLamps();
+    }
 
     // player
     G.player = { pos: new V3(0, 0, -2.5), yaw: 0, pitch: 0.12, bob: 0, stepT: 0, moving: false, running: false };
@@ -323,7 +332,8 @@ window.INN = window.INN || {};
       G.state = 'play';
       G.requestLock();
       if (firstOfBroadcast) {
-        setTimeout(() => G.say('Your room key is waiting on a door. Read the plaque before entering any common area.'), 2500);
+        if (G.SLICE) setTimeout(() => G.say('Your room is ' + G.run.claimed + ', down the hall to the west. The elevator to the amenities is beside the front desk.'), 2500);
+        else setTimeout(() => G.say('Your room key is waiting on a door. Read the plaque before entering any common area.'), 2500);
       } else {
         G.pa('Welcome back. Your stay has been extended.');
       }
@@ -362,6 +372,8 @@ window.INN = window.INN || {};
     addEventListener('mousemove', (e) => {
       if (G.state !== 'play') return;
       if (!G.locked && !(G.dragLook && G.mouseDown)) return;
+      // ignore the occasional bogus jump browsers report when the cursor is captured or a form closes
+      if (Math.abs(e.movementX) > 250 || Math.abs(e.movementY) > 250) return;
       const s = 0.0022;
       G.player.yaw -= e.movementX * s;
       G.player.pitch = Math.max(-1.45, Math.min(1.45, G.player.pitch - e.movementY * s));
@@ -446,6 +458,7 @@ window.INN = window.INN || {};
     const R = G.run;
     if (G.state === 'play' || G.state === 'paper' || G.state === 'paused' || G.state === 'checkout') {
       animateWorld(dt);
+      if (G.SLICE) INN.Stay.late(dt);
       updateLights(dt);
       renderTV();
     }
@@ -474,10 +487,9 @@ window.INN = window.INN || {};
     if (z !== R.zone) enterZone(z);
     R.zoneTime += dt;
     enforceRules(dt);
-    housekeeping(dt);
+    if (!G.SLICE) { housekeeping(dt); updateExits(); } else INN.Stay.update(dt);
     composure(dt);
     effects(dt);
-    updateExits();
     stalker(dt);
     G.wings.update(P.pos, dt);
     atmosphere(dt);
@@ -486,7 +498,7 @@ window.INN = window.INN || {};
     // watch & OSD
     const hour = R.T % 24;
     UI.raiseWatch(G.keys.KeyQ);
-    UI.drawWatch({ h: Math.floor(hour), m: (hour % 1) * 60, day: Math.floor((R.T - START_T + 20) / 24) + 1, hkLeft: R.claimed ? R.hkNext - R.T : null, room: R.claimed });
+    UI.drawWatch({ h: Math.floor(hour), m: (hour % 1) * 60, day: Math.floor((R.T - START_T + 20) / 24) + 1, hkLeft: R.claimed && !G.SLICE ? R.hkNext - R.T : null, room: R.claimed });
     UI.osd(dateStamp(R.T), false);
     // subliminal broadcast frames
     R.flashT -= dt * (R.composure < 30 ? 2.5 : 1);
@@ -593,7 +605,7 @@ window.INN = window.INN || {};
       if (R.runT > 0.5) { breakRule('atrium', 0); R.runT = 0; }
     } else R.runT = 0;
     // POOL 2: closes at eleven
-    if (z.area === 'pool' && R.poolClosed) {
+    if (z.area === 'pool' && R.poolClosed && !G.SLICE) {
       R.poolStayT += dt;
       if (R.poolStayT > 8) { breakRule('pool', 1); R.poolStayT = -10; }
     }
@@ -603,7 +615,7 @@ window.INN = window.INN || {};
       if (R.bedT > 0.4) { breakRule('garden', 0); R.bedT = -6; }
     } else if ((R.bedT || 0) > 0) R.bedT = 0;
     // POOL 1: your reflection, five seconds
-    reflection(dt);
+    if (!G.SLICE) reflection(dt);
   }
 
   function reflection(dt) {
@@ -822,7 +834,7 @@ window.INN = window.INN || {};
     const a = G.run.zone ? G.run.zone.area : '';
     const fog = G.scene.fog, k = Math.min(1, dt * 1.5);
     // green haze in the court (deep enough that the balconies never end), a colder haze in the wings
-    const far = a === 'garden' ? 82 : a === 'wing' ? 28 : 32, near = a === 'garden' ? 6 : 5;
+    const far = a === 'garden' ? 82 : a === 'wing' ? 28 : a === 'transit' ? 48 : 32, near = a === 'garden' ? 6 : a === 'transit' ? 14 : 5;
     fog.far += (far - fog.far) * k; fog.near += (near - fog.near) * k;
     _fogC.setHex(a === 'garden' ? 0x12301f : a === 'wing' ? 0x0a1519 : 0x0b1712);
     fog.color.lerp(_fogC, k); G.scene.background.copy(fog.color);
@@ -851,7 +863,7 @@ window.INN = window.INN || {};
       else R.muzakT = 5;
     }
     if (dnd && Audio.muzakOn) Audio.stopMuzak(true);
-    const vol = { atrium: 0.75, garden: 0.6, dining: 0.7, arcade: 0.55, pool: 0.45, room: 0.2, copy: 0.05, wing: 0.25, promenade: 0.45 }[area];
+    const vol = { atrium: 0.75, garden: 0.6, dining: 0.7, arcade: 0.55, pool: 0.45, room: 0.2, copy: 0.05, wing: 0.25, promenade: 0.45, transit: 0.18 }[area];
     Audio.setMuzakVolume(vol == null ? 0.35 : vol);
     const every = (k, a, b, fn) => { A[k] = (A[k] == null ? a + Math.random() * (b - a) : A[k]) - dt; if (A[k] <= 0) { A[k] = a + Math.random() * (b - a); fn(); } };
     every('ice', 30, 70, () => Audio.iceMachine(new V3(-13, 1, 1.1)));
@@ -1080,6 +1092,7 @@ window.INN = window.INN || {};
 
   function labelFor(it) {
     const R = G.run, W = G.world;
+    if (G.SLICE) { const l = INN.Stay.label(it); if (l != null) return l; }
     switch (it.type) {
       case 'door': {
         const rm = W.rooms[it.num];
@@ -1119,6 +1132,10 @@ window.INN = window.INN || {};
   G.tryInteract = function () {
     if (!G.target) return;
     const it = G.target.userData.it;
+    if (G.SLICE) {
+      if (it.type === 'deskbell' || it.type === 'clerk') { if (INN.Stay.act.desk()) return; }
+      else if (INN.Stay.act[it.type]) { INN.Stay.act[it.type](it, G.target); return; }
+    }
     const fn = ACT[it.type];
     if (fn) fn(it, G.target);
   };
@@ -1375,7 +1392,7 @@ window.INN = window.INN || {};
 
   function folioOpts(back) {
     const R = G.run;
-    const stamps = R.stamps.map((s) => '<span class="stamp ' + s.color + '">' + s.text + '</span>').join('');
+    const stamps = G.SLICE ? '' : R.stamps.map((s) => '<span class="stamp ' + s.color + '">' + s.text + '</span>').join('');
     const rules = [...R.rulesRead].map((k) => INN.RULES[k].short.map((s) => '<li>' + s + '</li>').join('')).join('');
     const list = (a) => (a.length ? a.map((x) => UI.esc(x)).join('<br>') : '—');
     const html =
@@ -1385,16 +1402,16 @@ window.INN = window.INN || {};
       '<div><b>CHECK-IN</b><br>' + R.checkInText + '</div>' +
       '<div><b>VEHICLE</b><br>' + (UI.esc(G.vehicle).toUpperCase() || '—') + '</div>' +
       '</div>' +
-      '<div class="stamps">' + stamps + '</div>' +
+      (G.SLICE ? INN.Stay.folioTop() : '<div class="stamps">' + stamps + '</div>') +
       '<div class="twocol">' +
-      '<div><b>RULES ON FILE</b><ul class="rules" style="padding-left:18px;margin:4px 0">' + (rules || '<li>None. Plaques are posted by each door.</li>') + '</ul></div>' +
+      (G.SLICE ? '<div><b>HOUSE RULES</b><br>NOT POSTED. THE OTHER GUESTS KNOW THEM. WATCH THE GUESTS.</div>' : '<div><b>RULES ON FILE</b><ul class="rules" style="padding-left:18px;margin:4px 0">' + (rules || '<li>None. Plaques are posted by each door.</li>') + '</ul></div>') +
       '<div><b>INCIDENTALS</b><br>' + list(R.foods.concat(R.shoes)) + '<br><br><b>ARTICLES</b><br>' + list(R.items.map((i) => i.name)) + '</div>' +
       '</div>' +
-      '<div style="margin-top:10px"><b>TICKETS</b><br>' + list(R.tickets) + '</div>' +
+      (G.SLICE ? '' : '<div style="margin-top:10px"><b>TICKETS</b><br>' + list(R.tickets) + '</div>') +
       '<div style="margin-top:10px"><b>GUEST CONDUCT</b> · ' + (R.conduct.length ? 'NOTED (' + R.conduct.length + ')' : 'SATISFACTORY') + '</div>';
     return {
       title: 'Guest Folio', html, closable: true,
-      footer: 'CHECK-OUT REQUIRES: ONE HOUSEKEEPING SERVICE · ONE BREAKFAST · KEY RETURNED TO ITS DOOR.',
+      footer: G.SLICE ? 'CHECK-OUT: FOUR STAMPS, AND THE CONCIERGE WILL SEE YOU AT THE FRONT DESK. AN EARLY DEPARTURE MAY BE ARRANGED, AS A COURTESY.' : 'CHECK-OUT REQUIRES: ONE HOUSEKEEPING SERVICE · ONE BREAKFAST · KEY RETURNED TO ITS DOOR.',
       onClose: back ? () => back() : undefined,
     };
   }
@@ -1497,6 +1514,7 @@ window.INN = window.INN || {};
       composure: 'THE GUEST’S COMPOSURE HAS BEEN RETURNED TO THE MANAGEMENT.',
       housekeeping: 'THE GUEST WAS PRESENT FOR HOUSEKEEPING.',
       food: 'THE GUEST HAS DEVELOPED A TASTE FOR THE INN.',
+      noted: 'THE GUEST HAS BEEN NOTED THREE TIMES.',
     }[reason];
     // engrave the name for the next broadcast
     const names = G.store.residents || [];
@@ -1534,7 +1552,7 @@ window.INN = window.INN || {};
     G.registration();
   };
 
-  G.win = function () {
+  G.win = function (variant) {
     G.state = 'standby';
     UI.hud(false);
     UI.clearCaptions();
@@ -1544,18 +1562,20 @@ window.INN = window.INN || {};
     const playTime = G.run.playTime;
     setTimeout(() => {
       UI.card('none');
-      G.ending = new INN.Ending(G.renderer, room);
+      G.ending = new INN.Ending(G.renderer, room, variant);
       G.endT = 0;
       G.state = 'ending';
       Audio.engine(true);
       setTimeout(() => G.say('Thank you for staying at the Inn Between.'), 3500);
-      setTimeout(() => G.say('Please drive safely. The road is very long, and the Inn is never far from it.'), 9000);
+      if (variant === 'loop') setTimeout(() => G.say('Early departures are arranged as a courtesy. The road is very long, and the Inn is never far from it.'), 9000);
+      else setTimeout(() => G.say('Please drive safely. The road is very long, and the Inn is never far from it.'), 9000);
       setTimeout(() => {
         Audio.engine(false);
         const mins = Math.floor(playTime / 60), secs = Math.floor(playTime % 60);
         UI.card('html', {
           html: '<div class="bigtitle">Thank you for watching.</div>' +
-            '<div class="subtitle">GUEST: ' + UI.esc(G.name).toUpperCase() + ' · ROOM ' + room + ' · EXTENDED STAYS: ' + G.extendedStays + ' · TIME ON TAPE: ' + mins + ':' + String(secs).padStart(2, '0') + '</div>' +
+            '<div class="subtitle">GUEST: ' + UI.esc(G.name).toUpperCase() + ' · ROOM ' + room + (G.SLICE ? ' · STAMPS: ' + INN.Stay.stampCount() + ' OF 4 · NOTED: ' + G.run.stay.noted : ' · EXTENDED STAYS: ' + G.extendedStays) + ' · TIME ON TAPE: ' + mins + ':' + String(secs).padStart(2, '0') + '</div>' +
+            (variant === 'loop' ? '<div class="subtitle" style="margin-top:2vh">EARLY DEPARTURE. THE INN HAS KEPT YOUR ROOM.</div>' : '') +
             '<div class="subtitle" style="margin-top:3vh">THIS HAS BEEN AN EDUCATIONAL BROADCAST.</div>' +
             '<div class="press" data-go>PRESS ▶ PLAY TO BEGIN A NEW BROADCAST</div>',
           onClick: () => { G.ending = null; G.newBroadcast(); },

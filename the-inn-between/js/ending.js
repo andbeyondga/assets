@@ -4,7 +4,8 @@ window.INN = window.INN || {};
 (function (INN) {
   'use strict';
 
-  function Ending(renderer, roomNum) {
+  function Ending(renderer, roomNum, variant) {
+    this.variant = variant;
     const scene = this.scene = new THREE.Scene();
     scene.fog = new THREE.Fog(0xf2b48a, 40, 260);
     const cam = this.camera = new THREE.PerspectiveCamera(62, innerWidth / innerHeight, 0.25, 600);
@@ -43,6 +44,19 @@ window.INN = window.INN || {};
     }
 
     // palms and telephone poles that scroll past
+    // an early departure: the road bends, and the Inn's sign comes back into view
+    if (variant === 'loop') {
+      const sg = this.innSign = new THREE.Group();
+      const pole = new THREE.MeshLambertMaterial({ color: 0x2a1a14 });
+      for (const dx of [-2.2, 2.2]) { const p = new THREE.Mesh(new THREE.CylinderGeometry(0.12, 0.14, 8, 6), pole); p.position.set(dx, 4, 0); sg.add(p); }
+      const board = new THREE.Mesh(new THREE.BoxGeometry(6, 2.2, 0.3), new THREE.MeshLambertMaterial({ color: 0x0e1a14 })); board.position.y = 8; sg.add(board);
+      const neon = new THREE.Mesh(new THREE.PlaneGeometry(5.8, 1.45), new THREE.MeshBasicMaterial({ map: INN.Tex.neon('The Inn Between', '#4dff9a', { underline: '#ff3a2a' }), transparent: true, blending: THREE.AdditiveBlending, depthWrite: false, fog: false }));
+      neon.position.set(0, 8.1, 0.17); sg.add(neon);
+      const vac = new THREE.Mesh(new THREE.PlaneGeometry(2.6, 0.55), new THREE.MeshBasicMaterial({ map: INN.Tex.neon('VACANCY', '#ff3a2a', { w: 512, h: 128, font: 'bold 84px "Futura","Trebuchet MS",sans-serif' }), transparent: true, blending: THREE.AdditiveBlending, depthWrite: false, fog: false }));
+      vac.position.set(0, 6.4, 0.17); sg.add(vac);
+      sg.position.set(-7.5, -1.6, -520);
+      scene.add(sg);
+    }
     this.props = [];
     const trunk = new THREE.MeshLambertMaterial({ color: 0x4a2a2a });
     const frond = new THREE.MeshLambertMaterial({ color: 0x2a3a3a });
@@ -104,7 +118,14 @@ window.INN = window.INN || {};
 
   Ending.prototype.update = function (dt) {
     this.t += dt;
-    const speed = 22;
+    // the car slows, and stops, in front of the Inn's sign
+    let k = 1;
+    if (this.innSign) {
+      const zs = this.innSign.position.z;
+      k = this.t < 3 ? 1 : Math.max(0, Math.min(1, (-zs - 46) / 90));
+      if (this.t >= 3) this.innSign.position.z = Math.min(-46, zs + 33 * Math.max(0.06, k) * dt);
+    }
+    const speed = 22 * (this.innSign && this.t >= 3 ? k : 1);
     this.dashes.forEach((d) => { d.position.z += speed * dt; if (d.position.z > 10) d.position.z -= 320; });
     this.props.forEach((p) => { p.position.z += speed * dt; if (p.position.z > 20) p.position.z -= 600; });
     this.pend.rotation.z = Math.sin(this.t * 1.7) * 0.25 + Math.sin(this.t * 0.6) * 0.08;
