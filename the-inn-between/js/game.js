@@ -221,12 +221,14 @@ window.INN = window.INN || {};
     G.introCam = { t: 0 };
     UI.card('static');
     Audio.staticBurst(1.4);
+    showSkip(true);
+    const live = () => G.state === 'intro';
     const seq = async () => {
-      await wait(1400);
+      await wait(1400); if (!live()) return;
       UI.card('emblem');
       Audio.paChime();
-      await wait(5200);
-      UI.cardData.fadeOut = UI.cardT; await wait(1100);
+      await wait(5200); if (!live()) return;
+      UI.cardData.fadeOut = UI.cardT; await wait(1100); if (!live()) return;
       UI.card('none');
       for (const line of INN.INTRO) {
         if (G.state !== 'intro') return;
@@ -239,9 +241,30 @@ window.INN = window.INN || {};
         }
         await G.say(line);
       }
-      G.registration();
+      if (live()) G.registration();
     };
     seq();
+  };
+
+  // the viewer may skip the safety film; the rules are still posted by every door
+  function showSkip(on) {
+    let b = document.getElementById('skip-intro');
+    if (!b) {
+      b = document.createElement('button');
+      b.id = 'skip-intro';
+      b.textContent = G.touch ? 'SKIP \u25B6\u25B6|' : 'SKIP \u25B6\u25B6|  (ESC)';
+      b.addEventListener('click', (e) => { e.stopPropagation(); G.skipIntro(); });
+      document.body.appendChild(b);
+    }
+    b.style.display = on ? 'block' : 'none';
+  }
+  G.skipIntro = function () {
+    if (G.state !== 'intro') return;
+    G.state = 'register';
+    UI.clearCaptions();
+    UI.card('none');
+    Audio.staticBurst(0.25);
+    G.registration();
   };
 
   function wait(ms) { return new Promise((r) => setTimeout(r, ms)); }
@@ -254,6 +277,7 @@ window.INN = window.INN || {};
 
   G.registration = function () {
     G.state = 'register';
+    showSkip(false);
     UI.card('standby', { line1: 'GUEST REGISTRATION', line2: 'PLEASE PRINT CLEARLY' });
     const voice = UI.voice;
     const render = () => {
@@ -313,6 +337,7 @@ window.INN = window.INN || {};
       if (UI.paperOpen && document.activeElement && document.activeElement.tagName === 'INPUT') return;
       G.keys[e.code] = true;
       if (e.code === 'Space' && (G.state === 'intro')) { e.preventDefault(); UI.skipLine(); }
+      if ((e.code === 'Escape' || e.code === 'Enter') && G.state === 'intro') { e.preventDefault(); G.skipIntro(); }
       if (G.state !== 'play' || e.innHandled) return;
       if (e.code === 'KeyE') G.tryInteract();
       if (e.code === 'KeyF' || e.code === 'Tab') { e.preventDefault(); G.openFolio(); }

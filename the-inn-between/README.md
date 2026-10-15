@@ -25,6 +25,7 @@ Use headphones. The sound design is half the game.
 | Q (hold) | Raise your wristwatch |
 | Esc | Pause the broadcast |
 | Space | Fast-forward the opening broadcast |
+| Esc / Enter / SKIP button | Skip the opening broadcast |
 
 If the page is embedded somewhere that refuses mouse capture, the game falls back to click-and-drag to look.
 

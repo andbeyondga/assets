@@ -98,6 +98,10 @@
   #paper .plaque ol { font-weight: bold; font-size: 17px; line-height: 1.5; }
   #paper .close { position: absolute; right: 10px; top: 6px; background: none; border: none; font: inherit; font-size: 13px; color: #5a4a3a; cursor: pointer; }
 
+  #skip-intro { position: fixed; z-index: 47; display: none; right: calc(4vw + env(safe-area-inset-right, 0px)); top: calc(3.5vh + env(safe-area-inset-top, 0px));
+                 font-family: "VT323", "Courier New", monospace; font-size: clamp(18px, 2.4vw, 28px); letter-spacing: 2px; color: #f4f4f0;
+                 background: rgba(0,0,0,.35); border: 2px solid rgba(244,244,240,.6); padding: 4px 14px; cursor: pointer; text-shadow: 2px 2px 0 #000; }
+  #skip-intro:hover, #skip-intro:focus-visible { background: rgba(244,244,240,.15); outline: none; border-color: #fff; }
   /* ---------- touch devices only (body.touch is set by js/touch.js) ---------- */
   #gl { touch-action: none; }
   #touch-ui { display: none; }
