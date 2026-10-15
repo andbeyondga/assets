@@ -90,7 +90,7 @@ window.INN = window.INN || {};
   // The front desk answers questions with printed forms.
   INN.FORMS = [
     { q: 'How do I check out?', form: 'FORM 3-C', body: 'CHECK-OUT IS BY APPOINTMENT WITH THE CONCIERGE.\n\nTHE CONCIERGE WILL SEE GUESTS WHOSE FOLIO CARRIES FOUR STAMPS, ONE FROM EACH AMENITY MANAGER.\n\nAN EARLY DEPARTURE MAY BE ARRANGED, AS A COURTESY, FOR GUESTS WITH FEWER.' },
-    { q: 'How do I reach the amenities?', form: 'FORM 2-E', body: 'BY ELEVATOR.\n\nTHE HALLWAYS BETWEEN MUST BE IN ORDER. A GUEST WHO FINDS ANYTHING OUT OF ORDER SHOULD TURN BACK. A GUEST WHO FINDS NOTHING OUT OF ORDER SHOULD CONTINUE.\n\nGUESTS WHO GUESS WRONG WILL BE RETURNED TO THE BEGINNING. THIS IS FOR THEIR SAFETY.' },
+    { q: 'How do I reach the amenities?', form: 'FORM 2-E', body: 'ON FOOT. THE POOL IS EAST OF THE FRONT DESK, THE ARCADE BEYOND IT, THE DINING ROOM SOUTH. THE GARDEN COURT IS NORTH, THROUGH THE HALLWAY BETWEEN.\n\nTHE ELEVATOR BESIDE THE FRONT DESK WILL RETURN A GUEST TO ANY AMENITY THE GUEST HAS ALREADY FOUND.\n\nTHE HALLWAY BETWEEN MUST BE IN ORDER. A GUEST WHO FINDS ANYTHING OUT OF ORDER SHOULD TURN BACK. A GUEST WHO FINDS NOTHING OUT OF ORDER SHOULD CONTINUE.\n\nGUESTS WHO GUESS WRONG WILL BE RETURNED TO THE BEGINNING. THIS IS FOR THEIR SAFETY.' },
     { q: 'Who are the Managers?', form: 'FORM 14-M', body: 'EACH AMENITY IS MANAGED.\n\nMANAGERS EXPECT GUESTS TO KNOW THE HOUSE RULES. THE HOUSE RULES ARE NOT POSTED. THE OTHER GUESTS KNOW THEM.\n\nWATCH THE OTHER GUESTS.' },
     { q: 'What happens if I disappoint a Manager?', form: 'FORM 9-N', body: 'THE BROADCAST WILL EXPERIENCE TECHNICAL DIFFICULTIES. THE GUEST WILL BE RETURNED TO THEIR ROOM, AND NOTED.\n\nA GUEST NOTED THREE TIMES HAS DECIDED TO STAY WITH US.\n\nHOUSE RULES MAY BE REVISED AFTER AN INCIDENT.' },
     { q: 'Can I trust the announcements?', form: 'FORM 11-B', body: 'ANNOUNCEMENTS ARE PROVIDED FOR YOUR COMFORT.' },
@@ -105,7 +105,7 @@ window.INN = window.INN || {};
     'You are now a guest of the Inn Between. The Inn is not haunted. The Inn is administered.',
     'Please observe the following.',
     'One. Your room has been prepared. Your key is in your folio.',
-    'Two. The Inn\u2019s amenities are reached by elevator. The hallways between must be in order. If anything is out of order, turn back. If nothing is, continue.',
+    'Two. The Inn\u2019s amenities are open to guests at all hours. The hallway to the Garden Court must be in order. If anything is out of order, turn back. If nothing is, continue.',
     'Three. Each amenity is run by a Manager. Managers expect you to know the house rules. The house rules are not posted. The other guests know them.',
     'Four. Collect a stamp from each Manager. Four stamps, and the Concierge will see you.',
     'Five. Announcements are provided for your comfort.',

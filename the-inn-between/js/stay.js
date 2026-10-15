@@ -1,9 +1,12 @@
-// THE INN BETWEEN — the stay. Hub, the hallways between, the amenities and their Managers.
+// THE INN BETWEEN — the stay. An open inn, its amenities, and the Managers who run them.
 //
-//   Front desk (hub)  ->  elevator  ->  the hallway (spot what is out of order)  ->  an amenity
+//   The whole inn is open. Walk anywhere: your room and the Do Not Disturb doors to the west,
+//   the Pool and the Arcade to the east, the Dining Room to the south. North of the front desk,
+//   the Hallway Between leads to the Garden Court and the endless Wings beyond; it lets you through
+//   only when you can tell whether it is in order.
 //   Each amenity has house rules nobody posts. The guests know them. Watch the guests.
-//   Each amenity's Manager tests you. Win: a stamp. Lose: technical difficulties, NOTED.
-//   Four stamps and the Concierge will see you. One is enough for an early departure.
+//   Each Manager tests you. Win: a stamp. Lose: technical difficulties, NOTED.
+//   Four stamps and the Concierge will see you. Fewer, and an early departure can be arranged.
 window.INN = window.INN || {};
 (function (INN) {
   'use strict';
@@ -13,23 +16,43 @@ window.INN = window.INN || {};
 
   const S = INN.Stay = { act: {} };
   const REALMS = [
-    { id: 'pool', name: 'THE POOL', manager: 'THE LIFEGUARD', open: true },
-    { id: 'arcade', name: 'THE ARCADE', manager: 'ATTRACT MODE', open: false },
-    { id: 'dining', name: 'THE DINING ROOM', manager: 'THE HEAD CHEF', open: false },
-    { id: 'garden', name: 'THE GARDEN COURT', manager: 'THE GROUNDSKEEPER', open: false },
+    { id: 'pool', name: 'THE POOL', manager: 'THE LIFEGUARD', entry: [17, -4.6, 0] },
+    { id: 'arcade', name: 'THE ARCADE', manager: 'ATTRACT MODE', entry: [44, -3.4, 0] },
+    { id: 'dining', name: 'THE DINING ROOM', manager: 'THE HEAD CHEF', entry: [0, 17.6, Math.PI] },
+    { id: 'garden', name: 'THE GARDEN COURT', manager: 'THE GROUNDSKEEPER', entry: [-9, -46.5, 0] },
   ];
   S.REALMS = REALMS;
 
   let G, W, R;
   const rnd = Math.random;
   const pick = (a) => a[Math.floor(rnd() * a.length)];
+  const shuffle = (a) => { for (let k = a.length - 1; k > 0; k--) { const j = Math.floor(rnd() * (k + 1)); [a[k], a[j]] = [a[j], a[k]]; } return a; };
+
+  // clues printed on arcade tickets: what the Hallway Between looks like when it is in order
+  const HINTS = [
+    'THE FOUNDER KEEPS HIS EYES CLOSED.',
+    'THE GUEST ON THE BENCH IS ALWAYS READING.',
+    'EVERY SCONCE IN THE HALLWAY BETWEEN IS RED.',
+    'THE HALLWAY CLOCK KEEPS THE INN’S TIME.',
+    'NOBODY KNOCKS FROM INSIDE 407.',
+    'EIGHT DOORS: 401 TO 408. NO MORE, NO LESS.',
+    'THE SNACK MACHINE SELLS SNACKS.',
+    'THE PENDANTS HANG STILL. ALL FIVE ARE LIT.',
+    'HOUSEKEEPING DOES NOT LEAVE ITS CART IN THE HALLWAY BETWEEN.',
+    'THE CARPET IS RED. IT HAS ALWAYS BEEN RED.',
+    'THE FERNS ARE GREEN.',
+    'NO DOOR IN THE HALLWAY IS LEFT OPEN.',
+    'NOBODY HAS ASKED NOT TO BE DISTURBED IN THE HALLWAY BETWEEN.',
+    'THE FLOOR IS DRY.',
+    'THE SIGN POINTS THE WAY YOU ARE GOING.',
+  ];
 
   // ================================================================= setup
   S.setup = function (game) {
     G = game; W = G.world; R = G.run;
-    R.stay = { stamps: {}, noted: 0, reached: {}, variant: { pool: 0 }, hints: {} };
+    R.stay = { stamps: {}, noted: 0, variant: { pool: 0, arcade: 0, dining: 0, garden: 0 }, hints: {}, visited: {}, notes: [], tickets: 0 };
 
-    // your room, prepared in advance: no key hunting
+    // your room, prepared in advance
     const keyRooms = Object.keys(INN.ROOMS).map(Number).filter((n) => INN.ROOMS[n].kind === 'key' && n <= 116);
     const n = pick(keyRooms);
     const rm = W.rooms[n];
@@ -39,86 +62,104 @@ window.INN = window.INN || {};
     R.hints.luggage = true;
     R.stamps.push({ text: 'ROOM ' + n, color: 'blue' });
 
-    // the rest of the inn is closed for service in this broadcast
-    rope(12, -1.5, 12, 1.5, 'z');             // east corridor
-    rope(-1.5, 12, 1.5, 12, 'x');             // dining hall
-    rope(-10.5, -12, -7.5, -12, 'x');         // promenade to the Garden Court
-    rope(15.9, -1.75, 18.1, -1.75, 'x');     // the pool's door to the east corridor (pool side)
-
     S.hall.init();
     S.pool.init();
+    S.arcade.init();
+    S.dining.init();
+    S.garden.init();
   };
-
-  // a velvet rope on brass posts across an opening, with a card
-  function rope(x0, z0, x1, z1, axis) {
-    const M = W.M;
-    for (const [x, z] of [[x0, z0], [x1, z1]]) {
-      W.cyl(0.04, 0.05, 1.0, M.brass, x, 0.5, z);
-      W.cyl(0.07, 0.07, 0.06, M.brass, x, 1.02, z);
-      W.cyl(0.18, 0.2, 0.04, M.brass, x, 0.02, z);
-    }
-    const len = Math.hypot(x1 - x0, z1 - z0);
-    const r = new THREE.Mesh(new THREE.CylinderGeometry(0.03, 0.03, len, 6), new THREE.MeshLambertMaterial({ color: 0x8a1410 }));
-    r.position.set((x0 + x1) / 2, 0.85, (z0 + z1) / 2);
-    r.rotation.z = Math.PI / 2; if (axis === 'z' || Math.abs(z1 - z0) > Math.abs(x1 - x0)) { r.rotation.z = 0; r.rotation.x = Math.PI / 2; }
-    W.add(r);
-    const card = W.signMesh(Tex.sign('CLOSED FOR\nSERVICE', { w: 256, h: 128 }), 0.5, 0.25, (x0 + x1) / 2, 0.85, (z0 + z1) / 2, 0, { double: true });
-    if (Math.abs(z1 - z0) > Math.abs(x1 - x0)) card.rotation.y = Math.PI / 2;
-    W.collider(Math.min(x0, x1) - 0.15, Math.min(z0, z1) - 0.15, Math.max(x0, x1) + 0.15, Math.max(z0, z1) + 0.15);
-  }
 
   // ================================================================= per-frame
   S.update = function (dt) {
     if (!R) return;
     S.hall.update(dt);
     S.pool.update(dt);
+    S.arcade.update(dt);
+    S.dining.update(dt);
+    S.garden.update(dt);
   };
-  S.late = function (dt) { if (R) S.pool.late(dt); };
+  S.late = function (dt) { if (!R) return; S.pool.late(dt); S.arcade.late(dt); S.dining.late(dt); S.garden.late(dt); };
+
+  // entering an area: remember it for the elevator, and let its Manager react
+  S.onZone = function (z) {
+    if (!R || !R.stay || !z) return;
+    const a = z.area;
+    if (REALMS.some((r) => r.id === a) && !R.stay.visited[a]) {
+      R.stay.visited[a] = true;
+      const r = REALMS.find((x) => x.id === a);
+      if (!R.stay.hints['first' + a]) {
+        R.stay.hints['first' + a] = true;
+        setTimeout(() => G.say(r.name.charAt(0) + r.name.slice(1).toLowerCase() + ' is managed by ' + r.manager.toLowerCase() + '. Watch the other guests before you ring.'), 1200);
+      }
+    }
+    if (a === 'pool') S.pool.onEnter();
+    if (a === 'arcade') S.arcade.onEnter();
+    if (a === 'dining') S.dining.onEnter();
+    if (a === 'garden') S.garden.onEnter();
+  };
 
   S.stampCount = () => Object.keys(R.stay.stamps).length;
 
+  S.award = function (id, text) {
+    R.stay.stamps[id] = true;
+    R.stamps.push({ text: REALMS.find((r) => r.id === id).name.replace('THE ', ''), color: 'green' });
+    const r = REALMS.find((x) => x.id === id);
+    G.say('Approved.', { tag: '◉ ' + r.manager });
+    setTimeout(() => {
+      G.openPaper({
+        title: 'Guest Folio · ' + r.name.replace('THE ', '').toLowerCase().replace(/^./, (c) => c.toUpperCase()),
+        html: '<div class="body" style="font-size:16px">' + text + '</div>' + S.folioTop(),
+        stamp: { text: r.manager.replace('THE ', '') + ' APPROVED', color: 'green' },
+        options: [{ label: 'Close the folio.', fn: () => UI.closePaper() }],
+      });
+      const n = S.stampCount();
+      setTimeout(() => G.say(n >= 4 ? 'Your folio is complete. The Concierge will see you at the front desk.' : n === 1 ? 'Your folio carries a stamp. The Concierge can arrange an early departure at the front desk, or you may continue your stay.' : 'Your folio carries ' + n + ' stamps. Four is customary.'), 1500);
+    }, 1400);
+  };
+
   // ================================================================= interactions
+  // handlers return false to let the inn's ordinary behaviour run instead
   S.label = function (it) {
     switch (it.type) {
-      case 'elevator': return 'CALL ELEVATOR · AMENITIES';
+      case 'elevator': return 'CALL ELEVATOR';
       case 'poolbell': return S.pool.state === 'idle' ? (R.stay.stamps.pool ? 'THE LIFEGUARD HAS NOTHING FURTHER FOR YOU' : 'RING FOR THE LIFEGUARD') : '';
-      case 'gate': return R.stay.stamps.pool ? 'RETURN TO THE FRONT DESK' : 'TRY THE GATE';
+      case 'arcadebell': return S.arcade.state === 'idle' ? (R.stay.stamps.arcade ? 'ATTRACT MODE HAS NOTHING FURTHER FOR YOU' : 'RING FOR ATTRACT MODE') : '';
+      case 'chefbell': return S.dining.state === 'idle' ? (R.stay.stamps.dining ? 'THE HEAD CHEF HAS NOTHING FURTHER FOR YOU' : 'RING FOR SERVICE') : '';
+      case 'gkbell': return S.garden.state === 'idle' ? (R.stay.stamps.garden ? 'THE GROUNDSKEEPER HAS NOTHING FURTHER FOR YOU' : 'RING FOR THE GROUNDSKEEPER') : '';
+      case 'chefitem': return 'TAKE ' + it.food.toUpperCase();
+      case 'guest': return S.dining.state === 'boss' && it.guest.area === 'dining' ? (R.stay.carry ? 'SERVE THE ' + R.stay.carry.toUpperCase() : 'NOTHING TO SERVE') : null;
+      case 'arcade': return S.arcade.state === 'boss' ? 'PLAY THIS ONE' : null;
+      case 'plate': return 'PLATES';
       case 'deskbell': case 'clerk': return S.stampCount() ? 'SPEAK WITH THE CONCIERGE' : 'SPEAK WITH THE DESK';
       default: return null;
     }
   };
 
+  // the elevator: fast travel to amenities you have already found on foot
   S.act.elevator = function () {
     Audio.click(new V3(10.3, 1.2, -11.8));
+    const known = REALMS.filter((r) => R.stay.visited[r.id]);
     G.openPaper({
-      title: 'Amenities',
-      speaker: 'The call button lights. A card beside it lists the floors in service.',
-      options: REALMS.map((r) => ({
-        label: r.name + (R.stay.stamps[r.id] ? '  (stamped)' : r.open ? '' : '  (not yet in service)'),
-        fn: () => {
-          if (!r.open) { UI.notice(r.name + ' is not yet in service. The button does not light.'); return; }
-          if (R.stay.stamps[r.id]) { UI.notice(r.manager + ' has nothing further for you.'); return; }
-          UI.closePaper();
-          S.hall.start(r.id);
-        },
-      })).concat([{ label: 'Not now.', fn: () => UI.closePaper() }]),
+      title: 'Elevator',
+      speaker: known.length ? 'The call button lights. The card beside it lists only the floors you have been to.' : 'The call button lights, then goes out. A card reads: THE ELEVATOR GOES ONLY WHERE THE GUEST HAS ALREADY BEEN.',
+      options: known.map((r) => ({
+        label: r.name + (R.stay.stamps[r.id] ? '  (stamped)' : ''),
+        fn: () => { UI.closePaper(); Audio.door(G.player.pos, false); S.teleport(r.entry[0], r.entry[1], r.entry[2]); },
+      })).concat([{ label: 'Never mind.', fn: () => UI.closePaper() }]),
     });
   };
 
-  S.act.gate = function () {
-    if (!R.stay.stamps.pool) { UI.notice('The gate is chained. A tag reads: GUESTS ARRIVE BY HALLWAY AND LEAVE APPROVED.'); return; }
-    S.teleport(8.5, -9.6, Math.PI);
-    UI.notice('The gate opens onto the front desk, which is not where it should be. The way back is always shorter.', 5);
-  };
-
-  S.act.poolbell = function () { S.pool.ringBell(); };
-
-  // the front desk: forms, or with a stamp, the Concierge
-  S.act.desk = function () {
-    if (!S.stampCount()) return false;
-    S.concierge();
-    return true;
-  };
+  S.act.poolbell = () => S.pool.ringBell();
+  S.act.arcadebell = () => S.arcade.ringBell();
+  S.act.chefbell = () => S.dining.ringBell();
+  S.act.gkbell = () => S.garden.ringBell();
+  S.act.chefitem = (it) => S.dining.take(it.food);
+  S.act.guest = (it) => (S.dining.state === 'boss' && it.guest.area === 'dining' ? S.dining.serve(it.guest) : false);
+  S.act.arcade = (it) => S.arcade.play(it.idx);
+  S.act.plate = () => { UI.notice('The plates are stacked and clean. The Head Chef serves the guests here, not you.'); };
+  S.act.gate = () => { UI.notice('The gate is chained. Beyond it, the dark smells of chlorine and highway.'); };
+  S.act.deskbell = () => (S.stampCount() ? (S.concierge(), true) : false);
+  S.act.clerk = S.act.deskbell;
 
   S.teleport = function (x, z, yaw) {
     G.player.pos.set(x, 0, z); G.player.yaw = yaw; G.player.pitch = 0;
@@ -126,7 +167,7 @@ window.INN = window.INN || {};
   };
 
   // ================================================================= losing: technical difficulties
-  S.strike = function (why) {
+  S.strike = function (why, realm) {
     if (G.state !== 'play' && G.state !== 'paper' && G.state !== 'checkout') return;
     G.state = 'strike';
     G.releaseLock();
@@ -137,6 +178,7 @@ window.INN = window.INN || {};
     Audio.staticBurst(1.2);
     G.vhs.pulse(1, 1);
     R.stay.noted++;
+    R.stay.carry = null;
     R.stamps.push({ text: 'NOTED', color: 'red' });
     const last = R.stay.noted >= 3;
     setTimeout(() => {
@@ -144,8 +186,9 @@ window.INN = window.INN || {};
       UI.card('standby', { line1: 'WE ARE EXPERIENCING TECHNICAL DIFFICULTIES', line2: 'PLEASE STAND BY' });
       setTimeout(() => G.say('The guest has been returned to their room.'), 600);
       setTimeout(() => {
-        S.pool.reset(true);
-        S.hall.stop();
+        // the house rules of the amenity where it happened are revised
+        if (realm && R.stay.variant[realm] != null) R.stay.variant[realm] = (R.stay.variant[realm] + 1) % 2;
+        S.pool.reset(); S.arcade.reset(); S.dining.reset(); S.garden.reset();
         const rm = W.rooms[R.claimed];
         rm.door.target = 0; rm.door.angle = 0;
         S.teleport(rm.insideWorld.x, rm.insideWorld.z, rm.side === 'N' ? 0 : Math.PI);
@@ -162,35 +205,55 @@ window.INN = window.INN || {};
   // ================================================================= the folio
   S.folioTop = function () {
     const slots = REALMS.map((r) => '<div class="slot' + (R.stay.stamps[r.id] ? ' done' : '') + '"><div class="slot-label">' + r.name.replace('THE ', '') + '</div>' +
-      (R.stay.stamps[r.id] ? '<div class="stamp green slot-stamp">' + r.manager.replace('THE ', '') + '<br>APPROVED</div>' : '<div class="slot-empty">' + (r.open ? '' : 'NOT IN SERVICE') + '</div>') + '</div>').join('');
+      (R.stay.stamps[r.id] ? '<div class="stamp green slot-stamp">' + r.manager.replace('THE ', '') + '<br>APPROVED</div>' : '<div class="slot-empty">' + r.manager + '</div>') + '</div>').join('');
     let noted = '';
     for (let i = 0; i < 3; i++) noted += '<span class="noted' + (i < R.stay.noted ? ' on' : '') + '">' + (i < R.stay.noted ? 'NOTED' : '') + '</span>';
     return '<div class="small" style="margin:0 0 6px">STAMPS. FOUR, AND THE CONCIERGE WILL SEE YOU.</div><div class="slots">' + slots + '</div>' +
       '<div class="noted-row"><span class="small" style="margin:0">CONDUCT</span>' + noted + '</div>';
   };
+  S.notesHTML = function () {
+    const n = R.stay.notes;
+    return '<div style="margin-top:10px"><b>NOTES</b><br>' + (n.length ? n.map((x) => '• ' + UI.esc(x)).join('<br>') : 'Free arcade cabinets print tickets. Some guests keep them.') + '</div>';
+  };
 
   // ================================================================= checkout with the Concierge
+  const GUEST_NAMES = { armored: 'the guest in armor', tall: 'the very tall guest', almost: 'the guest with the long neck', tentacle: 'the guest with the tentacles' };
+  function realmQuestions() {
+    const qs = [];
+    const v = R.stay.variant;
+    if (R.stay.stamps.pool) qs.push(v.pool === 0
+      ? { q: 'At the pool, when the whistle blows, what does a guest do?', a: ['Stands perfectly still.', 'Keeps walking. It is good for circulation.', 'Leaves the deck.'], c: 0 }
+      : { q: 'At the pool, how does a guest know to stand still?', a: ['When the Lifeguard raises an arm.', 'When the whistle blows.', 'When the lights change.'], c: 0 });
+    if (R.stay.stamps.arcade) qs.push({ q: 'A cabinet in the arcade is playing itself. What does a guest do?', a: ['Leaves it be.', 'Takes a turn.', 'Unplugs it.'], c: 0 });
+    if (R.stay.stamps.dining) {
+      const t = pick(Object.keys(GUEST_NAMES));
+      const food = S.dining.foodFor(t);
+      const others = ['grapefruit', 'coffee', 'eggs', 'toast'].filter((f) => f !== food).slice(0, 2);
+      qs.push({ q: 'What does ' + GUEST_NAMES[t] + ' take at breakfast?', a: [cap(food) + '.', cap(others[0]) + '.', cap(others[1]) + '.'], c: 0 });
+    }
+    if (R.stay.stamps.garden) {
+      const safe = v.garden === 0 ? 'black' : 'red', bad = v.garden === 0 ? 'red' : 'black';
+      qs.push({ q: 'Where does a guest step in the Garden Court?', a: ['Only on the ' + safe + ' squares.', 'Only on the ' + bad + ' squares.', 'Anywhere along the paths.'], c: 0 });
+    }
+    if (!qs.length) qs.push({ q: 'In the Hallway Between, if anything is out of order, what does a guest do?', a: ['Turns back.', 'Continues.', 'Reports it to the desk.'], c: 0 });
+    return qs;
+  }
+  const cap = (s) => s.charAt(0).toUpperCase() + s.slice(1);
+
   S.concierge = function () {
     const n = S.stampCount();
-    const v = R.stay.variant.pool;
-    const qs = [
-      v === 0
-        ? { q: 'At the pool, when the whistle blows, what does a guest do?', a: ['Stands perfectly still.', 'Keeps walking. It is good for circulation.', 'Leaves the deck.'], c: 0 }
-        : { q: 'At the pool, how does a guest know to stand still?', a: ['When the Lifeguard raises an arm.', 'When the whistle blows.', 'When the lights change.'], c: 0 },
-      { q: 'May a guest look at the water?', a: ['Never.', 'As long as they like.', 'Only during the whistle.'], c: 0 },
-      { q: 'How does a guest cross the pool deck?', a: ['At a walk.', 'Quickly, while the whistle is quiet.', 'Along the water’s edge.'], c: 0 },
-    ];
+    const qs = realmQuestions();
     G.state = 'checkout';
     G.releaseLock();
     UI.prompt('');
     let i = 0;
-    const shuffle = (a) => { for (let k = a.length - 1; k > 0; k--) { const j = Math.floor(rnd() * (k + 1)); [a[k], a[j]] = [a[j], a[k]]; } return a; };
+    const back = () => { UI.closePaper(); G.state = 'play'; G.requestLock(); };
     const intro = () => UI.paper({
       title: 'The Concierge',
       speaker: 'The clerk is gone. In their place, someone in the same uniform, taller, reading your folio upside down without turning it.',
-      html: '<div class="body" style="font-size:17px">“' + n + ' stamp' + (n === 1 ? '' : 's') + '. ' + (n >= 4 ? 'Everything appears to be in order.' : 'Four is customary. An early departure can be arranged, as a courtesy. A few questions first.') + '”</div>',
+      html: '<div class="body" style="font-size:17px">“' + n + ' stamp' + (n === 1 ? '' : 's') + '. ' + (n >= 4 ? 'Everything appears to be in order. A few questions, and you may go.' : 'Four is customary. An early departure can be arranged, as a courtesy. A few questions first.') + '”</div>',
       closable: false,
-      options: [{ label: 'Go ahead.', fn: () => ask() }, { label: 'I will come back with more stamps.', fn: () => { UI.closePaper(); G.state = 'play'; G.requestLock(); } }],
+      options: [{ label: n >= 4 ? 'I am ready to check out.' : 'I would like an early departure.', fn: () => ask() }, { label: 'I will stay a little longer.', fn: back }],
     });
     const ask = () => {
       const Q = qs[i];
@@ -210,9 +273,9 @@ window.INN = window.INN || {};
             if (i < qs.length) return ask();
             UI.paper({
               title: 'The Concierge',
-              html: '<div class="body" style="font-size:17px">“An early departure, then. Thank you for staying at the Inn Between. Please drive safely.”</div>',
+              html: '<div class="body" style="font-size:17px">“' + (n >= 4 ? 'Everything is in order. Thank you for staying at the Inn Between. Please drive safely.' : 'An early departure, then. Thank you for staying at the Inn Between. Please drive safely.') + '”</div>',
               closable: false,
-              stamp: { text: 'EARLY DEPARTURE', color: 'green' },
+              stamp: { text: n >= 4 ? 'CHECKED OUT' : 'EARLY DEPARTURE', color: 'green' },
               options: [{ label: 'Sign here.', fn: () => { UI.closePaper(); G.win(n >= 4 ? 'full' : 'loop'); } }],
             });
           },
@@ -223,9 +286,14 @@ window.INN = window.INN || {};
   };
 
   // =================================================================
-  // THE HALLWAY BETWEEN. One fixed, learnable corridor. Sometimes something is out of order.
+  // THE HALLWAY BETWEEN. The long hall from the front desk to the Garden Court.
+  // One fixed, learnable corridor. Sometimes something is out of order.
+  // Walk its length when it is in order, or back out when it is not. Five right calls in a row
+  // and it lets you through to the Garden Court, after which it stays open.
   // =================================================================
-  const OZ = 3000;              // the hallway lives far from the inn
+  const HX = -9;                // centre line of the hall
+  const OZ = -12.3;             // south archway, just inside the front desk's north wall
+  const END = -43.9;            // where the hall meets the Garden Court
   const HALF = 1.75;
   const ANOMALIES = [
     'door_number', 'door_ajar', 'dnd_card', 'sconce_green', 'pendant_swing', 'pendant_dark', 'painting_eyes',
@@ -235,7 +303,8 @@ window.INN = window.INN || {};
   const H = S.hall = { active: false, group: null, rec: null };
 
   H.init = function () {
-    W.zone('THE HALLWAY', 'corridor', -HALF, OZ - 46, HALF, OZ + 5, { area: 'transit' });
+    W.zone('THE HALLWAY BETWEEN', 'corridor', HX - HALF, -44, HX + HALF, -12, { area: 'transit' });
+    H.required = 5; H.count = 0; H.solved = false; H.engaged = false; H.last = null;
     H.mat = {
       blueCarpet: new THREE.MeshLambertMaterial({ map: Tex.spiralCarpet([0x0c1a3a, 0x1a3a7a, 0x2a2a4a, 0xb8c8d8, 0x2a4a8a, 0x101a2a, 0x1a2a5a]) }),
       green: new THREE.MeshBasicMaterial({ color: 0x5aff8a }),
@@ -272,30 +341,12 @@ window.INN = window.INN || {};
     return new THREE.MeshBasicMaterial({ map: new THREE.CanvasTexture(c) });
   }
 
-  H.start = function (realm) {
-    H.realm = realm;
-    H.required = R.stay.reached[realm] ? 2 : 5;
-    H.count = 0;
-    H.last = null;
-    H.active = true;
-    H.build(null, false);
-    H.spawn();
-    Audio.door(G.player.pos, false);
-    if (!R.stay.hints.hall) {
-      R.stay.hints.hall = true;
-      setTimeout(() => G.say('The hallways between must be in order. If anything is out of order, turn back. If nothing is, continue.'), 1200);
-    }
-  };
-
-  H.stop = function () {
-    H.active = false;
-    H.clear();
-  };
-
-  H.spawn = function () {
+  H.respawn = function () {
+    // seamless: same place in the new hall, a few steps in from the start
     const P = G.player;
-    P.pos.set(0, 0, OZ - 1.3); P.yaw = 0; P.pitch = 0;
-    G.vhs.pulse(0.5, 0.18); Audio.staticBurst(0.1);
+    P.pos.z = OZ - 1.2;
+    P.pos.x = Math.max(HX - HALF + 0.4, Math.min(HX + HALF - 0.4, P.pos.x));
+    G.vhs.pulse(0.45, 0.15); Audio.staticBurst(0.08);
   };
 
   H.clear = function () {
@@ -312,72 +363,80 @@ window.INN = window.INN || {};
 
   // judge the guest's choice when they leave through either end
   H.update = function (dt) {
-    if (!H.active || !H.rec) return;
+    if (!H.rec) H.build(null, false);
     const P = G.player, rec = H.rec;
-    const back = P.pos.z > OZ + 0.9;
-    const fwd = P.pos.z < OZ - rec.L - 0.9;
     rec.t += dt;
-    H.animate(dt);
-    if (!back && !fwd) return;
-    if (rec.arrival) {
-      if (fwd) { H.stop(); S.arrive(H.realm); return; }
-      // turning back from the doors of the amenity: the hallway forgives this once
-      H.spawn(); return;
+    const inHall = P.pos.x > HX - HALF - 0.2 && P.pos.x < HX + HALF + 0.2;
+    if (inHall) H.animate(dt);
+    if (H.solved || rec.arrival) {
+      if (rec.arrival && P.pos.z < END - 0.5) { H.solved = true; }
+      return;
     }
+    if (!inHall) { H.engaged = false; return; }
+    if (P.pos.z < OZ - 0.6 && P.pos.z > OZ - rec.L + 0.6) {
+      if (!H.engaged && !R.stay.hints.hall) { R.stay.hints.hall = true; G.say('This is the Hallway Between. It must be in order. If anything is out of order, turn back. If nothing is, continue.'); }
+      H.engaged = true;
+    }
+    if (!H.engaged) return;
+    const back = P.pos.z > OZ + 0.5;
+    const fwd = P.pos.z < OZ - rec.L - 0.9;
+    if (!back && !fwd) return;
     const correct = fwd ? !rec.anomaly : !!rec.anomaly;
-    if (correct) {
-      H.count++;
-      Audio.click(P.pos);
-    } else {
+    if (correct) { H.count++; Audio.click(P.pos); }
+    else {
       H.count = 0;
       G.vhs.pulse(1, 0.6); Audio.staticBurst(0.5);
       if (!R.stay.hints.hallWrong) { R.stay.hints.hallWrong = true; setTimeout(() => G.pa('Please return to the beginning of the hallway. Thank you.'), 900); }
     }
     let anom = null;
-    // (the very first hallway of a trip is always in order, so it can be learned)
     if (H.count < H.required && rnd() < 0.58) { do { anom = pick(ANOMALIES); } while (anom === H.last); }
-    H.last = anom || H.last;
+    if (anom) H.last = anom;
+    H.engaged = false;
     H.build(anom, H.count >= H.required);
-    H.spawn();
+    if (fwd) H.respawn(); else { G.vhs.pulse(0.5, 0.2); Audio.staticBurst(0.08); }
+    if (H.count >= H.required) setTimeout(() => G.say('The Hallway Between is in order. The Garden Court is ahead.'), 600);
   };
 
   H.build = function (anom, arrival) {
     H.clear();
     const M = W.M, b = new INN.Batch();
     const c0 = W.colliders.length, f0 = W.fixtures.length;
-    const group = new THREE.Group(); W.root.add(group);
-    const L = anom === 'longer' ? 36 : 30;
+    const group = new THREE.Group(); group.position.x = HX; W.root.add(group);
+    const col = (x0, z0, x1, z1) => W.collider(x0 + HX, z0, x1 + HX, z1);
+    const open = arrival || H.solved;
+    const L = anom === 'longer' ? 30.5 : 28;
     const CH = anom === 'ceiling_low' ? 2.25 : 2.7;
     const rec = H.rec = { group, textures: [], anomaly: anom, arrival, L, t: 0, anim: {} };
     const z = (off) => OZ - off;   // offsets run north from the south archway
-    const realm = REALMS.find((r) => r.id === H.realm);
+    const realm = REALMS.find((r) => r.id === 'garden');
 
-    // shell: floor, ceiling, walls, and dark vestibules at both ends
-    b.box(anom === 'carpet_blue' ? H.mat.blueCarpet : M.carpet, -HALF, HALF, -0.02, 0, z(L + 4), z(-4), 2.6);
-    b.box(M.ceiling, -HALF, HALF, CH, CH + 0.02, z(L + 4), z(-4), 1.4);
+    // shell: floor, ceiling and walls from the front desk to the Garden Court
+    b.box(anom === 'carpet_blue' ? H.mat.blueCarpet : M.carpet, -HALF, HALF, -0.02, 0, -44, -12, 2.6);
+    b.box(M.ceiling, -HALF, HALF, CH, CH + 0.02, -44, -12, 1.4);
+    if (CH < 2.7) b.box(M.woodDark, -HALF, HALF, CH, 2.72, -44, -12, 1);
     for (const side of [-1, 1]) {
       const x0 = side < 0 ? -HALF - 0.2 : HALF, x1 = side < 0 ? -HALF : HALF + 0.2;
-      b.box(M.wood, x0, x1, 0, 1.05, z(L + 4), z(-4), 1.2);
-      b.box(M.wallpaper, x0, x1, 1.05, CH, z(L + 4), z(-4), 1.2);
-      W.collider(x0, z(L + 4), x1, z(-4));
+      b.box(M.wood, x0, x1, 0, 1.05, -44, -12, 1.2);
+      b.box(M.wallpaper, x0, x1, 1.05, CH, -44, -12, 1.2);
+      b.box(M.woodDark, x0, x1, CH, 3.0, -44, -12, 1);
+      col(x0, -44, x1, -12);
     }
-    b.box(M.woodDark, -HALF, HALF, 0, CH, z(-4) - 0.0, z(-4.2), 1);
-    W.collider(-HALF, z(-4), HALF, z(-4.2));
-    b.box(M.woodDark, -HALF, HALF, 0, CH, z(L + 4.2), z(L + 4), 1);
-    W.collider(-HALF, z(L + 4.2), HALF, z(L + 4));
+    // until the hall is in order, its far end is a wall of shadow
+    if (!open) {
+      b.box(M.woodDark, -HALF, HALF, 0, CH, END - 0.2, END, 1);
+      col(-HALF, END - 0.2, HALF, END);
+    }
     // the archways: brass frames you pass through
     for (const off of [0, L]) {
       b.box(M.woodDark, -HALF, HALF, 2.25, CH, z(off) - 0.15, z(off) + 0.15, 1);
       b.box(M.brass, -HALF, -HALF + 0.12, 0, 2.25, z(off) - 0.15, z(off) + 0.15);
       b.box(M.brass, HALF - 0.12, HALF, 0, 2.25, z(off) - 0.15, z(off) + 0.15);
     }
-    // the vestibules are dark: black curtains of shadow
-    b.plane(H.mat.dark, 3.5, CH, 0, CH / 2, z(-3.9), 0, Math.PI, 0);
-    if (!arrival) b.plane(H.mat.dark, 3.5, CH, 0, CH / 2, z(L + 3.9), 0, 0, 0);
+    if (!open) b.plane(H.mat.dark, 3.5, CH, 0, CH / 2, END + 0.05, 0, 0, 0);
 
     // doors: left 401 403 405 407 (409), right 402 404 406 408 (410)
     const doors = [[-1, 5, 401], [1, 8, 402], [-1, 11, 403], [1, 14, 404], [-1, 17, 405], [1, 20, 406], [-1, 23, 407], [1, 26, 408]];
-    if (anom === 'longer') doors.push([-1, 31.5, 409], [1, 34, 410]);
+    if (anom === 'longer') doors.push([-1, 29.3, 409], [1, 29.3, 410]);
     const doorAt = {};
     doors.forEach(([side, off, num]) => {
       const face = side * (HALF - 0.01);
@@ -409,13 +468,13 @@ window.INN = window.INN || {};
     rec.doorAt = doorAt;
 
     // pendants: five (six if the hallway has grown), one may swing or go dark
-    const pend = [4, 10, 16, 22, 28].concat(anom === 'longer' ? [34] : []);
+    const pend = [4, 10, 16, 22, 27].concat(anom === 'longer' ? [29.8] : []);
     pend.forEach((off) => {
       const p = W.pendant(0, CH, z(off), group);
       const dark = anom === 'pendant_dark' && off === 16;
       if (dark) { p.glow.material = G.offMat; rec.anim.darkGlow = p.glow; }
       if (anom === 'pendant_swing' && off === 16) rec.anim.swing = p.glow.parent;
-      if (!dark) W.fixtures.push({ mesh: p.glow, pos: new V3(0, CH - p.drop - 0.25, z(off)), flickerable: false, color: 0xffd2a0 });
+      if (!dark) W.fixtures.push({ mesh: p.glow, pos: new V3(HX, CH - p.drop - 0.25, z(off)), flickerable: false, color: 0xffd2a0 });
     });
 
     // the founder's portrait, left wall between 403 and 405
@@ -432,7 +491,7 @@ window.INN = window.INN || {};
     // a guest on a bench, reading, right side by 408
     b.box(M.leather, HALF - 0.6, HALF - 0.05, 0.2, 0.48, z(23) - 0.85, z(23) + 0.85, 1);
     b.box(M.leather, HALF - 0.18, HALF - 0.05, 0.48, 0.95, z(23) - 0.85, z(23) + 0.85, 1);
-    W.collider(HALF - 0.65, z(23) - 0.9, HALF, z(23) + 0.9);
+    col(HALF - 0.65, z(23) - 0.9, HALF, z(23) + 0.9);
     if (anom !== 'guest_gone') {
       const gg = new INN.Guest({ type: 'armored', x: HALF - 0.35, z: z(23) + 0.2, ry: -Math.PI / 2, pose: 'sit', area: 'transit' });
       group.add(gg.g);
@@ -448,10 +507,10 @@ window.INN = window.INN || {};
 
     // a snack machine, left side near the far end
     const vm = new THREE.Mesh(new THREE.BoxGeometry(0.7, 1.9, 1.0), [H.mat.side, H.mat.side, H.mat.side, H.mat.side, H.mat.side, H.mat.side]);
-    vm.position.set(-HALF + 0.37, 0.95, z(28.5)); group.add(vm);
+    vm.position.set(-HALF + 0.37, 0.95, z(26.5)); group.add(vm);
     const front = new THREE.Mesh(new THREE.PlaneGeometry(0.98, 1.88), anom === 'vending_shoes' ? H.mat.shoes : H.mat.snax);
-    front.position.set(-HALF + 0.725, 0.95, z(28.5)); front.rotation.y = Math.PI / 2; group.add(front);
-    W.collider(-HALF, z(28.5) - 0.5, -HALF + 0.75, z(28.5) + 0.5);
+    front.position.set(-HALF + 0.725, 0.95, z(26.5)); front.rotation.y = Math.PI / 2; group.add(front);
+    col(-HALF, z(26.5) - 0.5, -HALF + 0.75, z(26.5) + 0.5);
 
     // potted ferns flanking the start
     for (const side of [-1, 1]) {
@@ -462,7 +521,7 @@ window.INN = window.INN || {};
         const g = new THREE.ConeGeometry(0.12, dead ? 0.7 : 1.0, 3); g.translate(0, dead ? 0.35 : 0.5, 0);
         b.mesh(dead ? H.mat.dead : (q % 2 ? M.leaf : M.leafDark), g, fx, 0.42, fz, dead ? 0.6 : 0, q * 0.9, dead ? 1.2 : 0.75);
       }
-      W.collider(fx - 0.28, fz - 0.28, fx + 0.28, fz + 0.28);
+      col(fx - 0.28, fz - 0.28, fx + 0.28, fz + 0.28);
     }
 
     // wet footprints toward 403
@@ -479,31 +538,24 @@ window.INN = window.INN || {};
       b.box(M.chrome, cx - 0.3, cx + 0.3, 0.1, 1.0, cz - 0.5, cz + 0.5);
       b.box(M.white, cx - 0.26, cx + 0.26, 1.0, 1.25, cz - 0.4, cz + 0.4);
       b.box(M.rustFab, cx - 0.26, cx + 0.26, 0.45, 0.7, cz - 0.45, cz + 0.45);
-      W.collider(cx - 0.32, cz - 0.52, cx + 0.32, cz + 0.52);
-      rec.anim.cartPos = new V3(cx, 0.6, cz);
+      col(cx - 0.32, cz - 0.52, cx + 0.32, cz + 0.52);
+      rec.anim.cartPos = new V3(cx + HX, 0.6, cz);
     }
-    if (anom === 'knocking') rec.anim.knockAt = new V3(doorAt[407].x, 1.4, doorAt[407].z);
+    if (anom === 'knocking') rec.anim.knockAt = new V3(doorAt[407].x + HX, 1.4, doorAt[407].z);
 
     // signs: where you are going, and how far along you are
     const arrow = anom === 'sign_wrong' ? '◂ ' + realm.name : realm.name + ' ▸';
     const st = Tex.sign(arrow, { w: 512, h: 110, bg: '#0e2a1e', fg: '#e8d3a0', border: '#c9a24a' }); rec.textures.push(st);
     const sg = new THREE.Mesh(new THREE.PlaneGeometry(1.7, 0.36), new THREE.MeshBasicMaterial({ map: st }));
     sg.position.set(0, 2.42, z(L) + 0.17); group.add(sg);
-    const ct = Tex.sign(realm.name + '  ·  ' + Math.min(H.count, H.required) + ' OF ' + H.required + '\nIF ANYTHING IS OUT OF ORDER, TURN BACK', { w: 1400, h: 190, bg: '#120c08', fg: '#f4efe2', border: '#c9a24a', font: 'bold 46px "Futura","Century Gothic","Trebuchet MS",sans-serif' });
+    const ct = Tex.sign(open ? 'THE HALLWAY BETWEEN\nIN ORDER' : 'THE HALLWAY BETWEEN  ·  ' + Math.min(H.count, H.required) + ' OF ' + H.required + '\nIF ANYTHING IS OUT OF ORDER, TURN BACK', { w: 1400, h: 190, bg: '#120c08', fg: '#f4efe2', border: '#c9a24a', font: 'bold 46px "Futura","Century Gothic","Trebuchet MS",sans-serif' });
     rec.textures.push(ct);
     const cs = new THREE.Mesh(new THREE.PlaneGeometry(2.8, 0.38), new THREE.MeshBasicMaterial({ map: ct }));
     cs.position.set(0, Math.min(2.3, CH - 0.3), z(3.6)); group.add(cs);
     const rod = new THREE.Mesh(new THREE.BoxGeometry(0.02, 0.4, 0.02), M.brass); rod.position.set(0, CH - 0.15, z(3.6)); group.add(rod);
 
-    // the last hallway ends at the doors of the amenity
-    if (arrival) {
-      b.box(M.door, -1.2, -0.02, 0, 2.6, z(L + 3.95), z(L + 3.9), 1);
-      b.box(M.door, 0.02, 1.2, 0, 2.6, z(L + 3.95), z(L + 3.9), 1);
-      const at = Tex.neon(realm.name.replace('THE ', ''), '#4dff9a', { w: 512, h: 128, font: 'bold 86px "Futura","Trebuchet MS",sans-serif' }); rec.textures.push(at);
-      const am = new THREE.Mesh(new THREE.PlaneGeometry(1.8, 0.45), new THREE.MeshBasicMaterial({ map: at, transparent: true, blending: THREE.AdditiveBlending, depthWrite: false }));
-      am.position.set(0, 2.45, z(L + 3.85)); group.add(am);
-      W.fixtures.push({ mesh: null, pos: new V3(0, 2.2, z(L + 3)), flickerable: false, color: 0x6aff9a, warm: true });
-    }
+    // in order: green light spills in from the Garden Court
+    if (open) W.fixtures.push({ mesh: null, pos: new V3(HX, 2.2, END + 0.6), flickerable: false, color: 0x6aff9a, warm: true });
 
     b.flush(group);
     rec.colliders = W.colliders.slice(c0);
@@ -523,7 +575,7 @@ window.INN = window.INN || {};
       a.guest.update(dt, rec.t);
       if (a.looks) {
         const g = a.guest.g;
-        const want = Math.atan2(P.pos.x - g.position.x, P.pos.z - g.position.z) - g.rotation.y;
+        const want = Math.atan2(P.pos.x - (g.position.x + HX), P.pos.z - g.position.z) - g.rotation.y;
         a.guest.head.rotation.y = Math.max(-1.3, Math.min(1.3, Math.atan2(Math.sin(want), Math.cos(want))));
         a.guest.head.rotation.x = 0;
       } else if (a.guest.head) { a.guest.head.rotation.y = 0.05; a.guest.head.rotation.x = 0.35; }
@@ -534,12 +586,6 @@ window.INN = window.INN || {};
       if (a.knockAt && a.knockAt.distanceTo(P.pos) < 12) Audio.knock(a.knockAt);
       if (a.cartPos && a.cartPos.distanceTo(P.pos) < 14) Audio.squeak(a.cartPos);
     }
-  };
-
-  // ================================================================= arriving at an amenity
-  S.arrive = function (realm) {
-    R.stay.reached[realm] = true;
-    if (realm === 'pool') S.pool.enter();
   };
 
   // =================================================================
@@ -591,7 +637,7 @@ window.INN = window.INN || {};
     PL.ripple = new THREE.Mesh(new THREE.RingGeometry(0.2, 0.32, 32), new THREE.MeshBasicMaterial({ color: 0xbff8f0, transparent: true, opacity: 0, depthWrite: false }));
     PL.ripple.rotation.x = -Math.PI / 2; W.add(PL.ripple);
     PL.reflect = makeReflectionFigure(); W.add(PL.reflect);
-    PL.reset(false);
+    PL.reset();
   };
 
   function makeLifeguard() {
@@ -629,8 +675,7 @@ window.INN = window.INN || {};
     return m;
   }
 
-  PL.reset = function (afterIncident) {
-    if (afterIncident) R.stay.variant.pool = (R.stay.variant.pool + 1) % 2;
+  PL.reset = function () {
     PL.state = 'idle';
     PL.signal = false;
     PL.demoT = 6;
@@ -645,15 +690,8 @@ window.INN = window.INN || {};
     setPoolLights(false);
   };
 
-  PL.enter = function () {
-    S.teleport(17, -4.6, 0);
-    const v = R.stay.variant.pool;
-    PL.lieT = 2.5;
-    if (!R.stay.hints.poolIntro) {
-      R.stay.hints.poolIntro = true;
-      setTimeout(() => G.say('This is the pool. The Lifeguard manages it. Watch the other guests before you ring.'), 900);
-    }
-    void v;
+  PL.onEnter = function () {
+    if (PL.state === 'idle' && !R.stay.stamps.pool) { PL.lieT = 3; PL.liesSaid = 0; }
   };
 
   // the swim test begins
@@ -798,26 +836,14 @@ window.INN = window.INN || {};
     Audio.whistle(new V3(CHAIR.x, 2.8, CHAIR.z), true);
     setPoolLights(true);
     PL.walkers.forEach((w) => { w.g.attentive = true; w.g.faceInstant(G.player.pos.x, G.player.pos.z); });
-    setTimeout(() => S.strike(why), 1300);
+    setTimeout(() => S.strike(why, 'pool'), 1300);
   };
 
   PL.win = function () {
-    PL.state = 'done';
     signalOn(false);
-    R.stay.stamps.pool = true;
-    R.stamps.push({ text: 'POOL', color: 'green' });
-    G.say('Approved.', { tag: '◉ THE LIFEGUARD' });
-    setTimeout(() => {
-      G.openPaper({
-        title: 'Guest Folio · The Pool',
-        html: '<div class="body" style="font-size:16px">The Lifeguard leans down from the chair and presses a wet stamp into your folio. It does not smudge.</div>',
-        stamp: { text: 'LIFEGUARD APPROVED', color: 'green' },
-        options: [{ label: 'Close the folio.', fn: () => UI.closePaper() }],
-      });
-      setTimeout(() => G.say('Your folio carries a stamp. The Concierge will see you at the front desk. The pool gate will take you there.'), 1500);
-    }, 1400);
     PL.state = 'idle';
     PL.demoT = 999;
+    S.award('pool', 'The Lifeguard leans down from the chair and presses a wet stamp into your folio. It does not smudge.');
   };
 
   // after the scene animates: walkers circle the deck, freeze at the signal, never look at the water
@@ -871,4 +897,416 @@ window.INN = window.INN || {};
     }
     return L0[0].clone();
   }
+
+  // =================================================================
+  // THE ARCADE, run by ATTRACT MODE.
+  // House rule (never posted): if a machine is already playing itself, do not interrupt it.
+  // The guests only ever wait at machines that are waiting for a player.
+  // The test: every cabinet lights up at once. Play the one that is waiting for you. Three rounds.
+  // =================================================================
+  const AR = S.arcade = { state: 'idle', guests: [] };
+  const BOOTH = new V3(41.4, 0, -4.4);
+
+  AR.init = function () {
+    const M = W.M;
+    W.box(0.9, 1.05, 0.7, M.woodDark, BOOTH.x, 0.52, BOOTH.z, { collide: true });
+    W.box(1.0, 0.05, 0.8, M.brass, BOOTH.x, 1.07, BOOTH.z);
+    const bell = W.cyl(0.04, 0.11, 0.09, M.brass, BOOTH.x + 0.22, 1.14, BOOTH.z);
+    W.interact(bell, { type: 'arcadebell' });
+    W.signMesh(Tex.sign('TOKENS\nRING FOR ATTRACT MODE', { w: 512, h: 160 }), 0.9, 0.28, BOOTH.x, 1.36, BOOTH.z + 0.37, 0);
+    AR.cabs = W.arcade.map((m) => {
+      const q = new THREE.Quaternion(); m.mesh.getWorldQuaternion(q);
+      const n = new V3(0, 0, 1).applyQuaternion(q); n.y = 0; n.normalize();
+      return { m, n, stand: m.pos.clone().setY(0).addScaledVector(n, 0.9) };
+    });
+    ['almost', 'tall'].forEach((t, i) => {
+      const gg = new INN.Guest({ type: t, x: 48 + i * 2, z: -8, ry: 0, pose: 'stand', area: 'arcade-staff' });
+      W.add(gg.g);
+      AR.guests.push({ g: gg, target: -1, wait: i * 4 });
+    });
+    AR.shuffleT = 30;
+    AR.reset();
+  };
+
+  AR.reset = function () { AR.state = 'idle'; AR.lied = false; };
+
+  AR.onEnter = function () {
+    if (AR.state === 'idle' && !R.stay.stamps.arcade && !AR.lieSaid) { AR.lieSaid = true; setTimeout(() => G.pa('In the arcade, every cabinet is free to play. Please, take a turn.'), 4000); }
+  };
+
+  AR.ringBell = function () {
+    if (AR.state !== 'idle') return;
+    if (R.stay.stamps.arcade) { UI.notice('The bell does not ring. Attract Mode has already approved you.'); return; }
+    Audio.deskBell(new V3(BOOTH.x, 1.1, BOOTH.z));
+    AR.state = 'boss'; AR.round = 1;
+    AR.newRound();
+    setTimeout(() => G.say('Play the one that is waiting for you.', { tag: '◉ ATTRACT MODE' }), 600);
+  };
+
+  AR.newRound = function () {
+    AR.target = Math.floor(rnd() * AR.cabs.length);
+    AR.timer = 22;
+    AR.flash = 1.2;
+    AR.frozenPh = rnd() * 10; AR.frozenScore = Math.floor(rnd() * 900) * 10;
+    Audio.staticBurst(0.15);
+    if (AR.round === 2 && !AR.lied) { AR.lied = true; G.pa('Every cabinet is free to play.'); }
+  };
+
+  AR.play = function (idx) {
+    if (AR.state === 'boss') {
+      if (AR.flash > 0) return true;
+      if (idx === AR.target) {
+        for (let k = 0; k < 4; k++) setTimeout(() => Audio.gameBlip(AR.cabs[idx].m.pos), k * 90);
+        AR.round++;
+        if (AR.round > 3) { AR.win(); return true; }
+        AR.newRound();
+        return true;
+      }
+      AR.state = 'caught';
+      Audio.staticBurst(0.6);
+      setTimeout(() => S.strike('You interrupted a machine that was playing itself.', 'arcade'), 900);
+      return true;
+    }
+    if (AR.state !== 'idle') return true;
+    // a machine playing itself: the inn's ordinary reaction (the guests notice)
+    if (R.selfPlaying.has(idx)) return false;
+    // a free game prints a ticket with a clue about the Hallway Between
+    const m = AR.cabs[idx].m;
+    Audio.gameBlip(m.pos);
+    const fresh = HINTS.filter((h) => !R.stay.notes.includes(h));
+    const hint = fresh.length ? pick(fresh) : pick(HINTS);
+    if (!R.stay.notes.includes(hint)) R.stay.notes.push(hint);
+    G.openPaper({
+      letterhead: false,
+      title: m.title,
+      html: '<div class="body" style="background:#05080a;color:#ffd080;padding:18px;font-family:VT323,monospace;font-size:22px;text-align:center">GAME OVER<br><br>A TICKET PRINTS:<br><br>' + UI.esc(hint) + '</div>',
+      footer: 'The ticket has been entered in your folio.',
+    });
+    return true;
+  };
+
+  AR.win = function () {
+    AR.state = 'idle';
+    S.award('arcade', 'Every screen in the arcade shows the same word for a single frame: APPROVED. A ticket prints from every slot at once. One of them is a stamp.');
+  };
+
+  AR.update = function (dt) {
+    const inArcade = R.zone && R.zone.area === 'arcade';
+    // machines take turns playing themselves while nobody is watching
+    AR.shuffleT -= dt;
+    if (AR.shuffleT <= 0 && !inArcade && AR.state === 'idle') {
+      AR.shuffleT = 30;
+      R.selfPlaying = new Set(shuffle([0, 1, 2, 3, 4, 5]).slice(0, 2));
+      AR.guests.forEach((g) => { g.target = -1; });
+    }
+    if (AR.state === 'boss') {
+      if (!inArcade) { AR.state = 'idle'; return; }
+      AR.flash -= dt;
+      AR.timer -= dt;
+      if (AR.timer <= 0) { G.say('Again.', { tag: '◉ ATTRACT MODE' }); AR.newRound(); }
+    }
+  };
+
+  // the guests wander from waiting machine to waiting machine, never near one playing itself
+  AR.late = function (dt) {
+    const taken = new Set(AR.guests.map((g) => g.target));
+    AR.guests.forEach((w) => {
+      const gg = w.g.g;
+      if (w.target >= 0 && R.selfPlaying.has(w.target)) w.target = -1;   // it started playing itself: step away
+      if (w.target < 0) {
+        const free = AR.cabs.map((c, i) => i).filter((i) => !R.selfPlaying.has(i) && !taken.has(i));
+        if (free.length) { w.target = pick(free); taken.add(w.target); w.wait = 6 + rnd() * 6; }
+        return;
+      }
+      const c = AR.cabs[w.target];
+      const d = c.stand.clone().sub(gg.position); d.y = 0;
+      const dist = d.length();
+      if (dist > 0.05) {
+        const step = Math.min(dist, dt * 0.8);
+        gg.position.addScaledVector(d.normalize(), step);
+        gg.rotation.y = Math.atan2(d.x, d.z);
+      } else {
+        gg.rotation.y = Math.atan2(-c.n.x, -c.n.z);
+        w.wait -= dt;
+        if (w.wait <= 0 && AR.state !== 'boss') w.target = -1;
+      }
+    });
+  };
+
+  // during the test, Attract Mode draws every screen
+  S.drawArcade = function (m, t) {
+    if (AR.state !== 'boss' && AR.state !== 'caught') return false;
+    const g = m.ctx, i = m.idx, r = AR.round;
+    g.fillStyle = '#05080a'; g.fillRect(0, 0, 128, 96);
+    g.textAlign = 'center';
+    if (AR.flash > 0) {
+      g.fillStyle = Math.floor(t * 8) % 2 ? '#ffd080' : '#ff4fa0'; g.font = 'bold 16px monospace';
+      g.fillText('ATTRACT', 64, 42); g.fillText('MODE', 64, 62);
+      return true;
+    }
+    const isT = i === AR.target;
+    if (r === 1 && isT) {
+      g.fillStyle = '#ffd080'; g.font = 'bold 9px monospace'; g.fillText(m.title, 64, 36);
+      if (Math.floor(t * 1.5) % 2) g.fillText('INSERT COIN', 64, 60);
+      m.stick.rotation.z = 0;
+      return true;
+    }
+    const frozen = r === 2 && isT, mirror = r === 3 && isT;
+    const ph = frozen ? AR.frozenPh : t * 2;
+    const score = frozen ? AR.frozenScore : Math.floor(t * 23) * 10;
+    g.fillStyle = '#ffd080'; g.font = 'bold 9px monospace'; g.textAlign = 'left';
+    g.fillText('1UP ' + String(score).padStart(6, '0'), 4, 10);
+    const sx = Math.sin(ph * 1.3) * 54;
+    const bx = 64 + (mirror ? -sx : sx), by = 52 + Math.sin(ph * 2.1) * 30;
+    g.fillStyle = '#e8f0ea'; g.fillRect(bx - 2, by - 2, 4, 4);
+    g.fillRect(4, by - 10, 3, 20); g.fillRect(121, 52 + Math.sin(ph * 2.1 - 0.3) * 28 - 10, 3, 20);
+    m.stick.rotation.z = frozen ? 0 : Math.sin(t * 9 + i) * 0.4;
+    return true;
+  };
+
+  // =================================================================
+  // THE DINING ROOM, run by THE HEAD CHEF.
+  // House rule (never posted): every guest takes the same thing, every time. Look at their plates.
+  // The test: service. Bring each guest what they always take, before the bell.
+  // =================================================================
+  const DN = S.dining = { state: 'idle', plates: [] };
+  const FOODS = ['grapefruit', 'coffee', 'eggs', 'toast'];
+  const TYPES = ['armored', 'tall', 'almost', 'tentacle'];
+  const PASS = new V3(2.6, 1.06, 31.45);
+  DN.foodFor = (type) => FOODS[(TYPES.indexOf(type) + R.stay.variant.dining) % 4];
+
+  function foodMesh(food, s) {
+    const g = new THREE.Group(), M = W.M;
+    const add = (geo, mat, x, y, z) => { const o = new THREE.Mesh(geo, mat); o.position.set(x, y, z); g.add(o); return o; };
+    add(new THREE.CylinderGeometry(0.15, 0.13, 0.02, 20), M.white, 0, 0.01, 0);
+    if (food === 'grapefruit') add(new THREE.SphereGeometry(0.075, 14, 8, 0, Math.PI * 2, 0, Math.PI / 2), new THREE.MeshLambertMaterial({ color: 0xe8603a }), 0, 0.02, 0);
+    if (food === 'coffee') { add(new THREE.CylinderGeometry(0.05, 0.04, 0.09, 14), M.white, 0, 0.065, 0); add(new THREE.CircleGeometry(0.045, 14), M.coffee, 0, 0.111, 0).rotation.x = -Math.PI / 2; }
+    if (food === 'eggs') for (const dx of [-0.045, 0.045]) { add(new THREE.CylinderGeometry(0.05, 0.05, 0.01, 14), M.white, dx, 0.025, 0); add(new THREE.SphereGeometry(0.02, 8, 6), new THREE.MeshLambertMaterial({ color: 0xf0b020 }), dx, 0.032, 0); }
+    if (food === 'toast') for (const dz of [-0.03, 0.03]) add(new THREE.BoxGeometry(0.11, 0.015, 0.1), new THREE.MeshLambertMaterial({ color: 0xc8904a }), 0, 0.025 + (dz > 0 ? 0.015 : 0), dz);
+    g.scale.setScalar(s || 1);
+    return g;
+  }
+
+  DN.init = function () {
+    const M = W.M;
+    // the buffet: one tray of each thing the guests take
+    FOODS.forEach((food, i) => {
+      const z = 20.8 + i * 1.6;
+      const tray = W.cyl(0.3, 0.28, 0.04, M.chrome, -10.95, 1.0, z);
+      W.interact(tray, { type: 'chefitem', food });
+      const f = foodMesh(food, 1.6); f.position.set(-10.95, 1.02, z); W.add(f);
+      W.signMesh(Tex.sign(food.toUpperCase(), { w: 256, h: 64 }), 0.5, 0.13, -10.44, 1.12, z, Math.PI / 2);
+    });
+    // the service bell on the pass, under the frosted glass
+    const bell = W.cyl(0.04, 0.11, 0.09, M.brass, PASS.x, PASS.y, PASS.z);
+    W.interact(bell, { type: 'chefbell' });
+    W.signMesh(Tex.sign('SERVICE\nRING FOR THE HEAD CHEF', { w: 512, h: 160 }), 0.9, 0.28, PASS.x, 1.38, 31.3, Math.PI);
+    // every guest has their plate in front of them: the rule, in plain sight
+    DN.guests = G.guests.filter((g) => g.area === 'dining');
+    DN.guests.forEach((gg) => {
+      const ry = gg.baseRy;
+      const pos = gg.g.position.clone().add(new V3(Math.sin(ry) * 0.55, 0.78, Math.cos(ry) * 0.55));
+      DN.plates.push({ guest: gg, pos, mesh: null });
+    });
+    DN.reset();
+  };
+
+  DN.showPlate = function (p, food) {
+    if (p.mesh) { p.mesh.removeFromParent(); p.mesh = null; }
+    if (!food) return;
+    p.mesh = foodMesh(food, 1); p.mesh.position.copy(p.pos); W.add(p.mesh);
+  };
+
+  DN.reset = function () {
+    DN.state = 'idle';
+    DN.served = new Set();
+    if (R) R.stay && (R.stay.carry = null);
+    DN.plates.forEach((p) => DN.showPlate(p, DN.foodFor(p.guest.spec.type)));
+  };
+
+  DN.onEnter = function () {
+    if (DN.state === 'idle' && !R.stay.stamps.dining && !DN.lieSaid) { DN.lieSaid = true; setTimeout(() => G.pa('The guests in the dining room are not particular. They will eat whatever they are served.'), 4000); }
+  };
+
+  DN.ringBell = function () {
+    if (DN.state !== 'idle') return;
+    if (R.stay.stamps.dining) { UI.notice('Nobody answers. The Head Chef has already approved you.'); return; }
+    Audio.deskBell(PASS);
+    DN.state = 'boss';
+    DN.timer = 75;
+    DN.served = new Set();
+    R.stay.carry = null;
+    DN.plates.forEach((p) => DN.showPlate(p, null));
+    setTimeout(() => G.say('Service.', { tag: '◉ THE HEAD CHEF' }), 500);
+    setTimeout(() => { if (DN.state === 'boss') UI.notice('The plates have been cleared. Every guest is waiting.', 4); }, 1500);
+  };
+
+  DN.take = function (food) {
+    if (DN.state !== 'boss') { UI.notice('The trays are full. The Head Chef has not called for service.'); return; }
+    R.stay.carry = food;
+    Audio.click(G.player.pos);
+    UI.notice('You take the ' + food + '.', 2);
+  };
+
+  DN.serve = function (gg) {
+    const p = DN.plates.find((x) => x.guest === gg);
+    if (!p) return false;
+    if (DN.served.has(gg)) { UI.notice('They have been served.'); return true; }
+    if (!R.stay.carry) { UI.notice('You have nothing to serve. The trays are on the buffet.'); return true; }
+    if (R.stay.carry !== DN.foodFor(gg.spec.type)) {
+      DN.state = 'caught';
+      UI.notice('The guest looks at the ' + R.stay.carry + ' and does not move. The kitchen goes quiet.', 4);
+      Audio.stopMuzak(true);
+      setTimeout(() => S.strike('The Head Chef saw what you served.', 'dining'), 1600);
+      return true;
+    }
+    DN.showPlate(p, R.stay.carry);
+    DN.served.add(gg);
+    R.stay.carry = null;
+    Audio.deskBell(p.pos);
+    if (DN.served.size >= DN.plates.length) { DN.state = 'idle'; S.award('dining', 'From behind the frosted glass, a hand you never quite see slides a card through the hatch. It is stamped, and still warm.'); }
+    return true;
+  };
+
+  DN.update = function (dt) {
+    if (DN.state !== 'boss') return;
+    if (!R.zone || R.zone.area !== 'dining') { DN.reset(); return; }
+    DN.timer -= dt;
+    DN.sizzleT = (DN.sizzleT || 0) - dt;
+    if (DN.sizzleT <= 0) { DN.sizzleT = 2 + rnd() * 2; Audio.sizzle(new V3(0, 1.4, 32.5)); }
+    if (DN.timer < 15 && !DN.warned) { DN.warned = true; UI.notice('The Head Chef rings the bell once. Not much time.', 3); Audio.deskBell(PASS); }
+    if (DN.timer <= 0) { DN.state = 'caught'; setTimeout(() => S.strike('Service ended before every guest was served.', 'dining'), 600); }
+  };
+
+  DN.late = function () {
+    // the Head Chef's shape behind the frosted glass: busy during service, still otherwise
+    if (W.cookShape) W.cookShape.visible = true;
+    if (DN.state === 'boss' && W.cookShape) W.cookShape.position.x = Math.sin(performance.now() / 300) * 3;
+  };
+
+  // =================================================================
+  // THE GARDEN COURT, run by THE GROUNDSKEEPER.
+  // House rule (never posted): on the marble, guests step only on one colour. Watch them walk:
+  // they move in strange diagonals, never touching the other colour. (After an incident, the colour changes.)
+  // The test: cross the court to the Groundskeeper by the glass elevator, on the right colour only.
+  // =================================================================
+  const GD = S.garden = { state: 'idle', walkers: [] };
+  const GK = new V3(0, 0, -71.2);
+  const GBELL = new V3(-6.8, 1.1, -46.4);
+
+  // the floor's checker, worked out from how its texture is laid on the court (2.4 m tiles of 2x2 squares)
+  function isRedAt(x, z) {
+    const u = (x + 30) / 2.4, v = (-44 - z) / 2.4;
+    const fu = u - Math.floor(u), fv = v - Math.floor(v);
+    const cx = Math.floor(fu * 2), cy = Math.floor((1 - fv) * 2);
+    return (cx + cy) % 2 === 1;
+  }
+  function edgeDist(x, z) {
+    const m = (a) => a - Math.floor(a);
+    const a = m((x + 30) / 1.2), b = m((-44 - z) / 1.2);
+    return Math.min(a, 1 - a, b, 1 - b) * 1.2;
+  }
+  const badColorIsRed = () => R.stay.variant.garden === 0;
+  const unsafe = (x, z) => isRedAt(x, z) === badColorIsRed();
+  GD.unsafe = unsafe;
+
+  // a zigzag of square centres on the safe colour, from (x,z) along an axis
+  function zigzag(x, z, axis, steps) {
+    let k = Math.round((x + 29.4) / 1.2), m = Math.round((-44.6 - z) / 1.2);
+    const cx = (kk) => -29.4 + 1.2 * kk, cz = (mm) => -44.6 - 1.2 * mm;
+    if (unsafe(cx(k), cz(m))) k += 1;
+    const pts = [new V3(cx(k), 0, cz(m))];
+    for (let i = 0; i < steps; i++) {
+      if (axis === 'x') { k += 1; m += i % 2 ? -1 : 1; } else { m += 1; k += i % 2 ? -1 : 1; }
+      pts.push(new V3(cx(k), 0, cz(m)));
+    }
+    return pts;
+  }
+
+  GD.init = function () {
+    const M = W.M;
+    W.box(0.08, 1.0, 0.08, M.brass, GBELL.x, 0.5, GBELL.z);
+    W.box(0.4, 0.05, 0.3, M.woodDark, GBELL.x, 1.02, GBELL.z);
+    W.collider(GBELL.x - 0.2, GBELL.z - 0.2, GBELL.x + 0.2, GBELL.z + 0.2);
+    const bell = W.cyl(0.04, 0.11, 0.09, M.brass, GBELL.x, 1.1, GBELL.z);
+    W.interact(bell, { type: 'gkbell' });
+    W.signMesh(Tex.sign('THE GROUNDSKEEPER\nRING TO CROSS THE COURT', { w: 512, h: 160 }), 0.9, 0.28, GBELL.x, 1.32, GBELL.z + 0.17, 0);
+    // the Groundskeeper: very tall, shears in hand, by the glass elevator
+    GD.keeper = new INN.Guest({ type: 'tall', x: GK.x, z: GK.z - 0.6, ry: 0, pose: 'stand', area: 'garden-staff' });
+    const shears = new THREE.Mesh(new THREE.BoxGeometry(0.05, 0.7, 0.05), M.chrome); shears.position.set(0.3, 1.2, 0.2); shears.rotation.z = 0.4;
+    GD.keeper.g.add(shears);
+    W.add(GD.keeper.g);
+    ['almost', 'armored'].forEach((t) => {
+      const gg = new INN.Guest({ type: t, x: 0, z: -60, ry: 0, pose: 'stand', area: 'garden-staff' });
+      W.add(gg.g);
+      GD.walkers.push({ g: gg, s: rnd() * 10, dir: 1 });
+    });
+    GD.reset();
+  };
+
+  GD.reset = function () {
+    GD.state = 'idle';
+    GD.badT = 0;
+    // two guests demonstrate, walking zigzags on the safe colour
+    const routes = [zigzag(-25.5, -61, 'x', 16), zigzag(-2.0, -66.5, 'x', 5).concat(zigzag(3.5, -66.5, 'z', 0))];
+    routes[1] = zigzag(-26.5, -46.2, 'x', 40);
+    GD.walkers.forEach((w, i) => { w.path = routes[i]; w.s = 0; w.dir = 1; });
+  };
+
+  GD.onEnter = function () {
+    if (GD.state === 'idle' && !R.stay.stamps.garden && !GD.lieSaid) { GD.lieSaid = true; setTimeout(() => G.pa('Guests may walk wherever they like in the Garden Court.'), 5000); }
+  };
+
+  GD.ringBell = function () {
+    if (GD.state !== 'idle') return;
+    if (R.stay.stamps.garden) { UI.notice('The bell does not ring. The Groundskeeper has already approved you.'); return; }
+    Audio.deskBell(GBELL);
+    GD.state = 'boss';
+    GD.badT = 0;
+    // every guest in the court turns to watch
+    G.guests.filter((g) => g.area === 'garden').forEach((g) => { g.attentive = true; g.faceSlow(G.player.pos.x, G.player.pos.z); });
+    setTimeout(() => G.say('Come to me. Mind where you step.', { tag: '◉ THE GROUNDSKEEPER' }), 600);
+  };
+
+  GD.update = function (dt) {
+    if (GD.state !== 'boss') return;
+    const P = G.player.pos;
+    if (!R.zone || R.zone.area !== 'garden') { GD.state = 'idle'; return; }
+    if (W.planters.some((b) => P.x > b.x0 && P.x < b.x1 && P.z > b.z0 && P.z < b.z1)) return GD.caught('You stepped into the planting beds.');
+    if (unsafe(P.x, P.z) && edgeDist(P.x, P.z) > 0.2) GD.badT += dt; else GD.badT = Math.max(0, GD.badT - dt * 2);
+    if (GD.badT > 0.3) return GD.caught('You stepped where the guests do not.');
+    if (Math.hypot(P.x - GK.x, P.z - GK.z) < 1.5) {
+      GD.state = 'idle';
+      G.guests.filter((g) => g.area === 'garden').forEach((g) => { g.attentive = false; });
+      S.award('garden', 'The Groundskeeper clips something from the nearest palm and presses it flat into your folio. When you look again, it is a stamp.');
+    }
+  };
+
+  GD.caught = function (why) {
+    GD.state = 'caught';
+    Audio.staticBurst(0.4);
+    G.guests.filter((g) => g.area === 'garden').forEach((g) => g.faceInstant(G.player.pos.x, G.player.pos.z));
+    setTimeout(() => S.strike(why, 'garden'), 1200);
+  };
+
+  GD.late = function (dt) {
+    GD.walkers.forEach((w) => {
+      const p = w.path; if (!p || p.length < 2) return;
+      const segs = p.length - 1;
+      w.s += dt * 0.55 * w.dir;
+      if (w.s >= segs) { w.s = segs; w.dir = -1; }
+      if (w.s <= 0) { w.s = 0; w.dir = 1; }
+      const i = Math.min(segs - 1, Math.floor(w.s)), f = w.s - i;
+      const a = p[i], b = p[i + 1];
+      const gg = w.g.g;
+      gg.position.set(a.x + (b.x - a.x) * f, 0, a.z + (b.z - a.z) * f);
+      const dx = (b.x - a.x) * w.dir, dz = (b.z - a.z) * w.dir;
+      gg.rotation.y = Math.atan2(dx, dz);
+    });
+    if (GD.keeper) {
+      const P = G.player.pos, k = GD.keeper;
+      const want = Math.atan2(P.x - k.g.position.x, P.z - k.g.position.z);
+      k.g.rotation.y += (want - k.g.rotation.y) * Math.min(1, dt * (GD.state === 'boss' ? 2 : 0.3));
+    }
+  };
 })(window.INN);

@@ -1025,6 +1025,8 @@ window.INN = window.INN || {};
   // ----------------------------------------------------------- the promenade
   // A long, tall hall from the front desk to the Garden Court. Slightly too long.
   P.buildPromenade = function () {
+    // in a stay, the promenade is the Hallway Between, built by INN.Stay
+    if (INN.Game && INN.Game.SLICE) { this.signMesh(Tex.sign('THE GARDEN COURT ↑', { w: 512, h: 96 }), 2.6, 0.48, -9, 3.45, -11.86, 0); return; }
     const M = this.M, H = 3.4;
     this.floor(-10.5, -44, -7.5, -12, M.carpet, 2.4);
     this.ceil(-10.5, -44, -7.5, -12, H);

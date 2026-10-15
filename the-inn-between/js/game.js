@@ -93,7 +93,7 @@ window.INN = window.INN || {};
     keyRooms.forEach((n, i) => { const rm = world.rooms[n]; rm.hasKey = i < nKeys; rm.key.visible = rm.hasKey; });
 
     // guests, staff, the player's own body
-    if (G.SLICE) world.guestSpots = world.guestSpots.filter((s) => s.area !== 'pool');
+    if (G.SLICE) world.guestSpots = world.guestSpots.filter((s) => s.area !== 'pool' && s.area !== 'arcade');
     G.guests = world.guestSpots.map((s) => { const gg = new INN.Guest(s); scene.add(gg.g); world.interact(gg.hit, { type: 'guest', guest: gg }); return gg; });
     G.clerk = new INN.Guest({ type: 'uniform', x: world.clerkSpot.x, z: world.clerkSpot.z, ry: 0, pose: 'stand', area: 'desk' });
     scene.add(G.clerk.g); world.interact(G.clerk.hit, { type: 'clerk' });
@@ -332,7 +332,7 @@ window.INN = window.INN || {};
       G.state = 'play';
       G.requestLock();
       if (firstOfBroadcast) {
-        if (G.SLICE) setTimeout(() => G.say('Your room is ' + G.run.claimed + ', down the hall to the west. The elevator to the amenities is beside the front desk.'), 2500);
+        if (G.SLICE) setTimeout(() => G.say('Your room is ' + G.run.claimed + ', down the hall to the west. The amenities are open. Wander. The elevator beside the front desk will take you back to any you have found.'), 2500);
         else setTimeout(() => G.say('Your room key is waiting on a door. Read the plaque before entering any common area.'), 2500);
       } else {
         G.pa('Welcome back. Your stay has been extended.');
@@ -560,6 +560,7 @@ window.INN = window.INN || {};
     const R = G.run;
     R.prevZone = R.zone; R.zone = z; R.zoneTime = 0;
     if (!z) return;
+    if (G.SLICE) INN.Stay.onZone(z);
     // attention: guests face you when you enter, silently
     if (R.attention > 0) {
       G.guests.forEach((g) => { if (g.area === z.area) { g.attentive = true; g.faceInstant(G.player.pos.x, G.player.pos.z); } });
@@ -943,6 +944,7 @@ window.INN = window.INN || {};
   }
 
   function drawArcade(m, t) {
+    if (G.SLICE && G.run && INN.Stay.drawArcade(m, t)) { m.tex.needsUpdate = true; return; }
     const R = G.run, g = m.ctx;
     const selfPlay = R && R.selfPlaying.has(m.idx);
     g.fillStyle = '#05080a'; g.fillRect(0, 0, 128, 96);
@@ -1133,8 +1135,8 @@ window.INN = window.INN || {};
     if (!G.target) return;
     const it = G.target.userData.it;
     if (G.SLICE) {
-      if (it.type === 'deskbell' || it.type === 'clerk') { if (INN.Stay.act.desk()) return; }
-      else if (INN.Stay.act[it.type]) { INN.Stay.act[it.type](it, G.target); return; }
+      const h = INN.Stay.act[it.type];
+      if (h && h(it, G.target) !== false) return;
     }
     const fn = ACT[it.type];
     if (fn) fn(it, G.target);
@@ -1407,7 +1409,7 @@ window.INN = window.INN || {};
       (G.SLICE ? '<div><b>HOUSE RULES</b><br>NOT POSTED. THE OTHER GUESTS KNOW THEM. WATCH THE GUESTS.</div>' : '<div><b>RULES ON FILE</b><ul class="rules" style="padding-left:18px;margin:4px 0">' + (rules || '<li>None. Plaques are posted by each door.</li>') + '</ul></div>') +
       '<div><b>INCIDENTALS</b><br>' + list(R.foods.concat(R.shoes)) + '<br><br><b>ARTICLES</b><br>' + list(R.items.map((i) => i.name)) + '</div>' +
       '</div>' +
-      (G.SLICE ? '' : '<div style="margin-top:10px"><b>TICKETS</b><br>' + list(R.tickets) + '</div>') +
+      (G.SLICE ? INN.Stay.notesHTML() : '<div style="margin-top:10px"><b>TICKETS</b><br>' + list(R.tickets) + '</div>') +
       '<div style="margin-top:10px"><b>GUEST CONDUCT</b> · ' + (R.conduct.length ? 'NOTED (' + R.conduct.length + ')' : 'SATISFACTORY') + '</div>';
     return {
       title: 'Guest Folio', html, closable: true,
